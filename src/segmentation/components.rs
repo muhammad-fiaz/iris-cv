@@ -108,7 +108,7 @@ mod tests {
     fn test_connected_components() {
         let device = Default::default();
         // 5x5 image with two separated components
-        let mut flat_data = vec![0.0f32; 1 * 5 * 5];
+        let mut flat_data = vec![0.0f32; 5 * 5];
         flat_data[0] = 1.0;
         flat_data[1] = 1.0;
         flat_data[23] = 1.0;

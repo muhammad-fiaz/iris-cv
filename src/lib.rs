@@ -67,6 +67,5 @@ pub mod video;
 mod tests {
     #[test]
     fn test_lib_compiles() {
-        assert!(true);
     }
 }

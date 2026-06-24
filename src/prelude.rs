@@ -39,6 +39,5 @@ mod tests {
         let _pt = Point::new(0.0, 0.0);
         let _sz = Size::new(640, 480);
         let _err = IrisError::Generic("test".into());
-        assert!(true);
     }
 }

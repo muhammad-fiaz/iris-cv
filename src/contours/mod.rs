@@ -241,7 +241,7 @@ mod tests {
 
         let device = Default::default();
         // Create an image with a single pixel set to 1.0 (binary mask)
-        let mut flat_data = vec![0.0f32; 1 * 10 * 10];
+        let mut flat_data = vec![0.0f32; 10 * 10];
         // Set a 3x3 block to 1.0
         for y in 2..5 {
             for x in 2..5 {
@@ -251,6 +251,6 @@ mod tests {
         let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [1, 10, 10]), &device);
         let img = Image::new(tensor);
         let found = img.find_contours().unwrap();
-        assert!(found.len() >= 1);
+        assert!(!found.is_empty());
     }
 }

@@ -374,7 +374,7 @@ mod tests {
         assert!(area > 0.0);
 
         let approx = contour.approx_poly_dp(1.0, true);
-        assert!(approx.points.len() > 0);
+        assert!(!approx.points.is_empty());
 
         let br = contour.bounding_rect();
         assert_eq!(br.width, 10);

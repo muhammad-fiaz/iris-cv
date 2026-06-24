@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     fn test_barcode_detector() {
-        let detector = BarcodeDetector::default();
+        let detector = BarcodeDetector;
         let device = Default::default();
         let flat_data = vec![0.5f32; 3 * 100 * 100];
         let tensor =

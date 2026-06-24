@@ -55,7 +55,7 @@ mod tests {
             Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
         let img = Image::new(tensor);
 
-        let detector = QrDetector::default();
+        let detector = QrDetector;
         let codes = detector.detect_and_decode(&img).unwrap();
         assert_eq!(codes.len(), 1);
         assert_eq!(codes[0].payload, "https://muhammad-fiaz.github.io/iris");
