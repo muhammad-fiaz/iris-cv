@@ -1,10 +1,10 @@
 use crate::core::types::{Rect, Scalar, Size};
-use crate::error::{ObserversError, Result};
+use crate::error::{IrisError, Result};
 use crate::image::Image;
 use burn::tensor::{Tensor, TensorData, backend::Backend};
 use std::path::Path;
 
-/// Helper class to load neural network weights from Safetensors and PyTorch .bin formats.
+/// Helper class to load neural network weights from Safetensors and `PyTorch` .bin formats.
 pub struct WeightLoader;
 
 impl WeightLoader {
@@ -15,11 +15,11 @@ impl WeightLoader {
         device: &B::Device,
     ) -> Result<std::collections::HashMap<String, Tensor<B, 2>>> {
         let bytes = std::fs::read(&path).map_err(|e| {
-            ObserversError::ModelLoad(format!("Failed to read safetensors file: {}", e))
+            IrisError::ModelLoad(format!("Failed to read safetensors file: {e}"))
         })?;
 
         let st = safetensors::SafeTensors::deserialize(&bytes).map_err(|e| {
-            ObserversError::ModelLoad(format!("Safetensors deserialization failed: {}", e))
+            IrisError::ModelLoad(format!("Safetensors deserialization failed: {e}"))
         })?;
 
         let mut weights = std::collections::HashMap::new();
@@ -51,14 +51,14 @@ impl WeightLoader {
         _path: impl AsRef<Path>,
         _device: &B::Device,
     ) -> Result<std::collections::HashMap<String, Tensor<B, 2>>> {
-        Err(ObserversError::ModelLoad(
+        Err(IrisError::ModelLoad(
             "Safetensors support is disabled. Enable the 'safetensors' feature in Cargo.toml"
                 .to_string(),
         ))
     }
 
-    /// Loads weights from a PyTorch `.bin` file.
-    /// Standard PyTorch files are zip archives containing pickle formats.
+    /// Loads weights from a `PyTorch` `.bin` file.
+    /// Standard `PyTorch` files are zip archives containing pickle formats.
     /// In this native Rust remake, we provide a binary stream weight deserializer
     /// that reads flat float streams, mimicking target weights layout.
     pub fn load_bin<B: Backend>(
@@ -67,7 +67,7 @@ impl WeightLoader {
         expected_shape: [usize; 2],
     ) -> Result<Tensor<B, 2>> {
         let bytes = std::fs::read(&path).map_err(|e| {
-            ObserversError::ModelLoad(format!("Failed to read weight bin file: {}", e))
+            IrisError::ModelLoad(format!("Failed to read weight bin file: {e}"))
         })?;
 
         // Expect flat f32 values
@@ -96,9 +96,8 @@ impl<B: Backend> OnnxModel<B> {
     pub fn load(path: impl AsRef<Path>, device: &B::Device) -> Result<Self> {
         let path_str = path.as_ref().to_string_lossy().into_owned();
         if !path.as_ref().exists() && !path_str.contains("mock") {
-            return Err(ObserversError::ModelLoad(format!(
-                "Model path does not exist: {}",
-                path_str
+            return Err(IrisError::ModelLoad(format!(
+                "Model path does not exist: {path_str}"
             )));
         }
         Ok(Self {
@@ -189,7 +188,8 @@ pub fn blob_from_image<B: Backend>(
     Ok(result_tensor)
 }
 
-/// Non-maximum suppression for bounding boxes based on scores and IoU threshold.
+/// Non-maximum suppression for bounding boxes based on scores and `IoU` threshold.
+#[must_use]
 pub fn nms_boxes(
     bboxes: &[Rect<usize>],
     scores: &[f32],
@@ -237,7 +237,7 @@ pub fn nms_boxes(
         let mut next_indices = Vec::new();
 
         for &other_idx in indices.iter().skip(1) {
-            if iou(current_box, &bboxes[other_idx]) <= nms_threshold as f64 {
+            if iou(current_box, &bboxes[other_idx]) <= f64::from(nms_threshold) {
                 next_indices.push(other_idx);
             }
         }
@@ -287,4 +287,3 @@ mod tests {
         assert_eq!(pred.dims(), [1, 10]);
     }
 }
-

@@ -48,6 +48,7 @@ pub struct Morphology;
 
 impl Morphology {
     /// Creates a structuring element (kernel matrix) for morphology.
+    #[must_use]
     pub fn get_structuring_element(shape: MorphShape, ksize: Size<usize>) -> Vec<Vec<u8>> {
         let w = ksize.width;
         let h = ksize.height;
@@ -61,11 +62,7 @@ impl Morphology {
                 *val = match shape {
                     MorphShape::Rect => 1,
                     MorphShape::Cross => {
-                        if x == w / 2 || y == h / 2 {
-                            1
-                        } else {
-                            0
-                        }
+                        u8::from(x == w / 2 || y == h / 2)
                     }
                     MorphShape::Ellipse => {
                         let dx = x as f64 - xc;
@@ -75,7 +72,7 @@ impl Morphology {
 
                         if r_x > 0.0 && r_y > 0.0 {
                             let term = (dx * dx) / (r_x * r_x) + (dy * dy) / (r_y * r_y);
-                            if term <= 1.05 { 1 } else { 0 }
+                            u8::from(term <= 1.05)
                         } else {
                             1
                         }
@@ -106,4 +103,3 @@ mod tests {
         assert_eq!(ellipse[0][0], 0);
     }
 }
-

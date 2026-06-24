@@ -149,4 +149,3 @@ mod tests {
         assert_eq!(laplace_img.shape(), [1, 8, 8]);
     }
 }
-

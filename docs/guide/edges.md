@@ -1,6 +1,12 @@
+---
+title: "Edge Detection & Gradients"
+description: "Detect edges and compute gradients using Canny, Sobel, Scharr, and Laplacian operators in Rust with Iris."
+keywords: ["edge detection", "canny", "sobel", "scharr", "laplacian", "gradients", "feature detection"]
+---
+
 # Edge Detection & Gradients
 
-Gradients and edge maps highlight structural changes and borders within images. Observers provides standard first and second-order image derivative approximations.
+Gradients and edge maps highlight structural changes and borders within images. Iris provides standard first and second-order image derivative approximations.
 
 ## Gradient Operators
 

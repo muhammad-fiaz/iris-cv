@@ -97,4 +97,3 @@ mod tests {
         assert_eq!(mask.mask.dims(), [8, 8]);
     }
 }
-

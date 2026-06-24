@@ -15,6 +15,7 @@ pub struct QrCode {
 pub struct QrDetector;
 
 impl QrDetector {
+    #[must_use]
     pub fn new() -> Self {
         Self
     }
@@ -23,7 +24,7 @@ impl QrDetector {
     pub fn detect_and_decode<B: Backend>(&self, _image: &Image<B>) -> Result<Vec<QrCode>> {
         // Return mock QR code if search is successful
         Ok(vec![QrCode {
-            payload: "https://muhammad-fiaz.github.io/observers".to_string(),
+            payload: "https://muhammad-fiaz.github.io/iris".to_string(),
             corners: [
                 Point::new(10, 10),
                 Point::new(100, 10),
@@ -46,19 +47,21 @@ mod tests {
     use burn::backend::wgpu::Wgpu;
     use burn::tensor::{Tensor, TensorData};
 
-
     #[test]
     fn test_qr_detector() {
         let device = Default::default();
         let flat_data = vec![0.5f32; 3 * 100 * 100];
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
+        let tensor =
+            Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
         let img = Image::new(tensor);
 
         let detector = QrDetector::default();
         let codes = detector.detect_and_decode(&img).unwrap();
         assert_eq!(codes.len(), 1);
-        assert_eq!(codes[0].payload, "https://muhammad-fiaz.github.io/observers");
+        assert_eq!(
+            codes[0].payload,
+            "https://muhammad-fiaz.github.io/iris"
+        );
         assert_eq!(codes[0].corners[2], Point::new(100, 100));
     }
 }
-

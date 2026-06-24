@@ -1,5 +1,5 @@
 use burn::backend::wgpu::Wgpu;
-use observers::prelude::*;
+use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
@@ -14,7 +14,10 @@ fn main() -> Result<()> {
     let w = 128;
     let h = 128;
     let flat_noisy = vec![0.5f32; 3 * h * w];
-    let noisy_img = Image::new(Tensor::<Backend, 3>::from_data(TensorData::new(flat_noisy, [3, h, w]), &device));
+    let noisy_img = Image::new(Tensor::<Backend, 3>::from_data(
+        TensorData::new(flat_noisy, [3, h, w]),
+        &device,
+    ));
 
     // 2. Perform Non-Local Means Denoising
     println!("Applying fast Non-Local Means Denoising...");

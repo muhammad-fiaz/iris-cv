@@ -1,6 +1,6 @@
-# Contributing to Observers
+# Contributing to Iris
 
-Thank you for your interest in contributing to Observers! As a pure Rust computer vision ecosystem powered by Burn, we welcome contributions of all kinds, including bug fixes, feature requests, new operators, and documentation improvements.
+Thank you for your interest in contributing to Iris! As a pure Rust computer vision ecosystem powered by Burn, we welcome contributions of all kinds, including bug fixes, feature requests, new operators, and documentation improvements.
 
 ## Code of Conduct
 

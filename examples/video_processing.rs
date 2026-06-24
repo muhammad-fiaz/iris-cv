@@ -1,5 +1,5 @@
 use burn::backend::wgpu::Wgpu;
-use observers::prelude::*;
+use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
@@ -25,7 +25,11 @@ fn main() -> Result<()> {
         if frame_count >= 5 {
             break;
         }
-        println!(" - Processed frame {} of size {:?}", frame_count, frame.shape());
+        println!(
+            " - Processed frame {} of size {:?}",
+            frame_count,
+            frame.shape()
+        );
         writer.write(&frame)?;
         frame_count += 1;
     }

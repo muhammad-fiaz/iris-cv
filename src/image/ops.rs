@@ -1,4 +1,4 @@
-use crate::error::{ObserversError, Result};
+use crate::error::{IrisError, Result};
 use crate::image::Image;
 use burn::tensor::{Int, Tensor, TensorData, backend::Backend};
 
@@ -12,7 +12,7 @@ impl<B: Backend> Image<B> {
         let w = dims[2];
 
         if new_width == 0 || new_height == 0 {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "Dimensions must be greater than zero".into(),
             ));
         }
@@ -51,7 +51,7 @@ impl<B: Backend> Image<B> {
         let w = dims[2];
 
         if x + width > w || y + height > h {
-            return Err(ObserversError::DimensionMismatch {
+            return Err(IrisError::DimensionMismatch {
                 expected: vec![c, height, width],
                 actual: vec![c, h, w],
             });
@@ -102,7 +102,7 @@ impl<B: Backend> Image<B> {
                 let rotated = transposed.flip([1]);
                 Ok(Image::new(rotated))
             }
-            _ => Err(ObserversError::InvalidParameter(
+            _ => Err(IrisError::InvalidParameter(
                 "Only 90, 180, 270 degrees rotations are supported".into(),
             )),
         }
@@ -121,7 +121,7 @@ impl<B: Backend> Image<B> {
         }
 
         if c < 3 {
-            return Err(ObserversError::Tensor(
+            return Err(IrisError::Tensor(
                 "Cannot convert image with less than 3 channels to grayscale".into(),
             ));
         }
@@ -147,7 +147,7 @@ impl<B: Backend> Image<B> {
             return Ok(self.clone());
         }
         if c != 1 {
-            return Err(ObserversError::Tensor(
+            return Err(IrisError::Tensor(
                 "Input image must be single-channel to convert to RGB".into(),
             ));
         }
@@ -174,7 +174,9 @@ mod tests {
     #[test]
     fn test_image_conversions() {
         let device = Default::default();
-        let flat_data = vec![0.1f32, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2];
+        let flat_data = vec![
+            0.1f32, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2,
+        ];
         let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 2, 2]), &device);
         let img = Image::new(tensor);
 
@@ -185,4 +187,3 @@ mod tests {
         assert_eq!(rgb.shape(), [3, 2, 2]);
     }
 }
-

@@ -26,6 +26,7 @@ pub struct Moments {
 
 impl Moments {
     /// Computes the centroid (center of mass) from the moments.
+    #[must_use]
     pub fn centroid(&self) -> Option<Point<f64>> {
         if self.m00.abs() < 1e-9 {
             None
@@ -37,11 +38,13 @@ impl Moments {
 
 impl Contour {
     /// Creates a new Contour with given points.
+    #[must_use]
     pub fn new(points: Vec<Point<usize>>) -> Self {
         Self { points }
     }
 
     /// Computes the convex hull of the contour using Andrew's Monotone Chain algorithm.
+    #[must_use]
     pub fn convex_hull(&self) -> Self {
         let mut pts = self.points.clone();
         if pts.len() <= 3 {
@@ -90,6 +93,7 @@ impl Contour {
     }
 
     /// Computes the polygon moments using the Shoelace formula and Green's Theorem.
+    #[must_use]
     pub fn moments(&self) -> Moments {
         let pts = &self.points;
         let n = pts.len();
@@ -250,4 +254,3 @@ mod tests {
         assert!(found.len() >= 1);
     }
 }
-

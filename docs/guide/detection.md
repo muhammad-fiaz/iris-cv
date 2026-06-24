@@ -1,6 +1,12 @@
+---
+title: "Object Detection & Recognition"
+description: "Detect faces, recognize embeddings, and decode QR codes and barcodes using Iris's built-in detection pipelines."
+keywords: ["object detection", "face detection", "face recognition", "QR code", "barcode", "embedding"]
+---
+
 # Object Detection & Recognition
 
-Observers provides built-in pipelines for object detection, face recognition, and barcode/QR reading.
+Iris provides built-in pipelines for object detection, face recognition, and barcode/QR reading.
 
 ## Face Detection & Recognition
 

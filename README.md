@@ -1,32 +1,32 @@
 <div align="center">
 
-# Observers
+# Iris
 
-<a href="https://muhammad-fiaz.github.io/observers/"><img src="https://img.shields.io/badge/docs-muhammad--fiaz.github.io-blue" alt="Documentation"></a>
+<a href="https://muhammad-fiaz.github.io/iris/"><img src="https://img.shields.io/badge/docs-muhammad--fiaz.github.io-blue" alt="Documentation"></a>
 <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/Rust-2024_Edition-orange.svg" alt="Rust Version"></a>
-<a href="https://github.com/muhammad-fiaz/observers"><img src="https://img.shields.io/github/stars/muhammad-fiaz/observers" alt="GitHub stars"></a>
-<a href="https://github.com/muhammad-fiaz/observers/issues"><img src="https://img.shields.io/github/issues/muhammad-fiaz/observers" alt="GitHub issues"></a>
-<a href="https://github.com/muhammad-fiaz/observers/pulls"><img src="https://img.shields.io/github/issues-pr/muhammad-fiaz/observers" alt="GitHub pull requests"></a>
-<a href="https://github.com/muhammad-fiaz/observers"><img src="https://img.shields.io/github/last-commit/muhammad-fiaz/observers" alt="GitHub last commit"></a>
-<a href="https://github.com/muhammad-fiaz/observers"><img src="https://img.shields.io/github/license/muhammad-fiaz/observers" alt="License"></a>
-<a href="https://github.com/muhammad-fiaz/observers/actions/workflows/ci.yml"><img src="https://github.com/muhammad-fiaz/observers/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+<a href="https://github.com/muhammad-fiaz/iris"><img src="https://img.shields.io/github/stars/muhammad-fiaz/iris" alt="GitHub stars"></a>
+<a href="https://github.com/muhammad-fiaz/iris/issues"><img src="https://img.shields.io/github/issues/muhammad-fiaz/iris" alt="GitHub issues"></a>
+<a href="https://github.com/muhammad-fiaz/iris/pulls"><img src="https://img.shields.io/github/issues-pr/muhammad-fiaz/iris" alt="GitHub pull requests"></a>
+<a href="https://github.com/muhammad-fiaz/iris"><img src="https://img.shields.io/github/last-commit/muhammad-fiaz/iris" alt="GitHub last commit"></a>
+<a href="https://github.com/muhammad-fiaz/iris"><img src="https://img.shields.io/github/license/muhammad-fiaz/iris" alt="License"></a>
+<a href="https://github.com/muhammad-fiaz/iris/actions/workflows/ci.yml"><img src="https://github.com/muhammad-fiaz/iris/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
 <img src="https://img.shields.io/badge/platforms-linux%20%7C%20windows%20%7C%20macos-blue" alt="Supported Platforms">
-<a href="https://github.com/muhammad-fiaz/observers/releases/latest"><img src="https://img.shields.io/github/v/release/muhammad-fiaz/observers?label=Latest%20Release&style=flat-square" alt="Latest Release"></a>
+<a href="https://github.com/muhammad-fiaz/iris/releases/latest"><img src="https://img.shields.io/github/v/release/muhammad-fiaz/iris?label=Latest%20Release&style=flat-square" alt="Latest Release"></a>
 <a href="https://pay.muhammadfiaz.com"><img src="https://img.shields.io/badge/Sponsor-pay.muhammadfiaz.com-ff69b4?style=flat&logo=heart" alt="Sponsor"></a>
 <a href="https://github.com/sponsors/muhammad-fiaz"><img src="https://img.shields.io/badge/Sponsor-💖-pink?style=social&logo=github" alt="GitHub Sponsors"></a>
-<a href="https://hits.sh/muhammad-fiaz/observers/"><img src="https://hits.sh/muhammad-fiaz/observers.svg?label=Visitors&extraCount=0&color=green" alt="Repo Visitors"></a>
+<a href="https://hits.sh/muhammad-fiaz/iris/"><img src="https://hits.sh/muhammad-fiaz/iris.svg?label=Visitors&extraCount=0&color=green" alt="Repo Visitors"></a>
 
 <p><em>A fast computer vision library framework in Rust.</em></p>
 
-<b><a href="https://muhammad-fiaz.github.io/observers/">Documentation</a> |
-<a href="https://muhammad-fiaz.github.io/observers/api">API Reference</a> |
+<b><a href="https://muhammad-fiaz.github.io/iris/">Documentation</a> |
+<a href="https://muhammad-fiaz.github.io/iris/api">API Reference</a> |
 <a href="CONTRIBUTING.md">Contributing</a></b>
 
 </div>
 
 A Rust-powered, cross-platform computer vision and deep learning library designed with a clean, modular, library-first architecture. Completely native with zero external C dependencies.
 
-**If you love `Observers`, make sure to give it a star!**
+**If you love `Iris`, make sure to give it a star!**
 
 ---
 
@@ -34,7 +34,7 @@ A Rust-powered, cross-platform computer vision and deep learning library designe
 <summary><strong>Table of Contents</strong> (click to expand)</summary>
 
 - [Prerequisites & Supported Platforms](#prerequisites--supported-platforms)
-- [Features of Observers](#features-of-observers)
+- [Features of Iris](#features-of-iris)
 - [Installation](#installation)
   - [Build from Source](#build-from-source)
 - [Library Usage](#library-usage)
@@ -46,7 +46,7 @@ A Rust-powered, cross-platform computer vision and deep learning library designe
 ---
 
 <details>
-<summary><strong>Features of Observers</strong> (click to expand)</summary>
+<summary><strong>Features of Iris</strong> (click to expand)</summary>
 
 | Feature | Description |
 |---------|-------------|
@@ -74,7 +74,7 @@ A Rust-powered, cross-platform computer vision and deep learning library designe
 
 ## Prerequisites
 
-Before installing Observers, ensure you have:
+Before installing Iris, ensure you have:
 
 - **Rust**: v1.85.0+ (Rust 2024 Edition). Install via [rustup](https://rustup.rs/):
   ```bash
@@ -84,7 +84,7 @@ Before installing Observers, ensure you have:
 
 ## Supported Platforms
 
-Observers supports a wide range of platforms and architectures:
+Iris supports a wide range of platforms and architectures:
 - **Windows 10+ / 11+**
 - **Linux** (Vulkan/CUDA acceleration support)
 - **macOS** (Metal acceleration support)
@@ -97,8 +97,8 @@ Observers supports a wide range of platforms and architectures:
 
 ### Build from Source
 ```bash
-git clone https://github.com/muhammad-fiaz/observers.git
-cd observers
+git clone https://github.com/muhammad-fiaz/iris.git
+cd iris
 cargo build --release
 ```
 
@@ -106,7 +106,7 @@ cargo build --release
 
 ## Cargo Features
 
-`Observers` provides several features to customize compilation and backend acceleration:
+`Iris` provides several features to customize compilation and backend acceleration:
 
 | Feature | Description | Enabled by Default |
 |---|---|---|
@@ -122,17 +122,17 @@ cargo build --release
 
 ## Library Usage
 
-To use `observers` in your Rust project, run:
+To use `iris` in your Rust project, run:
 
 ```bash
-cargo add observers
+cargo add iris
 ```
 
 Or add it directly to your `Cargo.toml` under dependencies:
 
 ```toml
 [dependencies]
-observers = "0.0.0"
+iris = "0.0.0"
 ```
 
 ### Development Version (Git)
@@ -140,14 +140,14 @@ observers = "0.0.0"
 To use the latest development branch directly from GitHub, run:
 
 ```bash
-cargo add observers --git https://github.com/muhammad-fiaz/observers
+cargo add iris --git https://github.com/muhammad-fiaz/iris
 ```
 
 Or add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-observers = { git = "https://github.com/muhammad-fiaz/observers" }
+iris = { git = "https://github.com/muhammad-fiaz/iris" }
 ```
 
 
@@ -155,7 +155,7 @@ observers = { git = "https://github.com/muhammad-fiaz/observers" }
 In your Rust code:
 
 ```rust
-use observers::prelude::*;
+use iris::prelude::*;
 use burn::backend::wgpu::Wgpu;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -187,7 +187,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## Examples
 
-Run any example to see Observers in action:
+Run any example to see Iris in action:
 
 ```bash
 cargo run --example image_loading

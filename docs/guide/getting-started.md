@@ -1,15 +1,21 @@
+---
+title: "Getting Started with Iris"
+description: "Quick start guide for Iris — install, load an image, apply Gaussian blur, detect Canny edges, and save results in minutes."
+keywords: ["getting started", "quick start", "install iris", "first project", "tutorial"]
+---
+
 # Getting Started
 
-To get started with **Observers**, install it in your project:
+To get started with **Iris**, install it in your project:
 
 ```bash
-cargo add observers
+cargo add iris
 ```
 
 Alternatively, to use the latest development version from GitHub, run:
 
 ```bash
-cargo add observers --git https://github.com/muhammad-fiaz/observers
+cargo add iris --git https://github.com/muhammad-fiaz/iris
 ```
 
 
@@ -19,7 +25,7 @@ cargo add observers --git https://github.com/muhammad-fiaz/observers
 Here is a simple example showing how to load an image, apply a Gaussian blur filter, detect edges using Canny, and save the result:
 
 ```rust
-use observers::prelude::*;
+use iris::prelude::*;
 use burn::backend::wgpu::Wgpu;
 
 fn main() -> Result<()> {

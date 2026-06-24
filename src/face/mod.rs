@@ -27,7 +27,7 @@ impl<B: Backend> FaceDetector<B> {
         Self { model: Some(model) }
     }
 
-    /// Loads a FaceDetector with default pretrained weights implicitly.
+    /// Loads a `FaceDetector` with default pretrained weights implicitly.
     pub fn pretrained(device: &B::Device) -> Result<Self> {
         if let Ok(model) = OnnxModel::load("weights/face_detector.onnx", device) {
             Ok(Self { model: Some(model) })
@@ -38,19 +38,19 @@ impl<B: Backend> FaceDetector<B> {
         }
     }
 
-    /// Loads a FaceDetector from an ONNX model.
+    /// Loads a `FaceDetector` from an ONNX model.
     pub fn from_onnx(path: impl AsRef<Path>, device: &B::Device) -> Result<Self> {
         let model = OnnxModel::load(path, device)?;
         Ok(Self { model: Some(model) })
     }
 
-    /// Loads a FaceDetector from a Safetensors model.
+    /// Loads a `FaceDetector` from a Safetensors model.
     pub fn from_safetensors(path: impl AsRef<Path>, device: &B::Device) -> Result<Self> {
         let _weights = WeightLoader::load_safetensors::<B>(path, device)?;
         Ok(Self { model: None })
     }
 
-    /// Loads a FaceDetector from a native Burn model.
+    /// Loads a `FaceDetector` from a native Burn model.
     pub fn from_burn(path: impl AsRef<Path>, device: &B::Device) -> Result<Self> {
         let _weights = WeightLoader::load_bin::<B>(path, device, [100, 100])?;
         Ok(Self { model: None })
@@ -94,7 +94,7 @@ impl<B: Backend> FaceRecognizer<B> {
         Self { model: Some(model) }
     }
 
-    /// Loads a FaceRecognizer with default pretrained weights implicitly.
+    /// Loads a `FaceRecognizer` with default pretrained weights implicitly.
     pub fn pretrained(device: &B::Device) -> Result<Self> {
         if let Ok(model) = OnnxModel::load("weights/face_recognizer.onnx", device) {
             Ok(Self { model: Some(model) })
@@ -105,19 +105,19 @@ impl<B: Backend> FaceRecognizer<B> {
         }
     }
 
-    /// Loads a FaceRecognizer from an ONNX model.
+    /// Loads a `FaceRecognizer` from an ONNX model.
     pub fn from_onnx(path: impl AsRef<Path>, device: &B::Device) -> Result<Self> {
         let model = OnnxModel::load(path, device)?;
         Ok(Self { model: Some(model) })
     }
 
-    /// Loads a FaceRecognizer from a Safetensors model.
+    /// Loads a `FaceRecognizer` from a Safetensors model.
     pub fn from_safetensors(path: impl AsRef<Path>, device: &B::Device) -> Result<Self> {
         let _weights = WeightLoader::load_safetensors::<B>(path, device)?;
         Ok(Self { model: None })
     }
 
-    /// Loads a FaceRecognizer from a native Burn model.
+    /// Loads a `FaceRecognizer` from a native Burn model.
     pub fn from_burn(path: impl AsRef<Path>, device: &B::Device) -> Result<Self> {
         let _weights = WeightLoader::load_bin::<B>(path, device, [100, 100])?;
         Ok(Self { model: None })
@@ -187,4 +187,3 @@ mod tests {
         assert!(similarity >= 0.0);
     }
 }
-

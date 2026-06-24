@@ -1,11 +1,17 @@
+---
+title: "Installation"
+description: "Install Iris in your Rust project — cargo add, Git dependency, feature flags for wgpu, parallel, cuda, tch, ndarray, and gpui."
+keywords: ["installation", "cargo add", "dependencies", "feature flags", "wgpu", "cuda", "setup"]
+---
+
 # Installation
 
-Observers compiles with a standard Rust toolchain. We recommend using the latest stable release of Rust (v1.85.0+ or Rust 2024 edition).
+Iris compiles with a standard Rust toolchain. We recommend using the latest stable release of Rust (v1.85.0+ or Rust 2024 edition).
 
-To install Observers in your Rust project, run:
+To install Iris in your Rust project, run:
 
 ```bash
-cargo add observers
+cargo add iris
 ```
 
 ### Development Version (Git)
@@ -13,30 +19,30 @@ cargo add observers
 To use the latest development branch directly from GitHub, run:
 
 ```bash
-cargo add observers --git https://github.com/muhammad-fiaz/observers
+cargo add iris --git https://github.com/muhammad-fiaz/iris
 ```
 
 Or add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-observers = { git = "https://github.com/muhammad-fiaz/observers" }
+iris = { git = "https://github.com/muhammad-fiaz/iris" }
 ```
 
 
 ## Cargo Features
 
-You can customize Observers by specifying feature flags when running `cargo add`:
+You can customize Iris by specifying feature flags when running `cargo add`:
 
 ```bash
-cargo add observers --no-default-features --features wgpu,parallel
+cargo add iris --no-default-features --features wgpu,parallel
 ```
 
 Or configure features directly inside your `Cargo.toml` under dependencies:
 
 ```toml
 [dependencies]
-observers = { version = "0.0.0", default-features = false, features = ["wgpu", "parallel"] }
+iris = { version = "0.0.0", default-features = false, features = ["wgpu", "parallel"] }
 ```
 
 

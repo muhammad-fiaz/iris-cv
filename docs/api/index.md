@@ -1,10 +1,16 @@
+---
+title: "API Reference"
+description: "Overview of Iris's core API — Image, Point, Rect, Scalar, and primary modules for filters, edges, morphology, DNN, and GUI."
+keywords: ["API reference", "documentation", "Image", "Point", "Rect", "Scalar", "modules"]
+---
+
 # API Reference Overview
 
-Welcome to the API reference docs for **Observers**. This page introduces the major structures, traits, and modules exported by the library.
+Welcome to the API reference docs for **Iris**. This page introduces the major structures, traits, and modules exported by the library.
 
 ## Main Types
 
-### [Image](file:///c:/Users/user/Downloads/observers/src/image/mod.rs)
+### Image
 The primary image representation type. It wraps a multi-channel Burn tensor of shape `[Channels, Height, Width]`.
 ```rust
 pub struct Image<B: Backend> {
@@ -12,7 +18,7 @@ pub struct Image<B: Backend> {
 }
 ```
 
-### [Point](file:///c:/Users/user/Downloads/observers/src/core/types.rs)
+### Point
 Represents a coordinate pair `(x, y)` in 2D space.
 ```rust
 pub struct Point<T> {
@@ -21,7 +27,7 @@ pub struct Point<T> {
 }
 ```
 
-### [Rect](file:///c:/Users/user/Downloads/observers/src/core/types.rs)
+### Rect
 Defines a 2D bounding rectangle.
 ```rust
 pub struct Rect<T> {
@@ -32,7 +38,7 @@ pub struct Rect<T> {
 }
 ```
 
-### [Scalar](file:///c:/Users/user/Downloads/observers/src/core/types.rs)
+### Scalar
 A 4-element floating-point array, typically representing color values (e.g. RGBA).
 ```rust
 pub struct Scalar(pub [f64; 4]);

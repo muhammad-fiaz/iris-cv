@@ -1,3 +1,9 @@
+---
+title: "Core Module Reference"
+description: "API reference for Iris core module — Point, Rect, Size, Scalar, and Mat types with shape utilities."
+keywords: ["core module", "Point", "Rect", "Size", "Scalar", "Mat", "geometry types"]
+---
+
 # Core Module Reference
 
 The `core` module contains common algebraic representations, basic geometries, and utility structures.

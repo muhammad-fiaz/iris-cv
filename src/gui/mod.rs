@@ -39,7 +39,7 @@ impl Gui {
                 image_bytes: None,
             },
         );
-        println!("[GUI] Created window: '{}'", name);
+        println!("[GUI] Created window: '{name}'");
         Ok(())
     }
 
@@ -47,7 +47,7 @@ impl Gui {
     pub fn destroy_window(name: &str) -> Result<()> {
         let mut wins = get_windows().lock().unwrap();
         wins.remove(name);
-        println!("[GUI] Destroyed window: '{}'", name);
+        println!("[GUI] Destroyed window: '{name}'");
         Ok(())
     }
 
@@ -114,11 +114,10 @@ impl Gui {
             }
         }
 
-        let path = format!("preview_{}.png", winname.replace(" ", "_"));
+        let path = format!("preview_{}.png", winname.replace(' ', "_"));
         image.save(&path)?;
         println!(
-            "[GUI] Rendering frame in window '{}' (saved preview to '{}')",
-            winname, path
+            "[GUI] Rendering frame in window '{winname}' (saved preview to '{path}')"
         );
         Ok(())
     }
@@ -177,8 +176,7 @@ impl Gui {
                 },
             );
             println!(
-                "[GUI] Trackbar '{}' created in window '{}'",
-                trackbar_name, winname
+                "[GUI] Trackbar '{trackbar_name}' created in window '{winname}'"
             );
         }
         Ok(())
@@ -213,7 +211,7 @@ impl Gui {
     where
         F: Fn(i32, usize, usize, i32) + Send + 'static,
     {
-        println!("[GUI] Registered mouse callback in window '{}'", winname);
+        println!("[GUI] Registered mouse callback in window '{winname}'");
         Ok(())
     }
 }
@@ -226,7 +224,7 @@ fn run_gpui_event_loop(delay_ms: i32) {
         prelude::*, px, rgb, size,
     };
 
-    struct ObserversWindow {
+    struct IrisWindow {
         title: String,
         width: usize,
         height: usize,
@@ -234,7 +232,7 @@ fn run_gpui_event_loop(delay_ms: i32) {
         image_bytes: Option<Vec<u8>>,
     }
 
-    impl Render for ObserversWindow {
+    impl Render for IrisWindow {
         fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
             div()
                 .flex()
@@ -275,7 +273,7 @@ fn run_gpui_event_loop(delay_ms: i32) {
                 ..Default::default()
             },
             |_, cx| {
-                cx.new(|_| ObserversWindow {
+                cx.new(|_| IrisWindow {
                     title,
                     width,
                     height,
@@ -324,7 +322,7 @@ mod tests {
         let img = Image::new(tensor);
 
         Gui::imshow(win, &img).unwrap();
-        
+
         let _ = std::fs::remove_file("preview_Test_Window.png");
 
         Gui::destroy_window(win).unwrap();
@@ -334,4 +332,3 @@ mod tests {
         assert!(code == 0 || code == -1);
     }
 }
-

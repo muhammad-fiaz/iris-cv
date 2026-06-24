@@ -60,4 +60,3 @@ mod tests {
         assert_eq!(frame.shape(), [3, 480, 640]);
     }
 }
-

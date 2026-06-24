@@ -1,5 +1,5 @@
 use crate::core::types::Point;
-use crate::error::{ObserversError, Result};
+use crate::error::{IrisError, Result};
 use crate::image::Image;
 use burn::tensor::{Tensor, TensorData, backend::Backend};
 
@@ -30,7 +30,7 @@ impl<B: Backend> Image<B> {
         // Solve M inverse using standard Cramer's rule for the 2x2 part of the matrix
         let det = m[0][0] * m[1][1] - m[0][1] * m[1][0];
         if det.abs() < 1e-9 {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "Transformation matrix is singular".into(),
             ));
         }
@@ -126,7 +126,7 @@ impl<B: Backend> Image<B> {
             + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
 
         if det.abs() < 1e-9 {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "Perspective matrix is singular".into(),
             ));
         }
@@ -297,6 +297,7 @@ pub struct GeometricTransform;
 
 impl GeometricTransform {
     /// Computes a 2x3 affine matrix for a rotation around center with given angle (degrees) and scale.
+    #[must_use]
     pub fn get_rotation_matrix_2d(
         center: Point<f64>,
         angle_degrees: f64,
@@ -313,6 +314,7 @@ impl GeometricTransform {
     }
 
     /// Computes a 2x3 affine matrix matching 3 point correspondence pairs.
+    #[must_use]
     pub fn get_affine_transform(src: &[Point<f64>; 3], dst: &[Point<f64>; 3]) -> [[f64; 3]; 2] {
         // Solves the linear system:
         // dst[i].x = a*src[i].x + b*src[i].y + c
@@ -353,6 +355,7 @@ impl GeometricTransform {
     }
 
     /// Computes a 3x3 perspective matrix matching 4 point correspondence pairs.
+    #[must_use]
     pub fn get_perspective_transform(
         src: &[Point<f64>; 4],
         dst: &[Point<f64>; 4],
@@ -435,10 +438,14 @@ mod tests {
         let resized = img.resize(20, 20).unwrap();
         assert_eq!(resized.shape(), [3, 20, 20]);
 
-        let warped_aff = img.warp_affine([[1.0, 0.0, 2.0], [0.0, 1.0, 3.0]], 10, 10).unwrap();
+        let warped_aff = img
+            .warp_affine([[1.0, 0.0, 2.0], [0.0, 1.0, 3.0]], 10, 10)
+            .unwrap();
         assert_eq!(warped_aff.shape(), [3, 10, 10]);
 
-        let warped_persp = img.warp_perspective([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], 10, 10).unwrap();
+        let warped_persp = img
+            .warp_perspective([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], 10, 10)
+            .unwrap();
         assert_eq!(warped_persp.shape(), [3, 10, 10]);
 
         let map_x = Tensor::<Wgpu, 2>::zeros([10, 10], &device);
@@ -450,6 +457,3 @@ mod tests {
         assert_eq!(rotated.shape(), [3, 10, 10]);
     }
 }
-
-
-

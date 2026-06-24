@@ -4,11 +4,13 @@ pub struct Scalar(pub [f64; 4]);
 
 impl Scalar {
     /// Creates a new Scalar with the given values.
+    #[must_use]
     pub fn new(v0: f64, v1: f64, v2: f64, v3: f64) -> Self {
         Scalar([v0, v1, v2, v3])
     }
 
     /// Creates a new Scalar with all values set to the same value.
+    #[must_use]
     pub fn all(val: f64) -> Self {
         Scalar([val, val, val, val])
     }
@@ -95,9 +97,8 @@ mod tests {
 
         let col_all = Scalar::all(5.0);
         assert_eq!(col_all.0, [5.0, 5.0, 5.0, 5.0]);
-        
+
         let col_def = Scalar::default();
         assert_eq!(col_def.0, [0.0, 0.0, 0.0, 0.0]);
     }
 }
-

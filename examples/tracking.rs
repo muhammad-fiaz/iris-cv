@@ -1,5 +1,5 @@
 use burn::backend::wgpu::Wgpu;
-use observers::prelude::*;
+use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
@@ -22,8 +22,14 @@ fn main() -> Result<()> {
         }
     }
 
-    let img1 = Image::new(Tensor::<Backend, 3>::from_data(TensorData::new(flat1, [3, h, w]), &device));
-    let img2 = Image::new(Tensor::<Backend, 3>::from_data(TensorData::new(flat2, [3, h, w]), &device));
+    let img1 = Image::new(Tensor::<Backend, 3>::from_data(
+        TensorData::new(flat1, [3, h, w]),
+        &device,
+    ));
+    let img2 = Image::new(Tensor::<Backend, 3>::from_data(
+        TensorData::new(flat2, [3, h, w]),
+        &device,
+    ));
 
     // 2. Background subtraction
     println!("Applying BackgroundSubtractor...");

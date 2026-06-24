@@ -1,5 +1,5 @@
 use burn::backend::wgpu::Wgpu;
-use observers::prelude::*;
+use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
@@ -54,8 +54,7 @@ fn main() -> Result<()> {
                 .unwrap();
         data.insert("weight_1".to_string(), view);
 
-        safetensors::tensor::serialize_to_file(&data, &None, std::path::Path::new(sf_path))
-            .unwrap();
+        safetensors::tensor::serialize_to_file(&data, None, std::path::Path::new(sf_path)).unwrap();
 
         let loaded_map = WeightLoader::load_safetensors::<Backend>(sf_path, &device)?;
         println!("Loaded safetensors weights keys: {:?}", loaded_map.keys());

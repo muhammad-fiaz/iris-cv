@@ -1,5 +1,5 @@
 use burn::backend::wgpu::Wgpu;
-use observers::prelude::*;
+use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
@@ -14,7 +14,10 @@ fn main() -> Result<()> {
     let w = 128;
     let h = 128;
     let flat_data = vec![0.5f32; 3 * h * w];
-    let img = Image::new(Tensor::<Backend, 3>::from_data(TensorData::new(flat_data, [3, h, w]), &device));
+    let img = Image::new(Tensor::<Backend, 3>::from_data(
+        TensorData::new(flat_data, [3, h, w]),
+        &device,
+    ));
 
     // 2. Perform semantic segmentation
     println!("Instantiating Segmenter...");
@@ -31,8 +34,11 @@ fn main() -> Result<()> {
             binary_data[y * 50 + x] = 1.0;
         }
     }
-    let binary_img = Image::new(Tensor::<Backend, 3>::from_data(TensorData::new(binary_data, [1, 50, 50]), &device));
-    let (labels, stats) = binary_img.connected_components_with_stats()?;
+    let binary_img = Image::new(Tensor::<Backend, 3>::from_data(
+        TensorData::new(binary_data, [1, 50, 50]),
+        &device,
+    ));
+    let (_labels, stats) = binary_img.connected_components_with_stats()?;
 
     println!("Found {} connected component(s):", stats.len());
     for stat in stats {

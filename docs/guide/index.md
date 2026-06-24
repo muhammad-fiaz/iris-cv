@@ -1,6 +1,12 @@
-# What is Observers?
+---
+title: "What is Iris?"
+description: "Iris is a fast, pure-Rust computer vision library framework powered by Burn. Learn about its goals, architecture, and modular design."
+keywords: ["Iris", "what is iris", "rust computer vision", "burn framework", "CV library"]
+---
 
-**Observers** is a fast computer vision library framework in Rust. It leverages the power of the **Burn** framework to execute GPU/CPU tensor computations cleanly and idiomatic, without relying on legacy C++ libraries like OpenCV or external dynamic loaders.
+# What is Iris?
+
+**Iris** is a fast computer vision library framework in Rust. It leverages the power of the **Burn** framework to execute GPU/CPU tensor computations cleanly and idiomatic, without relying on legacy C++ libraries like OpenCV or external dynamic loaders.
 
 ## Key Goals
 
@@ -11,7 +17,7 @@
 
 ## Project Structure
 
-Observers is designed with modularity in mind:
+Iris is designed with modularity in mind:
 - **`core`**: Contains the basic matrix representations (`Mat`), geometric types (`Point`, `Rect`, `Size`, `Scalar`), and randomized number generators.
 - **`image`**: Provides representation, file I/O, resizing, remapping, and geometric warping.
 - **`filters`**: Includes box blur, Gaussian blur, median filter, bilateral filter, and separable 2D filtering.

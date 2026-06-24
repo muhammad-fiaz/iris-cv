@@ -106,4 +106,3 @@ mod tests {
         writer.write(&frame_img).unwrap();
     }
 }
-

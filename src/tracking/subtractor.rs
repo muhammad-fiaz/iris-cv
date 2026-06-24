@@ -11,6 +11,7 @@ pub struct BackgroundSubtractor<B: Backend> {
 
 impl<B: Backend> BackgroundSubtractor<B> {
     /// Creates a new background subtractor.
+    #[must_use]
     pub fn new(learning_rate: f32, threshold: f32) -> Self {
         Self {
             learning_rate,
@@ -23,22 +24,19 @@ impl<B: Backend> BackgroundSubtractor<B> {
     pub fn apply(&mut self, frame: &Image<B>) -> Result<Image<B>> {
         let frame_gray = frame.grayscale()?;
 
-        let bg = match &self.background {
-            Some(bg_img) => {
-                // Update running background model: B_t = (1 - alpha)*B_{t-1} + alpha*I_t
-                let updated = bg_img
-                    .tensor
-                    .clone()
-                    .mul_scalar(1.0 - self.learning_rate)
-                    .add(frame_gray.tensor.clone().mul_scalar(self.learning_rate));
-                let bg_new = Image::new(updated);
-                self.background = Some(bg_new.clone());
-                bg_new
-            }
-            None => {
-                self.background = Some(frame_gray.clone());
-                frame_gray.clone()
-            }
+        let bg = if let Some(bg_img) = &self.background {
+            // Update running background model: B_t = (1 - alpha)*B_{t-1} + alpha*I_t
+            let updated = bg_img
+                .tensor
+                .clone()
+                .mul_scalar(1.0 - self.learning_rate)
+                .add(frame_gray.tensor.clone().mul_scalar(self.learning_rate));
+            let bg_new = Image::new(updated);
+            self.background = Some(bg_new.clone());
+            bg_new
+        } else {
+            self.background = Some(frame_gray.clone());
+            frame_gray.clone()
         };
 
         // Foreground mask: F = |Frame - Background| > threshold
@@ -59,9 +57,15 @@ mod tests {
         let device = Default::default();
         let flat_data1 = vec![0.5f32; 3 * 8 * 8];
         let flat_data2 = vec![0.6f32; 3 * 8 * 8];
-        
-        let img1 = Image::new(Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data1, [3, 8, 8]), &device));
-        let img2 = Image::new(Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data2, [3, 8, 8]), &device));
+
+        let img1 = Image::new(Tensor::<Wgpu, 3>::from_data(
+            TensorData::new(flat_data1, [3, 8, 8]),
+            &device,
+        ));
+        let img2 = Image::new(Tensor::<Wgpu, 3>::from_data(
+            TensorData::new(flat_data2, [3, 8, 8]),
+            &device,
+        ));
 
         let mut bs = BackgroundSubtractor::new(0.1, 0.05);
         let mask1 = bs.apply(&img1).unwrap();
@@ -71,5 +75,3 @@ mod tests {
         assert_eq!(mask2.shape(), [1, 8, 8]);
     }
 }
-
-

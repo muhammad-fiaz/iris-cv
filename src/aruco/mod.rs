@@ -3,13 +3,13 @@ use crate::error::Result;
 use crate::image::Image;
 use burn::tensor::backend::Backend;
 
-/// Predefined ArUco marker dictionary types.
+/// Predefined `ArUco` marker dictionary types.
 pub enum ArucoDict {
     Dict4X4_50,
     Dict6X6_250,
 }
 
-/// Represents a detected ArUco marker.
+/// Represents a detected `ArUco` marker.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ArucoMarker {
     pub id: usize,
@@ -21,11 +21,12 @@ pub struct ArucoDetector {
 }
 
 impl ArucoDetector {
+    #[must_use]
     pub fn new(dictionary: ArucoDict) -> Self {
         Self { dictionary }
     }
 
-    /// Detects ArUco markers in the image.
+    /// Detects `ArUco` markers in the image.
     pub fn detect_markers<B: Backend>(&self, image: &Image<B>) -> Result<Vec<ArucoMarker>> {
         let w = image.width() as f64;
         let h = image.height() as f64;
@@ -76,7 +77,8 @@ mod tests {
         let detector = ArucoDetector::new(ArucoDict::Dict6X6_250);
         let device = Default::default();
         let flat_data = vec![0.5f32; 3 * 100 * 100];
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
+        let tensor =
+            Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
         let img = Image::new(tensor);
 
         let markers = detector.detect_markers(&img).unwrap();
@@ -90,4 +92,3 @@ mod tests {
         assert_eq!(tvecs.len(), 1);
     }
 }
-

@@ -1,3 +1,9 @@
+---
+title: "Image Operators Reference"
+description: "API reference for Iris image operators — conversions, I/O, arithmetic, geometric transforms, resize, warp, rotate, and remap."
+keywords: ["image operators", "conversions", "grayscale", "RGB", "arithmetic", "geometric transforms", "resize"]
+---
+
 # Image Operators Reference
 
 Exposes image allocation, transformation, and pixel arithmetic operators on the `Image` struct.

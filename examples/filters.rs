@@ -1,5 +1,5 @@
 use burn::backend::wgpu::Wgpu;
-use observers::prelude::*;
+use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
@@ -36,7 +36,9 @@ fn main() -> Result<()> {
     bilateral_filtered.save("output_bilateral.png")?;
 
     println!("Applying Separable Filter...");
-    let sep_filtered = image.clone().sep_filter_2d(&[0.2, 0.6, 0.2], &[0.2, 0.6, 0.2])?;
+    let sep_filtered = image
+        .clone()
+        .sep_filter_2d(&[0.2, 0.6, 0.2], &[0.2, 0.6, 0.2])?;
     sep_filtered.save("output_sep_filter.png")?;
 
     println!("Filter operations example completed successfully.");

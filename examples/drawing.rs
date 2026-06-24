@@ -1,5 +1,5 @@
 use burn::backend::wgpu::Wgpu;
-use observers::prelude::*;
+use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
@@ -20,17 +20,35 @@ fn main() -> Result<()> {
     // 2. Draw various items
     println!("Drawing shapes on the canvas...");
     // Draw a red line
-    canvas = canvas.draw_line(Point::new(10, 10), Point::new(390, 10), Scalar::new(1.0, 0.0, 0.0, 0.0))?;
-    
+    canvas = canvas.draw_line(
+        Point::new(10, 10),
+        Point::new(390, 10),
+        Scalar::new(1.0, 0.0, 0.0, 0.0),
+    )?;
+
     // Draw a green border rectangle
-    canvas = canvas.draw_rectangle(Rect::new(50, 50, 100, 100), Scalar::new(0.0, 1.0, 0.0, 0.0), 2)?;
+    canvas = canvas.draw_rectangle(
+        Rect::new(50, 50, 100, 100),
+        Scalar::new(0.0, 1.0, 0.0, 0.0),
+        2,
+    )?;
 
     // Draw a blue filled circle
-    canvas = canvas.draw_circle(Point::new(300, 100), 40, Scalar::new(0.0, 0.0, 1.0, 0.0), -1)?;
+    canvas = canvas.draw_circle(
+        Point::new(300, 100),
+        40,
+        Scalar::new(0.0, 0.0, 1.0, 0.0),
+        -1,
+    )?;
 
     // Render white text label
     println!("Rendering text label...");
-    canvas = canvas.draw_text("Observers library", Point::new(50, 200), 2, Scalar::new(1.0, 1.0, 1.0, 0.0))?;
+    canvas = canvas.draw_text(
+        "Iris library",
+        Point::new(50, 200),
+        2,
+        Scalar::new(1.0, 1.0, 1.0, 0.0),
+    )?;
 
     canvas.save("output_drawing.png")?;
     println!("Saved drawing output to 'output_drawing.png'");

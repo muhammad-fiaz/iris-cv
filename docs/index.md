@@ -2,19 +2,19 @@
 layout: home
 
 hero:
-  name: Observers
+  name: Iris
   text: Native Rust Computer Vision
   tagline: A fast computer vision library framework in Rust.
   image:
     src: /logo.svg
-    alt: Observers Logo
+    alt: Iris Logo
   actions:
     - theme: brand
       text: Get Started
       link: /guide/getting-started
     - theme: alt
       text: View on GitHub
-      link: https://github.com/muhammad-fiaz/observers
+      link: https://github.com/muhammad-fiaz/iris
 
 features:
   - icon: 🦀

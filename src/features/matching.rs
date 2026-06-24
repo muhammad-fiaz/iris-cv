@@ -129,8 +129,14 @@ mod tests {
     #[test]
     fn test_descriptor_matching() {
         let device = Default::default();
-        let query = Tensor::<Wgpu, 2>::from_data(TensorData::new(vec![1.0f32, 0.0, 0.0, 1.0], [2, 2]), &device);
-        let train = Tensor::<Wgpu, 2>::from_data(TensorData::new(vec![1.0f32, 0.0, 0.0, 1.0], [2, 2]), &device);
+        let query = Tensor::<Wgpu, 2>::from_data(
+            TensorData::new(vec![1.0f32, 0.0, 0.0, 1.0], [2, 2]),
+            &device,
+        );
+        let train = Tensor::<Wgpu, 2>::from_data(
+            TensorData::new(vec![1.0f32, 0.0, 0.0, 1.0], [2, 2]),
+            &device,
+        );
 
         let matcher = BFMatcher;
         let matches = matcher.match_descriptors(&query, &train).unwrap();
@@ -141,7 +147,8 @@ mod tests {
         assert_eq!(matches[1].train_idx, 1);
 
         let flat_data = vec![0.5f32; 3 * 8 * 8];
-        let t1 = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data.clone(), [3, 8, 8]), &device);
+        let t1 =
+            Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data.clone(), [3, 8, 8]), &device);
         let t2 = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
         let img1 = Image::new(t1);
         let img2 = Image::new(t2);
@@ -153,4 +160,3 @@ mod tests {
         assert_eq!(drawn.shape(), [3, 8, 16]);
     }
 }
-

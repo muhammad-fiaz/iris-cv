@@ -1,5 +1,5 @@
 use burn::backend::wgpu::Wgpu;
-use observers::prelude::*;
+use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
@@ -14,7 +14,10 @@ fn main() -> Result<()> {
     let w = 400;
     let h = 100;
     let flat_data = vec![0.5f32; 3 * h * w];
-    let img = Image::new(Tensor::<Backend, 3>::from_data(TensorData::new(flat_data, [3, h, w]), &device));
+    let img = Image::new(Tensor::<Backend, 3>::from_data(
+        TensorData::new(flat_data, [3, h, w]),
+        &device,
+    ));
 
     // 2. Perform OCR text recognition
     println!("Running OCR text recognition...");

@@ -1,3 +1,9 @@
+---
+title: "Camera & Calibration"
+description: "Capture video, calibrate camera matrices, estimate homography, solve PnP, and project 3D points with Iris."
+keywords: ["camera", "calibration", "video capture", "homography", "camera matrix", "PnP", "projection"]
+---
+
 # Camera & Calibration
 
 Interfacing with video sources and estimating camera matrices is essential for spatial mapping, stereo mapping, and 3D projection.

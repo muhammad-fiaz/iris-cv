@@ -1,3 +1,9 @@
+---
+title: "Segmentation & Contours"
+description: "Find contours, compute convex hulls, analyze shapes with Hu moments, and label connected components in binary images."
+keywords: ["segmentation", "contours", "convex hull", "connected components", "shape analysis", "Hu moments"]
+---
+
 # Segmentation & Contours
 
 Segmentation splits images into regions, allowing you to isolate shapes, track outlines, and label connected components.

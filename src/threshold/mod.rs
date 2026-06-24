@@ -196,4 +196,3 @@ mod tests {
         assert_eq!(otsu.shape(), [3, 8, 8]);
     }
 }
-

@@ -1,4 +1,4 @@
-use crate::error::{ObserversError, Result};
+use crate::error::{IrisError, Result};
 use burn::tensor::{Int, Tensor, TensorData, backend::Backend};
 
 /// Classical Machine Learning algorithms powered by Burn.
@@ -9,7 +9,8 @@ pub struct KMeans<B: Backend> {
 }
 
 impl<B: Backend> KMeans<B> {
-    /// Creates a new KMeans model.
+    /// Creates a new `KMeans` model.
+    #[must_use]
     pub fn new(k: usize, max_iter: usize) -> Self {
         Self {
             k,
@@ -25,7 +26,7 @@ impl<B: Backend> KMeans<B> {
         let d = dims[1];
 
         if n < self.k {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "Number of data points must be >= K".into(),
             ));
         }
@@ -86,7 +87,7 @@ impl<B: Backend> KMeans<B> {
     /// Predicts closest cluster assignments for inputs of shape [N, D].
     pub fn predict(&self, data: &Tensor<B, 2>) -> Result<Tensor<B, 1, Int>> {
         let centroids = self.centroids.as_ref().ok_or_else(|| {
-            ObserversError::Generic(
+            IrisError::Generic(
                 "K-Means centroids are not initialized. Fit the model first.".into(),
             )
         })?;
@@ -119,10 +120,9 @@ mod tests {
 
         let mut km = KMeans::new(2, 5);
         km.fit(&data).unwrap();
-        
+
         assert!(km.centroids.is_some());
         let assignments = km.predict(&data).unwrap();
         assert_eq!(assignments.dims(), [4]);
     }
 }
-

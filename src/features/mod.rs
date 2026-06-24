@@ -25,6 +25,7 @@ pub struct KeyPoint {
 }
 
 impl KeyPoint {
+    #[must_use]
     pub fn new(x: f64, y: f64, size: f64) -> Self {
         Self {
             pt: Point::new(x, y),
@@ -50,6 +51,7 @@ pub struct FeatureDetector {
 }
 
 impl FeatureDetector {
+    #[must_use]
     pub fn new(detector_type: FeatureType) -> Self {
         Self { detector_type }
     }
@@ -65,7 +67,7 @@ impl FeatureDetector {
     }
 
     /// Computes descriptors for detected keypoints.
-    /// Returns a descriptor tensor of shape [NumKeyPoints, DescriptorDim].
+    /// Returns a descriptor tensor of shape [`NumKeyPoints`, `DescriptorDim`].
     pub fn compute<B: Backend>(
         &self,
         image: &Image<B>,
@@ -93,7 +95,8 @@ mod tests {
     fn test_feature_detector() {
         let device = Default::default();
         let flat_data = vec![0.5f32; 3 * 100 * 100];
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
+        let tensor =
+            Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
         let img = Image::new(tensor);
 
         let detector = FeatureDetector::new(FeatureType::ORB);
@@ -104,4 +107,3 @@ mod tests {
         assert_eq!(descriptors.dims(), [2, 32]);
     }
 }
-

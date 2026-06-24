@@ -27,4 +27,3 @@ mod tests {
         assert_eq!(out, vec![5.0f32, 7.0, 9.0]);
     }
 }
-

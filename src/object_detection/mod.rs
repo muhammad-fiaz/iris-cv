@@ -26,7 +26,7 @@ impl<B: Backend> ObjectDetector<B> {
         Self { model: Some(model) }
     }
 
-    /// Loads an ObjectDetector with default pretrained weights implicitly.
+    /// Loads an `ObjectDetector` with default pretrained weights implicitly.
     pub fn pretrained(device: &B::Device) -> Result<Self> {
         if let Ok(model) = OnnxModel::load("weights/object_detector.onnx", device) {
             Ok(Self { model: Some(model) })
@@ -37,19 +37,19 @@ impl<B: Backend> ObjectDetector<B> {
         }
     }
 
-    /// Loads an ObjectDetector from an ONNX model.
+    /// Loads an `ObjectDetector` from an ONNX model.
     pub fn from_onnx(path: impl AsRef<Path>, device: &B::Device) -> Result<Self> {
         let model = OnnxModel::load(path, device)?;
         Ok(Self { model: Some(model) })
     }
 
-    /// Loads an ObjectDetector from a Safetensors model.
+    /// Loads an `ObjectDetector` from a Safetensors model.
     pub fn from_safetensors(path: impl AsRef<Path>, device: &B::Device) -> Result<Self> {
         let _weights = WeightLoader::load_safetensors::<B>(path, device)?;
         Ok(Self { model: None })
     }
 
-    /// Loads an ObjectDetector from a native Burn model.
+    /// Loads an `ObjectDetector` from a native Burn model.
     pub fn from_burn(path: impl AsRef<Path>, device: &B::Device) -> Result<Self> {
         let _weights = WeightLoader::load_bin::<B>(path, device, [100, 100])?;
         Ok(Self { model: None })
@@ -102,7 +102,8 @@ mod tests {
     fn test_object_detector() {
         let device = Default::default();
         let flat_data = vec![0.5f32; 3 * 100 * 100];
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
+        let tensor =
+            Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
         let img = Image::new(tensor);
 
         let detector = ObjectDetector::<Wgpu>::default();
@@ -112,4 +113,3 @@ mod tests {
         assert_eq!(detections[0].confidence, 0.92);
     }
 }
-

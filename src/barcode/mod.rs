@@ -8,7 +8,7 @@ use burn::tensor::backend::Backend;
 pub struct Barcode {
     /// Decoded barcode text.
     pub payload: String,
-    /// Format (e.g. EAN_13, UPC_A).
+    /// Format (e.g. `EAN_13`, `UPC_A`).
     pub format: String,
     /// Corner points of the barcode.
     pub corners: Vec<Point<usize>>,
@@ -17,6 +17,7 @@ pub struct Barcode {
 pub struct BarcodeDetector;
 
 impl BarcodeDetector {
+    #[must_use]
     pub fn new() -> Self {
         Self
     }
@@ -53,7 +54,8 @@ mod tests {
         let detector = BarcodeDetector::default();
         let device = Default::default();
         let flat_data = vec![0.5f32; 3 * 100 * 100];
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
+        let tensor =
+            Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
         let img = Image::new(tensor);
 
         let barcodes = detector.detect_and_decode(&img).unwrap();
@@ -62,4 +64,3 @@ mod tests {
         assert_eq!(barcodes[0].format, "EAN_13");
     }
 }
-

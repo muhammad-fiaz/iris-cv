@@ -21,9 +21,9 @@ pub fn load_image<B: Backend>(path: impl AsRef<Path>, device: &B::Device) -> Res
         for x in 0..w {
             let idx = (y * w + x) * 3;
             // Map HWC (file layout) to CHW (standard deep learning tensor layout)
-            flat_data[y * w + x] = (slice[idx] as f32) / 255.0; // R
-            flat_data[h * w + y * w + x] = (slice[idx + 1] as f32) / 255.0; // G
-            flat_data[2 * h * w + y * w + x] = (slice[idx + 2] as f32) / 255.0; // B
+            flat_data[y * w + x] = f32::from(slice[idx]) / 255.0; // R
+            flat_data[h * w + y * w + x] = f32::from(slice[idx + 1]) / 255.0; // G
+            flat_data[2 * h * w + y * w + x] = f32::from(slice[idx + 2]) / 255.0; // B
         }
     }
 
@@ -94,4 +94,3 @@ mod tests {
         let _ = std::fs::remove_file(temp_path);
     }
 }
-

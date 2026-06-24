@@ -1,3 +1,9 @@
+---
+title: "Drawing Canvas & Text Rendering"
+description: "Draw lines, rectangles, circles, polygons, and render text on images using Iris's built-in 5x7 bitmap font."
+keywords: ["drawing", "canvas", "text rendering", "shapes", "lines", "circles", "rectangles", "bitmap font"]
+---
+
 # Drawing Canvas & Text Rendering
 
 Drawing shapes and rendering text onto frames is useful for displaying visualization boxes, showing tracking overlays, and labeling image outputs.
@@ -42,11 +48,11 @@ let image = image.draw_circle(center, radius, color, -1)?;
 
 ## Rendering Text
 
-Observers contains a lightweight, built-in **5x7 bitmap font** (`FONT_5X7`) to render standard ASCII labels onto images directly, eliminating the need to link external system font files.
+Iris contains a lightweight, built-in **5x7 bitmap font** (`FONT_5X7`) to render standard ASCII labels onto images directly, eliminating the need to link external system font files.
 
 ```rust
 let org = Point::new(50, 250);
 let scale = 2;
 let color = Scalar::all(1.0); // White text
-let image = image.draw_text("Observers library", org, scale, color)?;
+let image = image.draw_text("Iris library", org, scale, color)?;
 ```

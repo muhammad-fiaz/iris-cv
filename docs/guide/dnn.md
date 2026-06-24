@@ -1,6 +1,12 @@
+---
+title: "Deep Neural Networks (DNN)"
+description: "Load and run ONNX, Safetensors, and PyTorch bin models with Iris's native DNN module powered by the Burn framework."
+keywords: ["DNN", "deep learning", "ONNX", "safetensors", "neural network", "inference", "model loading"]
+---
+
 # Deep Neural Networks (DNN)
 
-Deep learning modules in Observers are built natively on the **Burn** framework. This allows you to construct model structures, load weights, and execute forward passes across multiple backends (WGPU, CUDA, LibTorch, Ndarray).
+Deep learning modules in Iris are built natively on the **Burn** framework. This allows you to construct model structures, load weights, and execute forward passes across multiple backends (WGPU, CUDA, LibTorch, Ndarray).
 
 ## Loading Pretrained Model Weights
 
@@ -21,7 +27,7 @@ let weight_tensor = WeightLoader::load_bin::<Backend>("weights/model.bin", &devi
 
 ## Running ONNX Models
 
-Observers supports importing ONNX model pipelines.
+Iris supports importing ONNX model pipelines.
 
 ```rust
 // Load an ONNX model from file

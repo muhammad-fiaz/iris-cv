@@ -1,6 +1,12 @@
+---
+title: "Image Filters & Blur"
+description: "Apply box blur, Gaussian blur, median filter, bilateral filter, and separable 2D filters in Rust with Iris."
+keywords: ["image filters", "blur", "gaussian blur", "median filter", "bilateral filter", "box blur", "smoothing"]
+---
+
 # Image Filters & Blur
 
-Image filtering is essential for noise reduction, smoothing, and feature enhancement. Observers implements standard spatial filters using parallelized row-by-row CPU iterations (powered by `rayon` under the `parallel` feature flag) or accelerated GPU tensor calculations.
+Image filtering is essential for noise reduction, smoothing, and feature enhancement. Iris implements standard spatial filters using parallelized row-by-row CPU iterations (powered by `rayon` under the `parallel` feature flag) or accelerated GPU tensor calculations.
 
 ## Available Blur Filters
 

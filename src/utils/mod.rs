@@ -1,13 +1,15 @@
-/// Common utility functions for the Observers library.
+/// Common utility functions for the Iris library.
 pub struct Utils;
 
 impl Utils {
     /// Formats a time duration in milliseconds.
+    #[must_use]
     pub fn format_duration_ms(ms: f64) -> String {
-        format!("{:.2} ms", ms)
+        format!("{ms:.2} ms")
     }
 
     /// Linear interpolation between two float values.
+    #[must_use]
     pub fn lerp(a: f32, b: f32, t: f32) -> f32 {
         a + (b - a) * t.clamp(0.0, 1.0)
     }

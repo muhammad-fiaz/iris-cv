@@ -1,4 +1,4 @@
-use crate::error::{ObserversError, Result};
+use crate::error::{IrisError, Result};
 use crate::image::Image;
 use burn::tensor::backend::Backend;
 
@@ -9,7 +9,7 @@ impl Stitcher {
     /// Stitches a list of images into a single panorama.
     pub fn stitch<B: Backend>(&self, images: &[Image<B>]) -> Result<Image<B>> {
         if images.is_empty() {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "Images list cannot be empty".into(),
             ));
         }
@@ -45,12 +45,17 @@ mod tests {
         let flat_data1 = vec![0.5f32; 3 * 8 * 8];
         let flat_data2 = vec![0.3f32; 3 * 8 * 8];
 
-        let img1 = Image::new(Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data1, [3, 8, 8]), &device));
-        let img2 = Image::new(Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data2, [3, 8, 8]), &device));
+        let img1 = Image::new(Tensor::<Wgpu, 3>::from_data(
+            TensorData::new(flat_data1, [3, 8, 8]),
+            &device,
+        ));
+        let img2 = Image::new(Tensor::<Wgpu, 3>::from_data(
+            TensorData::new(flat_data2, [3, 8, 8]),
+            &device,
+        ));
 
         let stitcher = Stitcher;
         let stitched = stitcher.stitch(&[img1, img2]).unwrap();
         assert_eq!(stitched.shape(), [3, 8, 16]);
     }
 }
-

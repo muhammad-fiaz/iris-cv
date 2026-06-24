@@ -1,6 +1,12 @@
+---
+title: "Motion Tracking & Optical Flow"
+description: "Track objects with KCF, CSRT, and MOSSE trackers. Compute dense Farneback and sparse Lucas-Kanade optical flow."
+keywords: ["tracking", "optical flow", "background subtraction", "KCF", "CSRT", "Farneback", "Lucas-Kanade"]
+---
+
 # Motion Tracking & Optical Flow
 
-Observers includes algorithms to isolate moving objects, track dynamic structures, and evaluate pixel motion vectors.
+Iris includes algorithms to isolate moving objects, track dynamic structures, and evaluate pixel motion vectors.
 
 ## Background Subtractor
 

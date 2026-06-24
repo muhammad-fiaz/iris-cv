@@ -4947,6 +4947,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d98f6fed1fde3f8c21bc40a1abb88dd75e67924f9cffc3ef95607bad8017f8e2"
 
 [[package]]
+name = "iris"
+version = "0.0.0"
+dependencies = [
+ "burn",
+ "gpui 0.2.2 (git+https://github.com/zed-industries/zed)",
+ "gpui-component",
+ "image",
+ "rayon",
+ "safetensors 0.8.0",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "itertools"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6281,19 +6294,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ff76201f031d8863c38aa7f905eca4f53abbfa15f609db4277d44cd8938f33fe"
 dependencies = [
  "memchr",
-]
-
-[[package]]
-name = "observers"
-version = "0.0.0"
-dependencies = [
- "burn",
- "gpui 0.2.2 (git+https://github.com/zed-industries/zed)",
- "gpui-component",
- "image",
- "rayon",
- "safetensors 0.8.0",
- "thiserror 2.0.18",
 ]
 
 [[package]]

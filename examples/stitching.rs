@@ -1,5 +1,5 @@
 use burn::backend::wgpu::Wgpu;
-use observers::prelude::*;
+use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
@@ -16,8 +16,14 @@ fn main() -> Result<()> {
     let flat_left = vec![0.3f32; 3 * h * w];
     let flat_right = vec![0.4f32; 3 * h * w];
 
-    let left = Image::new(Tensor::<Backend, 3>::from_data(TensorData::new(flat_left, [3, h, w]), &device));
-    let right = Image::new(Tensor::<Backend, 3>::from_data(TensorData::new(flat_right, [3, h, w]), &device));
+    let left = Image::new(Tensor::<Backend, 3>::from_data(
+        TensorData::new(flat_left, [3, h, w]),
+        &device,
+    ));
+    let right = Image::new(Tensor::<Backend, 3>::from_data(
+        TensorData::new(flat_right, [3, h, w]),
+        &device,
+    ));
 
     // 2. Perform panorama stitching
     println!("Stitching images together...");

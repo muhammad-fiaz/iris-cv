@@ -10,7 +10,7 @@ impl Photo {
     pub fn fast_nl_means_denoising<B: Backend>(image: &Image<B>, h: f32) -> Result<Image<B>> {
         // Simulates denoising by smoothing/blurring with a dynamic factor based on h
         let kernel_size = if h > 10.0 { 5 } else { 3 };
-        image.clone().gaussian_blur(kernel_size, (h / 5.0) as f64)
+        image.clone().gaussian_blur(kernel_size, f64::from(h / 5.0))
     }
 }
 
@@ -21,6 +21,7 @@ pub struct MergeMertens {
 }
 
 impl MergeMertens {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             contrast_weight: 1.0,
@@ -31,7 +32,7 @@ impl MergeMertens {
     /// Merges multiple exposure images into a high dynamic range image.
     pub fn process<B: Backend>(&self, images: &[Image<B>]) -> Result<Image<B>> {
         if images.is_empty() {
-            return Err(crate::error::ObserversError::InvalidParameter(
+            return Err(crate::error::IrisError::InvalidParameter(
                 "Images list cannot be empty".into(),
             ));
         }
@@ -57,7 +58,6 @@ mod tests {
     use burn::backend::wgpu::Wgpu;
     use burn::tensor::{Tensor, TensorData};
 
-
     #[test]
     fn test_photo_processing() {
         let device = Default::default();
@@ -73,4 +73,3 @@ mod tests {
         assert_eq!(merged.shape(), [3, 8, 8]);
     }
 }
-

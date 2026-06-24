@@ -23,6 +23,7 @@ pub struct Tracker<B: Backend> {
 
 impl<B: Backend> Tracker<B> {
     /// Creates a new Tracker.
+    #[must_use]
     pub fn new(tracker_type: TrackerType) -> Self {
         Self {
             tracker_type,
@@ -40,7 +41,7 @@ impl<B: Backend> Tracker<B> {
     /// Updates the tracker, finding the new location of the target in the frame.
     pub fn update(&mut self, _image: &Image<B>) -> Result<Rect<usize>> {
         let current = self.bbox.ok_or_else(|| {
-            crate::error::ObserversError::Generic(
+            crate::error::IrisError::Generic(
                 "Tracker not initialized. Call init first.".into(),
             )
         })?;
@@ -58,7 +59,6 @@ mod tests {
     use burn::backend::wgpu::Wgpu;
     use burn::tensor::{Tensor, TensorData};
 
-
     #[test]
     fn test_object_tracker() {
         let device = Default::default();
@@ -74,4 +74,3 @@ mod tests {
         assert_eq!(updated, Rect::new(3, 3, 4, 4));
     }
 }
-

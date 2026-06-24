@@ -7,7 +7,7 @@ pub use crate::core::{Mat, Point, Rect, Rng, Scalar, Size};
 pub use crate::dnn::{
     OnnxModel, WeightLoader, blob_from_image, nms_boxes, read_net, read_net_from_onnx,
 };
-pub use crate::error::{ObserversError, Result};
+pub use crate::error::{IrisError, Result};
 pub use crate::face::{Face, FaceDetector, FaceRecognizer};
 pub use crate::features::{BFMatcher, DMatch, FeatureDetector, FeatureType, KeyPoint, MatchDrawer};
 pub use crate::gui::Gui;
@@ -38,8 +38,7 @@ mod tests {
         // Just verify we can access structural items exported by prelude
         let _pt = Point::new(0.0, 0.0);
         let _sz = Size::new(640, 480);
-        let _err = ObserversError::Generic("test".into());
+        let _err = IrisError::Generic("test".into());
         assert!(true);
     }
 }
-

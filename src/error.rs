@@ -1,8 +1,8 @@
 use thiserror::Error;
 
-/// Error type for all Observers library operations.
+/// Error type for all Iris library operations.
 #[derive(Debug, Error)]
-pub enum ObserversError {
+pub enum IrisError {
     #[error("Image I/O or format error: {0}")]
     Image(#[from] image::ImageError),
 
@@ -34,8 +34,8 @@ pub enum ObserversError {
     Generic(String),
 }
 
-/// Result type for Observers library operations.
-pub type Result<T> = std::result::Result<T, ObserversError>;
+/// Result type for Iris library operations.
+pub type Result<T> = std::result::Result<T, IrisError>;
 
 #[cfg(test)]
 mod tests {
@@ -43,14 +43,13 @@ mod tests {
 
     #[test]
     fn test_error_formatting() {
-        let err = ObserversError::Generic("test error".to_string());
+        let err = IrisError::Generic("test error".to_string());
         assert_eq!(format!("{}", err), "Generic error: test error");
-        
-        let err_dim = ObserversError::DimensionMismatch {
+
+        let err_dim = IrisError::DimensionMismatch {
             expected: vec![1, 2, 3],
             actual: vec![1, 2],
         };
         assert!(format!("{}", err_dim).contains("Dimension mismatch"));
     }
 }
-

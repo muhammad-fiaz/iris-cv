@@ -34,10 +34,12 @@ mod tests {
     #[test]
     fn test_mat_operations() {
         let device = Default::default();
-        let tensor = Tensor::<Wgpu, 2>::from_data(TensorData::new(vec![1.0f32, 2.0, 3.0, 4.0], [2, 2]), &device);
+        let tensor = Tensor::<Wgpu, 2>::from_data(
+            TensorData::new(vec![1.0f32, 2.0, 3.0, 4.0], [2, 2]),
+            &device,
+        );
         let mat = Mat::new(tensor);
         assert_eq!(mat.shape(), vec![2, 2]);
         assert_eq!(mat.total(), 4);
     }
 }
-

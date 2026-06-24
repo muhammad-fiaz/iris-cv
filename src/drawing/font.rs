@@ -158,4 +158,3 @@ mod tests {
         assert_eq!(FONT_5X7[33][2], 0x5f);
     }
 }
-

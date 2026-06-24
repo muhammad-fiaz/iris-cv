@@ -98,4 +98,3 @@ mod tests {
         assert_eq!(eq.shape(), [1, 2, 4]);
     }
 }
-

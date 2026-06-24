@@ -1,5 +1,5 @@
 use burn::backend::wgpu::Wgpu;
-use observers::prelude::*;
+use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
@@ -20,9 +20,13 @@ fn main() -> Result<()> {
 
     // 2. Structuring Element (demonstrating the function exists)
     let element = Morphology::get_structuring_element(MorphShape::Rect, Size::new(5, 5));
-    println!("Structuring element Rect 5x5: {}x{}", element.len(), element[0].len());
+    println!(
+        "Structuring element Rect 5x5: {}x{}",
+        element.len(),
+        element[0].len()
+    );
 
-    // 3. Perform morphology using actual observers API
+    // 3. Perform morphology using actual iris API
     println!("Applying Dilation (kernel size 3)...");
     let dilated = image.clone().dilate(3)?;
     dilated.save("output_dilation.png")?;

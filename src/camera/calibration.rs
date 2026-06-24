@@ -1,5 +1,5 @@
 use crate::core::types::{Point, Size};
-use crate::error::{ObserversError, Result};
+use crate::error::{IrisError, Result};
 use crate::image::GeometricTransform;
 
 pub struct CameraCalibration;
@@ -12,7 +12,7 @@ impl CameraCalibration {
         _image_size: Size<usize>,
     ) -> Result<([[f64; 3]; 3], Vec<f64>)> {
         if object_points.is_empty() || image_points.is_empty() {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "Points list cannot be empty".into(),
             ));
         }
@@ -73,7 +73,7 @@ impl CameraCalibration {
     /// Computes a 3x3 homography matrix mapping src to dst.
     pub fn find_homography(src: &[Point<f64>], dst: &[Point<f64>]) -> Result<[[f64; 3]; 3]> {
         if src.len() < 4 || dst.len() < 4 {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "At least 4 point pairs are required".into(),
             ));
         }
@@ -101,7 +101,7 @@ impl CameraCalibration {
     /// Computes a 3x3 Fundamental Matrix mapping coordinates between stereo views.
     pub fn find_fundamental_mat(src: &[Point<f64>], dst: &[Point<f64>]) -> Result<[[f64; 3]; 3]> {
         if src.len() < 8 || dst.len() < 8 {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "At least 8 point pairs are required".into(),
             ));
         }
@@ -141,8 +141,18 @@ mod tests {
 
     #[test]
     fn test_camera_calibration() {
-        let obj_pts = vec![vec![Point::new(0.0, 0.0), Point::new(1.0, 0.0), Point::new(1.0, 1.0), Point::new(0.0, 1.0)]];
-        let img_pts = vec![vec![Point::new(10.0, 10.0), Point::new(20.0, 10.0), Point::new(20.0, 20.0), Point::new(10.0, 20.0)]];
+        let obj_pts = vec![vec![
+            Point::new(0.0, 0.0),
+            Point::new(1.0, 0.0),
+            Point::new(1.0, 1.0),
+            Point::new(0.0, 1.0),
+        ]];
+        let img_pts = vec![vec![
+            Point::new(10.0, 10.0),
+            Point::new(20.0, 10.0),
+            Point::new(20.0, 20.0),
+            Point::new(10.0, 20.0),
+        ]];
         let size = Size::new(640, 480);
         let (k, dist) = CameraCalibration::calibrate_camera(&obj_pts, &img_pts, size).unwrap();
         assert_eq!(k[0][0], 500.0);
@@ -152,8 +162,14 @@ mod tests {
         assert_eq!(h[2][2], 1.0);
 
         let pts = vec![Point::new(0.5, 0.5)];
-        let projected = CameraCalibration::project_points(&pts, &[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], &[[0.0, 0.0, 0.0]], &k, &dist).unwrap();
+        let projected = CameraCalibration::project_points(
+            &pts,
+            &[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+            &[[0.0, 0.0, 0.0]],
+            &k,
+            &dist,
+        )
+        .unwrap();
         assert!(projected.len() == 1);
     }
 }
-

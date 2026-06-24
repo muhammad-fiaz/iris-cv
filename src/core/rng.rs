@@ -7,6 +7,7 @@ pub struct Rng {
 
 impl Rng {
     /// Creates a new RNG with a given seed.
+    #[must_use]
     pub fn new(seed: u64) -> Self {
         let mut rng = Self {
             state: [seed, seed ^ 0x72636467_75736867],

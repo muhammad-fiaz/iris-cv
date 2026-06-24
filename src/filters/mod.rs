@@ -1,6 +1,6 @@
 pub mod bilateral;
 
-use crate::error::{ObserversError, Result};
+use crate::error::{IrisError, Result};
 use crate::image::Image;
 use burn::tensor::{Tensor, TensorData, backend::Backend};
 
@@ -8,7 +8,7 @@ impl<B: Backend> Image<B> {
     /// Applies a box filter to blur the image with the specified kernel size.
     pub fn box_blur(self, kernel_size: usize) -> Result<Self> {
         if kernel_size.is_multiple_of(2) {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "Kernel size must be odd".into(),
             ));
         }
@@ -91,7 +91,7 @@ impl<B: Backend> Image<B> {
     /// Applies a Gaussian blur filter to the image.
     pub fn gaussian_blur(self, kernel_size: usize, sigma: f64) -> Result<Self> {
         if kernel_size.is_multiple_of(2) {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "Kernel size must be odd".into(),
             ));
         }
@@ -148,8 +148,7 @@ impl<B: Backend> Image<B> {
                                 let px = x as isize + kx;
                                 let px_clamped = px.clamp(0, w as isize - 1) as usize;
                                 let weight = kernel[(ky + rad) as usize][(kx + rad) as usize];
-                                blur_sum += flat_vals[ch * h * w + py_clamped * w + px_clamped]
-                                    as f64
+                                blur_sum += f64::from(flat_vals[ch * h * w + py_clamped * w + px_clamped])
                                     * weight;
                             }
                         }
@@ -190,7 +189,7 @@ impl<B: Backend> Image<B> {
     /// Applies a median filter to reduce salt-and-pepper noise.
     pub fn median_blur(self, kernel_size: usize) -> Result<Self> {
         if kernel_size.is_multiple_of(2) {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "Kernel size must be odd".into(),
             ));
         }
@@ -299,4 +298,3 @@ mod tests {
         assert_eq!(median.shape(), [3, 8, 8]);
     }
 }
-

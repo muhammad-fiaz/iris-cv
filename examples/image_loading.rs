@@ -1,5 +1,5 @@
 use burn::backend::wgpu::Wgpu;
-use observers::prelude::*;
+use iris::prelude::*;
 
 fn main() -> Result<()> {
     // 1. Select compute backend
@@ -39,7 +39,7 @@ fn main() -> Result<()> {
             3,
         )?
         .draw_text(
-            "Observers CV",
+            "Iris CV",
             Point::new(60, 80),
             2,
             Scalar::new(0.0, 1.0, 0.0, 0.0),

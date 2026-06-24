@@ -4,11 +4,13 @@ pub struct GpuContext {
 }
 
 impl GpuContext {
+    #[must_use]
     pub fn new() -> Self {
         Self { enabled: true }
     }
 
     /// Queries if acceleration is supported by the active device.
+    #[must_use]
     pub fn is_accelerated(&self) -> bool {
         self.enabled
     }
@@ -30,4 +32,3 @@ mod tests {
         assert!(ctx.is_accelerated());
     }
 }
-

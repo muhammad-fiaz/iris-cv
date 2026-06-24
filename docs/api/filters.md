@@ -1,3 +1,9 @@
+---
+title: "Filters & Morphology Reference"
+description: "API reference for Iris filters — blur, gradient, edge detection, thresholding, and morphological operations."
+keywords: ["filters", "blur", "thresholding", "morphology", "edge detection", "gradients", "canny"]
+---
+
 # Compute & Filters Reference
 
 Details image filters, edge extraction, thresholding, and morphological operation signatures.

@@ -3,6 +3,7 @@ use crate::core::types::{Point, Rect, Size};
 
 impl Contour {
     /// Computes the perimeter/length of a contour.
+    #[must_use]
     pub fn arc_length(&self, closed: bool) -> f64 {
         let pts = &self.points;
         let n = pts.len();
@@ -25,11 +26,13 @@ impl Contour {
     }
 
     /// Returns the area of the contour region.
+    #[must_use]
     pub fn contour_area(&self) -> f64 {
         self.moments().m00
     }
 
     /// Approximates a polygonal curve using the Douglas-Peucker algorithm.
+    #[must_use]
     pub fn approx_poly_dp(&self, epsilon: f64, closed: bool) -> Self {
         let pts = &self.points;
         if pts.len() <= 2 {
@@ -118,6 +121,7 @@ impl Contour {
     }
 
     /// Computes the straight bounding rectangle of the contour.
+    #[must_use]
     pub fn bounding_rect(&self) -> Rect<usize> {
         if self.points.is_empty() {
             return Rect::default();
@@ -139,6 +143,7 @@ impl Contour {
     }
 
     /// Finds the minimum area bounding box (center, size, and rotation angle in degrees).
+    #[must_use]
     pub fn min_area_rect(&self) -> (Point<f64>, Size<f64>, f64) {
         let hull = self.convex_hull();
         if hull.points.len() < 3 {
@@ -160,7 +165,7 @@ impl Contour {
 
         // Iterates rotations around center to find the minimum area bounding box
         for angle_deg in 0..90 {
-            let theta = (angle_deg as f64).to_radians();
+            let theta = f64::from(angle_deg).to_radians();
             let cos_t = theta.cos();
             let sin_t = theta.sin();
 
@@ -188,15 +193,15 @@ impl Contour {
 
             if area < min_area {
                 min_area = area;
-                let uc = (min_u + max_u) / 2.0;
-                let vc = (min_v + max_v) / 2.0;
+                let uc = f64::midpoint(min_u, max_u);
+                let vc = f64::midpoint(min_v, max_v);
                 // Map center back
                 let cx = uc * cos_t - vc * sin_t;
                 let cy = uc * sin_t + vc * cos_t;
 
                 best_center = Point::new(cx, cy);
                 best_size = Size::new(w_rot, h_rot);
-                best_angle = angle_deg as f64;
+                best_angle = f64::from(angle_deg);
             }
         }
 
@@ -208,6 +213,7 @@ impl Contour {
     /// - Positive distance if inside.
     /// - Negative distance if outside.
     /// - Zero if on the edge.
+    #[must_use]
     pub fn point_polygon_test(&self, pt: Point<f64>, measure_dist: bool) -> f64 {
         let pts = &self.points;
         let n = pts.len();
@@ -272,6 +278,7 @@ pub struct RotatedRect;
 
 impl RotatedRect {
     /// Maps center, size, and angle (degrees) to 4 corner points.
+    #[must_use]
     pub fn box_points(center: Point<f64>, size: Size<f64>, angle_degrees: f64) -> [Point<f64>; 4] {
         let theta = angle_degrees.to_radians();
         let cos_t = theta.cos();
@@ -304,6 +311,7 @@ pub struct ShapeAnalysis;
 
 impl ShapeAnalysis {
     /// Computes the 7 Hu Moments from image spatial moments.
+    #[must_use]
     pub fn hu_moments(m: &Moments) -> [f64; 7] {
         if m.m00.abs() < 1e-9 {
             return [0.0; 7];
@@ -332,6 +340,7 @@ impl ShapeAnalysis {
     }
 
     /// Matches two shapes based on their Hu moments.
+    #[must_use]
     pub fn match_shapes(m1: &Moments, m2: &Moments) -> f64 {
         let hu1 = Self::hu_moments(m1);
         let hu2 = Self::hu_moments(m2);
@@ -357,7 +366,7 @@ mod tests {
             Point::new(0, 10),
         ];
         let contour = Contour::new(pts);
-        
+
         let length = contour.arc_length(true);
         assert!(length > 0.0);
 
@@ -390,4 +399,3 @@ mod tests {
         assert!(score < 1e-9);
     }
 }
-

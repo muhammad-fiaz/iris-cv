@@ -1,9 +1,21 @@
 import { defineConfig } from "vitepress";
 import llmstxt from "vitepress-plugin-llms";
 
+interface TransformPageData {
+  title: string;
+  description: string;
+  relativePath: string;
+  lastUpdated: number;
+  frontmatter: {
+    head?: unknown[];
+    description?: string;
+    [key: string]: unknown;
+  };
+}
+
 // Site configuration
-export const SITE_URL = "https://muhammad-fiaz.github.io/observers";
-export const SITE_NAME = "observers";
+export const SITE_URL = "https://muhammad-fiaz.github.io/iris";
+export const SITE_NAME = "Iris";
 export const SITE_DESCRIPTION =
   "A fast computer vision library framework in Rust. Features include GPU-acceleration, image filters, camera integration, drawing canvas, and native ONNX inference.";
 
@@ -16,18 +28,18 @@ export const ADSENSE_CLIENT_ID = "ca-pub-2040560600290490";
 
 // SEO Keywords
 export const KEYWORDS =
-  "rust, computer vision, image processing, video processing, deep learning, burn framework, wgpu, cuda, machine learning, opencv alternative, rust-cv, image filtering, edge detection, camera calibration";
+  "rust, computer vision, image processing, video processing, deep learning, burn framework, wgpu, cuda, machine learning, opencv alternative, rust-cv, image filtering, edge detection, camera calibration, iris, object detection, face recognition, QR code, optical flow, morphological operations, segmentation, contours, GPU acceleration";
 
 export default defineConfig({
   lang: "en-US",
   title: SITE_NAME,
   description: SITE_DESCRIPTION,
-  base: "/observers/",
+  base: "/iris/",
   lastUpdated: true,
   cleanUrls: true,
 
   sitemap: {
-    hostname: SITE_URL,
+    hostname: "https://muhammad-fiaz.github.io/iris",
   },
 
   vite: {
@@ -62,7 +74,7 @@ export default defineConfig({
       "meta",
       {
         property: "og:image:alt",
-        content: "observers - Rust computer vision and deep learning library",
+        content: "Iris - Rust computer vision and deep learning library",
       },
     ],
     ["meta", { property: "og:site_name", content: SITE_NAME }],
@@ -76,11 +88,8 @@ export default defineConfig({
     ["meta", { name: "twitter:image", content: `${SITE_URL}/logo.svg` }],
     ["meta", { name: "twitter:creator", content: "@muhammadfiaz_" }],
 
-    // Canonical URL
-    ["link", { rel: "canonical", href: SITE_URL }],
-
     // Favicons
-    ["link", { rel: "icon", href: "/observers/logo.svg" }],
+    ["link", { rel: "icon", href: "/iris/logo.svg" }],
 
     // Theme color
     ["meta", { name: "theme-color", content: "#5e35b1" }],
@@ -132,7 +141,7 @@ gtag('config', '${GA_ID}');`,
 
   ignoreDeadLinks: [/.*\.rs$/],
 
-  transformPageData(pageData) {
+  transformPageData(pageData: TransformPageData) {
     // Dynamic OG image generation based on page title
     const pageTitle = pageData.title || SITE_NAME;
     const pageDescription = pageData.description || SITE_DESCRIPTION;
@@ -228,7 +237,7 @@ gtag('config', '${GA_ID}');`,
           price: "0",
           priceCurrency: "USD",
         },
-        downloadUrl: "https://github.com/muhammad-fiaz/observers",
+        downloadUrl: "https://github.com/muhammad-fiaz/iris",
         softwareVersion: "0.0.0",
         license: "https://opensource.org/licenses/MIT",
       });
@@ -301,7 +310,7 @@ gtag('config', '${GA_ID}');`,
 
   themeConfig: {
     logo: "/logo.svg",
-    siteTitle: "observers",
+    siteTitle: "Iris",
 
     nav: [
       { text: "Home", link: "/" },
@@ -318,7 +327,7 @@ gtag('config', '${GA_ID}');`,
           { text: "☕ Donate", link: "https://pay.muhammadfiaz.com" },
         ],
       },
-      { text: "GitHub", link: "https://github.com/muhammad-fiaz/observers" },
+      { text: "GitHub", link: "https://github.com/muhammad-fiaz/iris" },
     ],
 
     sidebar: {
@@ -326,7 +335,7 @@ gtag('config', '${GA_ID}');`,
         {
           text: "Introduction",
           items: [
-            { text: "What is Observers?", link: "/guide/" },
+            { text: "What is Iris?", link: "/guide/" },
             { text: "Introduction", link: "/guide/introduction" },
             { text: "Getting Started", link: "/guide/getting-started" },
             { text: "Installation", link: "/guide/installation" },
@@ -369,7 +378,7 @@ gtag('config', '${GA_ID}');`,
     },
 
     socialLinks: [
-      { icon: "github", link: "https://github.com/muhammad-fiaz/observers" },
+      { icon: "github", link: "https://github.com/muhammad-fiaz/iris" },
     ],
 
     footer: {
@@ -383,7 +392,7 @@ gtag('config', '${GA_ID}');`,
 
     editLink: {
       pattern:
-        "https://github.com/muhammad-fiaz/observers/edit/main/docs/:path",
+        "https://github.com/muhammad-fiaz/iris/edit/main/docs/:path",
       text: "Edit this page on GitHub",
     },
 

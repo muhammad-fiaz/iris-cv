@@ -239,15 +239,23 @@ mod tests {
     fn test_drawing_operations() {
         let device = Default::default();
         let flat_data = vec![0.0f32; 3 * 100 * 100];
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
+        let tensor =
+            Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
         let img = Image::new(tensor);
 
-        let img = img.draw_line(Point::new(10, 10), Point::new(90, 90), Scalar::all(1.0)).unwrap();
-        let img = img.draw_rectangle(Rect::new(20, 20, 30, 40), Scalar::all(0.5), 1).unwrap();
-        let img = img.draw_circle(Point::new(50, 50), 20, Scalar::all(0.8), -1).unwrap();
-        let img = img.draw_text("Hello", Point::new(10, 80), 2, Scalar::all(0.9)).unwrap();
+        let img = img
+            .draw_line(Point::new(10, 10), Point::new(90, 90), Scalar::all(1.0))
+            .unwrap();
+        let img = img
+            .draw_rectangle(Rect::new(20, 20, 30, 40), Scalar::all(0.5), 1)
+            .unwrap();
+        let img = img
+            .draw_circle(Point::new(50, 50), 20, Scalar::all(0.8), -1)
+            .unwrap();
+        let img = img
+            .draw_text("Hello", Point::new(10, 80), 2, Scalar::all(0.9))
+            .unwrap();
 
         assert_eq!(img.shape(), [3, 100, 100]);
     }
 }
-

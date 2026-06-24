@@ -1,5 +1,5 @@
 use crate::core::types::Point;
-use crate::error::{ObserversError, Result};
+use crate::error::{IrisError, Result};
 use crate::image::Image;
 use burn::tensor::{Tensor, TensorData, backend::Backend};
 
@@ -7,7 +7,7 @@ impl<B: Backend> Image<B> {
     /// Computes the element-wise sum of two images.
     pub fn add(&self, other: &Self) -> Result<Self> {
         if self.shape() != other.shape() {
-            return Err(ObserversError::DimensionMismatch {
+            return Err(IrisError::DimensionMismatch {
                 expected: self.shape().to_vec(),
                 actual: other.shape().to_vec(),
             });
@@ -19,7 +19,7 @@ impl<B: Backend> Image<B> {
     /// Computes the element-wise difference of two images.
     pub fn subtract(&self, other: &Self) -> Result<Self> {
         if self.shape() != other.shape() {
-            return Err(ObserversError::DimensionMismatch {
+            return Err(IrisError::DimensionMismatch {
                 expected: self.shape().to_vec(),
                 actual: other.shape().to_vec(),
             });
@@ -31,7 +31,7 @@ impl<B: Backend> Image<B> {
     /// Computes the element-wise multiplication of two images.
     pub fn multiply(&self, other: &Self) -> Result<Self> {
         if self.shape() != other.shape() {
-            return Err(ObserversError::DimensionMismatch {
+            return Err(IrisError::DimensionMismatch {
                 expected: self.shape().to_vec(),
                 actual: other.shape().to_vec(),
             });
@@ -43,7 +43,7 @@ impl<B: Backend> Image<B> {
     /// Computes the element-wise division of two images.
     pub fn divide(&self, other: &Self) -> Result<Self> {
         if self.shape() != other.shape() {
-            return Err(ObserversError::DimensionMismatch {
+            return Err(IrisError::DimensionMismatch {
                 expected: self.shape().to_vec(),
                 actual: other.shape().to_vec(),
             });
@@ -55,7 +55,7 @@ impl<B: Backend> Image<B> {
     /// Computes the absolute difference between two images.
     pub fn absdiff(&self, other: &Self) -> Result<Self> {
         if self.shape() != other.shape() {
-            return Err(ObserversError::DimensionMismatch {
+            return Err(IrisError::DimensionMismatch {
                 expected: self.shape().to_vec(),
                 actual: other.shape().to_vec(),
             });
@@ -96,7 +96,7 @@ impl<B: Backend> Image<B> {
             use rayon::prelude::*;
             out_vals.par_iter_mut().enumerate().for_each(|(i, val)| {
                 let pixel_val = (flat_vals[i].clamp(0.0, 1.0) * 255.0) as u8;
-                *val = (!pixel_val) as f32 / 255.0;
+                *val = f32::from(!pixel_val) / 255.0;
             });
         }
 
@@ -128,7 +128,7 @@ impl<B: Backend> Image<B> {
             let mut sum = 0.0;
             for y in 0..h {
                 for x in 0..w {
-                    sum += flat_vals[ch * h * w + y * w + x] as f64;
+                    sum += f64::from(flat_vals[ch * h * w + y * w + x]);
                 }
             }
             channel_means[ch] = sum / ((h * w) as f64);
@@ -156,7 +156,7 @@ impl<B: Backend> Image<B> {
             let mut sum = 0.0;
             for y in 0..h {
                 for x in 0..w {
-                    sum += flat_vals[ch * h * w + y * w + x] as f64;
+                    sum += f64::from(flat_vals[ch * h * w + y * w + x]);
                 }
             }
             let mean = sum / n;
@@ -165,7 +165,7 @@ impl<B: Backend> Image<B> {
             let mut sq_sum = 0.0;
             for y in 0..h {
                 for x in 0..w {
-                    let diff = flat_vals[ch * h * w + y * w + x] as f64 - mean;
+                    let diff = f64::from(flat_vals[ch * h * w + y * w + x]) - mean;
                     sq_sum += diff * diff;
                 }
             }
@@ -183,7 +183,7 @@ impl<B: Backend> Image<B> {
         let w = dims[2];
 
         if c != 1 {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "min_max_loc requires a single-channel image".into(),
             ));
         }
@@ -198,7 +198,7 @@ impl<B: Backend> Image<B> {
 
         for y in 0..h {
             for x in 0..w {
-                let val = flat_vals[y * w + x] as f64;
+                let val = f64::from(flat_vals[y * w + x]);
                 if val < min_val {
                     min_val = val;
                     min_loc = Point::new(x, y);
@@ -224,7 +224,7 @@ impl<B: Backend> Image<B> {
     // Helper for pixel-wise logical operations
     fn bitwise_op(&self, other: &Self, op: impl Fn(u8, u8) -> u8 + Sync + Send) -> Result<Self> {
         if self.shape() != other.shape() {
-            return Err(ObserversError::DimensionMismatch {
+            return Err(IrisError::DimensionMismatch {
                 expected: self.shape().to_vec(),
                 actual: other.shape().to_vec(),
             });
@@ -248,7 +248,7 @@ impl<B: Backend> Image<B> {
             out_vals.par_iter_mut().enumerate().for_each(|(i, val)| {
                 let b1 = (vals_self[i].clamp(0.0, 1.0) * 255.0) as u8;
                 let b2 = (vals_other[i].clamp(0.0, 1.0) * 255.0) as u8;
-                *val = op(b1, b2) as f32 / 255.0;
+                *val = f32::from(op(b1, b2)) / 255.0;
             });
         }
 

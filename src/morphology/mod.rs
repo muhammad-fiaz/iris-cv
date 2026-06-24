@@ -2,7 +2,7 @@ pub mod ops;
 
 pub use ops::{MorphOp, MorphShape, Morphology};
 
-use crate::error::{ObserversError, Result};
+use crate::error::{IrisError, Result};
 use crate::image::Image;
 use burn::tensor::{Tensor, TensorData, backend::Backend};
 
@@ -11,7 +11,7 @@ impl<B: Backend> Image<B> {
     /// For each pixel, it takes the maximum value in the neighborhood.
     pub fn dilate(self, kernel_size: usize) -> Result<Self> {
         if kernel_size.is_multiple_of(2) {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "Kernel size must be odd".into(),
             ));
         }
@@ -96,7 +96,7 @@ impl<B: Backend> Image<B> {
     /// For each pixel, it takes the minimum value in the neighborhood.
     pub fn erode(self, kernel_size: usize) -> Result<Self> {
         if kernel_size.is_multiple_of(2) {
-            return Err(ObserversError::InvalidParameter(
+            return Err(IrisError::InvalidParameter(
                 "Kernel size must be odd".into(),
             ));
         }
@@ -213,4 +213,3 @@ mod tests {
         assert_eq!(closed.shape(), [3, 8, 8]);
     }
 }
-

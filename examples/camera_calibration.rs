@@ -1,4 +1,4 @@
-use observers::prelude::*;
+use iris::prelude::*;
 
 fn main() -> Result<()> {
     println!("--- Camera Calibration & Geometry Example ---");

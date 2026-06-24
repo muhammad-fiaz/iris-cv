@@ -1,5 +1,5 @@
 use burn::backend::wgpu::Wgpu;
-use observers::prelude::*;
+use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
@@ -14,8 +14,14 @@ fn main() -> Result<()> {
     let w = 100;
     let h = 100;
     let flat = vec![0.5f32; 3 * h * w];
-    let img1 = Image::new(Tensor::<Backend, 3>::from_data(TensorData::new(flat.clone(), [3, h, w]), &device));
-    let img2 = Image::new(Tensor::<Backend, 3>::from_data(TensorData::new(flat, [3, h, w]), &device));
+    let img1 = Image::new(Tensor::<Backend, 3>::from_data(
+        TensorData::new(flat.clone(), [3, h, w]),
+        &device,
+    ));
+    let img2 = Image::new(Tensor::<Backend, 3>::from_data(
+        TensorData::new(flat, [3, h, w]),
+        &device,
+    ));
 
     // 2. Dense Optical Flow (Farneback)
     println!("Calculating dense optical flow (Farneback)...");

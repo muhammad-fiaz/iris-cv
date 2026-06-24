@@ -1,3 +1,9 @@
+---
+title: "DNN Module Reference"
+description: "API reference for Iris DNN module — ONNX model loading, weight loaders, blob preprocessing, and NMS."
+keywords: ["DNN", "ONNX", "model loading", "weight loader", "safetensors", "NMS", "blob"]
+---
+
 # DNN Module Reference
 
 Contains definitions for neural network loaders, non-maximum suppression, and blob preprocessing helper pipelines.

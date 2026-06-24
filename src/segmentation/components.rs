@@ -109,8 +109,10 @@ mod tests {
         let device = Default::default();
         // 5x5 image with two separated components
         let mut flat_data = vec![0.0f32; 1 * 5 * 5];
-        flat_data[0] = 1.0; flat_data[1] = 1.0;
-        flat_data[23] = 1.0; flat_data[24] = 1.0;
+        flat_data[0] = 1.0;
+        flat_data[1] = 1.0;
+        flat_data[23] = 1.0;
+        flat_data[24] = 1.0;
 
         let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [1, 5, 5]), &device);
         let img = Image::new(tensor);
@@ -122,4 +124,3 @@ mod tests {
         assert_eq!(stats[1].area, 2);
     }
 }
-

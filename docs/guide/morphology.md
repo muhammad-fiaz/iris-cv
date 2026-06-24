@@ -1,3 +1,9 @@
+---
+title: "Morphological Operations"
+description: "Perform morphological image transformations — dilation, erosion, opening, closing, top hat, and black hat with custom structuring elements."
+keywords: ["morphology", "dilation", "erosion", "opening", "closing", "structuring element", "binary image"]
+---
+
 # Morphological Operations
 
 Morphological operations are shape-based image transformations that process images using structuring elements. They are commonly used on binary or grayscale images for filtering noise, separating touching elements, or detecting corners.
@@ -36,7 +42,7 @@ let opened = image.morphology_ex(MorphOp::Opening, 3)?;
 
 ## Structuring Elements
 
-Structuring elements (or kernels) represent the spatial shapes used during filtering. Observers provides standard pre-built shape models:
+Structuring elements (or kernels) represent the spatial shapes used during filtering. Iris provides standard pre-built shape models:
 
 - **`MorphShape::Rect`**: Flat box elements.
 - **`MorphShape::Cross`**: Cross-shaped orthogonal lines.
