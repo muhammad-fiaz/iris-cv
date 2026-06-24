@@ -81,13 +81,14 @@ impl<B: Backend> Image<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helpers::{test_device, TestBackend};
+    use crate::test_helpers::{TestBackend, test_device};
 
     #[test]
     fn test_histogram_operations() {
         let device = test_device();
         let flat_data = vec![0.1f32, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8];
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 2, 4]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 2, 4]), &device);
         let img = Image::new(tensor);
 
         let hists = img.calc_hist().unwrap();

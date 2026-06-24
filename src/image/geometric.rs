@@ -425,14 +425,15 @@ impl GeometricTransform {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helpers::{test_device, TestBackend};
+    use crate::test_helpers::{TestBackend, test_device};
     use burn::tensor::TensorData;
 
     #[test]
     fn test_geometric_transforms() {
         let device = test_device();
         let flat_data = vec![0.5f32; 3 * 10 * 10];
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 10, 10]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 10, 10]), &device);
         let img = Image::new(tensor);
 
         let resized = img.resize(20, 20).unwrap();

@@ -248,7 +248,7 @@ pub fn nms_boxes(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helpers::{test_device, TestBackend};
+    use crate::test_helpers::{TestBackend, test_device};
 
     #[test]
     fn test_nms_boxes() {
@@ -269,7 +269,8 @@ mod tests {
     fn test_dnn_helpers() {
         let device = test_device();
         let flat_data = vec![0.5f32; 3 * 8 * 8];
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
         let img = Image::new(tensor);
 
         let blob = blob_from_image(&img, 1.0, Size::new(8, 8), Scalar::all(0.0), true).unwrap();

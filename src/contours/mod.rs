@@ -219,7 +219,7 @@ impl<B: Backend> Image<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helpers::{test_device, TestBackend};
+    use crate::test_helpers::{TestBackend, test_device};
     use burn::tensor::{Tensor, TensorData};
 
     #[test]
@@ -248,7 +248,8 @@ mod tests {
                 flat_data[y * 10 + x] = 1.0;
             }
         }
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 10, 10]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 10, 10]), &device);
         let img = Image::new(tensor);
         let found = img.find_contours().unwrap();
         assert!(!found.is_empty());

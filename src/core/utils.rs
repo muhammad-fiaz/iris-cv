@@ -270,7 +270,7 @@ impl<B: Backend> Image<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helpers::{test_device, TestBackend};
+    use crate::test_helpers::{TestBackend, test_device};
     use burn::backend::ndarray::NdArrayDevice;
 
     fn get_test_device() -> NdArrayDevice {

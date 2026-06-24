@@ -106,7 +106,7 @@ impl<B: Backend> KMeans<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helpers::{test_device, TestBackend};
+    use crate::test_helpers::{TestBackend, test_device};
 
     #[test]
     fn test_kmeans_clustering() {

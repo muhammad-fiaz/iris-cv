@@ -102,7 +102,7 @@ impl<B: Backend> Image<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helpers::{test_device, TestBackend};
+    use crate::test_helpers::{TestBackend, test_device};
 
     #[test]
     fn test_connected_components() {
@@ -114,7 +114,8 @@ mod tests {
         flat_data[23] = 1.0;
         flat_data[24] = 1.0;
 
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 5, 5]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 5, 5]), &device);
         let img = Image::new(tensor);
 
         let (labels, stats) = img.connected_components_with_stats().unwrap();

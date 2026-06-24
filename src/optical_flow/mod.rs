@@ -44,16 +44,19 @@ impl OpticalFlow {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helpers::{test_device, TestBackend};
+    use crate::test_helpers::{TestBackend, test_device};
     use burn::tensor::TensorData;
 
     #[test]
     fn test_optical_flow() {
         let device = test_device();
         let flat_data = vec![0.5f32; 3 * 8 * 8];
-        let tensor1 =
-            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data.clone(), [3, 8, 8]), &device);
-        let tensor2 = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
+        let tensor1 = Tensor::<TestBackend, 3>::from_data(
+            TensorData::new(flat_data.clone(), [3, 8, 8]),
+            &device,
+        );
+        let tensor2 =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
         let img1 = Image::new(tensor1);
         let img2 = Image::new(tensor2);
 

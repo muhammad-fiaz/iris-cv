@@ -124,7 +124,7 @@ impl MatchDrawer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_helpers::{test_device, TestBackend};
+    use crate::test_helpers::{TestBackend, test_device};
 
     #[test]
     fn test_descriptor_matching() {
@@ -147,9 +147,12 @@ mod tests {
         assert_eq!(matches[1].train_idx, 1);
 
         let flat_data = vec![0.5f32; 3 * 8 * 8];
-        let t1 =
-            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data.clone(), [3, 8, 8]), &device);
-        let t2 = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
+        let t1 = Tensor::<TestBackend, 3>::from_data(
+            TensorData::new(flat_data.clone(), [3, 8, 8]),
+            &device,
+        );
+        let t2 =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
         let img1 = Image::new(t1);
         let img2 = Image::new(t2);
 
