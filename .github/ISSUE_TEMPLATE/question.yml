@@ -1,0 +1,13 @@
+name: ❓ Question / Help
+description: Ask a question about using the library
+title: "[QUESTION]: "
+labels: ["question"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What are you trying to achieve or what are you unsure about?
+      placeholder: e.g., How do I customize the WGPU device options?
+    validations:
+      required: true

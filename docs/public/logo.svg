@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c4dff" />
+      <stop offset="100%" stop-color="#5e35b1" />
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff" />
+      <stop offset="100%" stop-color="#00b0ff" />
+    </linearGradient>
+  </defs>
+  <!-- Outer Ring (Camera Lens style) -->
+  <circle cx="50" cy="50" r="40" fill="none" stroke="url(#purpleGrad)" stroke-width="6" />
+  <!-- Inner Aperture / Iris -->
+  <circle cx="50" cy="50" r="24" fill="url(#purpleGrad)" opacity="0.15" />
+  <circle cx="50" cy="50" r="16" fill="url(#cyanGrad)" />
+  <!-- Lens reflection highlight -->
+  <path d="M 40,40 A 14,14 0 0,1 60,40" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+  <!-- Stylized Pupil center -->
+  <circle cx="53" cy="47" r="4" fill="#ffffff" />
+</svg>

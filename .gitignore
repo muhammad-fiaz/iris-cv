@@ -1,0 +1,29 @@
+# Cargo
+/target
+Cargo.lock
+
+# VitePress & Node
+docs/node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# IDEs & OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Output / temporary preview files
+*.preview.png
+preview_*.png
+output_*.png
+temp_*.png
+*.log
+*.bin
+*.safetensors
+*.onnx
