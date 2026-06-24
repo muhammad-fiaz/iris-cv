@@ -66,6 +66,5 @@ pub mod video;
 #[cfg(test)]
 mod tests {
     #[test]
-    fn test_lib_compiles() {
-    }
+    fn test_lib_compiles() {}
 }
