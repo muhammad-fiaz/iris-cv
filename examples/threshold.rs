@@ -13,7 +13,7 @@ fn main() -> Result<()> {
     // 1. Generate a test image
     let w = 128;
     let h = 128;
-    let mut flat_data = vec![0.0f32; 1 * h * w];
+    let mut flat_data = vec![0.0f32; h * w];
     for y in 0..h {
         for x in 0..w {
             flat_data[y * w + x] = (x as f32) / (w as f32);

@@ -27,7 +27,7 @@ fn main() -> Result<()> {
 
     // 3. Connected components labeling & stats
     println!("Running connected components labeling on mock binary image...");
-    let mut binary_data = vec![0.0f32; 1 * 50 * 50];
+    let mut binary_data = vec![0.0f32; 50 * 50];
     // Create a 5x5 white square in center
     for y in 20..25 {
         for x in 20..25 {
