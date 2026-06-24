@@ -124,16 +124,16 @@ impl MatchDrawer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
 
     #[test]
     fn test_descriptor_matching() {
-        let device = Default::default();
-        let query = Tensor::<Wgpu, 2>::from_data(
+        let device = test_device();
+        let query = Tensor::<TestBackend, 2>::from_data(
             TensorData::new(vec![1.0f32, 0.0, 0.0, 1.0], [2, 2]),
             &device,
         );
-        let train = Tensor::<Wgpu, 2>::from_data(
+        let train = Tensor::<TestBackend, 2>::from_data(
             TensorData::new(vec![1.0f32, 0.0, 0.0, 1.0], [2, 2]),
             &device,
         );
@@ -148,8 +148,8 @@ mod tests {
 
         let flat_data = vec![0.5f32; 3 * 8 * 8];
         let t1 =
-            Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data.clone(), [3, 8, 8]), &device);
-        let t2 = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data.clone(), [3, 8, 8]), &device);
+        let t2 = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
         let img1 = Image::new(t1);
         let img2 = Image::new(t2);
 

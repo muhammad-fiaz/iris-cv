@@ -68,3 +68,15 @@ mod tests {
     #[test]
     fn test_lib_compiles() {}
 }
+
+#[cfg(test)]
+pub(crate) mod test_helpers {
+    use burn::backend::ndarray::{NdArray, NdArrayDevice};
+
+    pub type TestBackend = NdArray;
+
+    /// Returns an NdArray CPU device. Always available, no GPU required.
+    pub fn test_device() -> NdArrayDevice {
+        NdArrayDevice::default()
+    }
+}

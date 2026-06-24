@@ -168,16 +168,16 @@ impl<B: Backend> Image<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
     use burn::tensor::TensorData;
 
     #[test]
     fn test_image_conversions() {
-        let device = Default::default();
+        let device = test_device();
         let flat_data = vec![
             0.1f32, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2,
         ];
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 2, 2]), &device);
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 2, 2]), &device);
         let img = Image::new(tensor);
 
         let gray = img.grayscale().unwrap();

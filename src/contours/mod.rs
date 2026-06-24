@@ -219,7 +219,7 @@ impl<B: Backend> Image<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
     use burn::tensor::{Tensor, TensorData};
 
     #[test]
@@ -239,7 +239,7 @@ mod tests {
         let centroid = m.centroid().unwrap();
         assert!(centroid.x > 0.0);
 
-        let device = Default::default();
+        let device = test_device();
         // Create an image with a single pixel set to 1.0 (binary mask)
         let mut flat_data = vec![0.0f32; 10 * 10];
         // Set a 3x3 block to 1.0
@@ -248,7 +248,7 @@ mod tests {
                 flat_data[y * 10 + x] = 1.0;
             }
         }
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [1, 10, 10]), &device);
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 10, 10]), &device);
         let img = Image::new(tensor);
         let found = img.find_contours().unwrap();
         assert!(!found.is_empty());

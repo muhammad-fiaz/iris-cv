@@ -294,7 +294,7 @@ fn run_gpui_event_loop(delay_ms: i32) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
     use burn::tensor::{Tensor, TensorData};
 
     #[test]
@@ -312,9 +312,9 @@ mod tests {
         let pos_new = Gui::get_trackbar_pos("bar", win).unwrap();
         assert_eq!(pos_new, 25);
 
-        let device = Default::default();
+        let device = test_device();
         let flat_data = vec![0.5f32; 3 * 8 * 8];
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
         let img = Image::new(tensor);
 
         Gui::imshow(win, &img).unwrap();

@@ -76,19 +76,19 @@ pub fn save_image<B: Backend>(image: &Image<B>, path: impl AsRef<Path>) -> Resul
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
 
     #[test]
     fn test_image_io() {
-        let device = Default::default();
+        let device = test_device();
         let flat_data = vec![0.5f32; 3 * 8 * 8];
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
         let img = Image::new(tensor);
 
         let temp_path = "temp_test_io.png";
         save_image(&img, temp_path).unwrap();
 
-        let loaded = load_image::<Wgpu>(temp_path, &device).unwrap();
+        let loaded = load_image::<TestBackend>(temp_path, &device).unwrap();
         assert_eq!(loaded.shape(), [3, 8, 8]);
 
         let _ = std::fs::remove_file(temp_path);

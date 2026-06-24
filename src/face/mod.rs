@@ -163,22 +163,22 @@ impl<B: Backend> Default for FaceRecognizer<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
     use burn::tensor::TensorData;
 
     #[test]
     fn test_face_pipeline() {
-        let device = Default::default();
+        let device = test_device();
         let flat_data = vec![0.5f32; 3 * 8 * 8];
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
         let img = Image::new(tensor);
 
-        let detector = FaceDetector::<Wgpu>::default();
+        let detector = FaceDetector::<TestBackend>::default();
         let faces = detector.detect(&img).unwrap();
         assert_eq!(faces.len(), 1);
         assert_eq!(faces[0].confidence, 0.98);
 
-        let recognizer = FaceRecognizer::<Wgpu>::default();
+        let recognizer = FaceRecognizer::<TestBackend>::default();
         let emb1 = recognizer.extract_embedding(&img).unwrap();
         let emb2 = recognizer.extract_embedding(&img).unwrap();
         assert_eq!(emb1.dims(), [1, 512]);

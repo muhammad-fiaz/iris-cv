@@ -46,16 +46,16 @@ impl Default for BarcodeDetector {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
     use burn::tensor::{Tensor, TensorData};
 
     #[test]
     fn test_barcode_detector() {
         let detector = BarcodeDetector;
-        let device = Default::default();
+        let device = test_device();
         let flat_data = vec![0.5f32; 3 * 100 * 100];
         let tensor =
-            Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 100, 100]), &device);
         let img = Image::new(tensor);
 
         let barcodes = detector.detect_and_decode(&img).unwrap();

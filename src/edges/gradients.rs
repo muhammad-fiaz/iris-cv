@@ -133,14 +133,14 @@ impl<B: Backend> Image<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
 
     #[test]
     fn test_gradients() {
-        let device = Default::default();
+        let device = test_device();
         let flat_data = vec![0.5f32; 3 * 8 * 8];
         let tensor_data = TensorData::new(flat_data, [3, 8, 8]);
-        let img = Image::new(Tensor::<Wgpu, 3>::from_data(tensor_data, &device));
+        let img = Image::new(Tensor::<TestBackend, 3>::from_data(tensor_data, &device));
 
         let scharr_img = img.scharr().unwrap();
         assert_eq!(scharr_img.shape(), [1, 8, 8]);

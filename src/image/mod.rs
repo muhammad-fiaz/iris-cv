@@ -58,13 +58,12 @@ impl<B: Backend> Image<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::{Wgpu, WgpuDevice};
+    use crate::test_helpers::{test_device, TestBackend};
+    use burn::backend::ndarray::NdArrayDevice;
     use burn::tensor::TensorData;
 
-    type TestBackend = Wgpu;
-
-    fn get_test_device() -> WgpuDevice {
-        Default::default()
+    fn get_test_device() -> NdArrayDevice {
+        test_device()
     }
 
     #[test]

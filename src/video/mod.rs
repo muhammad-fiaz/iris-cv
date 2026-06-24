@@ -88,12 +88,12 @@ impl<B: Backend> VideoWriter<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
 
     #[test]
     fn test_video_io() {
-        let device = Default::default();
-        let mut capture = VideoCapture::<Wgpu>::open("mock_video.mp4", &device).unwrap();
+        let device = test_device();
+        let mut capture = VideoCapture::<TestBackend>::open("mock_video.mp4", &device).unwrap();
         assert_eq!(capture.source_path, "mock_video.mp4");
 
         let frame = capture.read().unwrap();
@@ -101,7 +101,7 @@ mod tests {
         let frame_img = frame.unwrap();
         assert_eq!(frame_img.shape(), [3, 480, 640]);
 
-        let mut writer = VideoWriter::<Wgpu>::create("output.mp4", 640, 480, 30.0).unwrap();
+        let mut writer = VideoWriter::<TestBackend>::create("output.mp4", 640, 480, 30.0).unwrap();
         assert_eq!(writer.dest_path, "output.mp4");
         writer.write(&frame_img).unwrap();
     }

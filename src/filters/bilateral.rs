@@ -237,14 +237,14 @@ impl<B: Backend> Image<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
 
     #[test]
     fn test_bilateral_and_separable() {
-        let device = Default::default();
+        let device = test_device();
         let flat_data = vec![0.5f32; 3 * 8 * 8];
         let tensor_data = TensorData::new(flat_data, [3, 8, 8]);
-        let img = Image::new(Tensor::<Wgpu, 3>::from_data(tensor_data, &device));
+        let img = Image::new(Tensor::<TestBackend, 3>::from_data(tensor_data, &device));
 
         let bilateral = img.bilateral_filter(3, 0.1, 1.0).unwrap();
         assert_eq!(bilateral.shape(), [3, 8, 8]);

@@ -106,12 +106,12 @@ impl<B: Backend> KMeans<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
 
     #[test]
     fn test_kmeans_clustering() {
-        let device = Default::default();
-        let data = Tensor::<Wgpu, 2>::from_data(
+        let device = test_device();
+        let data = Tensor::<TestBackend, 2>::from_data(
             TensorData::new(vec![1.0f32, 1.0, 1.1, 1.1, 10.0, 10.0, 10.2, 10.2], [4, 2]),
             &device,
         );

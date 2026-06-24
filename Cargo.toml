@@ -22,7 +22,7 @@ gpui-component = { git = "https://github.com/longbridge/gpui-component", optiona
 rayon = { version = "1.12.0", optional = true }
 
 [features]
-default = ["wgpu", "safetensors", "parallel"]
+default = ["ndarray", "safetensors", "parallel"]
 wgpu = ["burn/wgpu"]
 cuda = ["burn/cuda"]
 tch = ["burn/tch"]
@@ -30,3 +30,95 @@ ndarray = ["burn/ndarray"]
 safetensors = ["dep:safetensors"]
 gpui = ["dep:gpui", "dep:gpui-component"]
 parallel = ["dep:rayon"]
+
+[[example]]
+name = "aruco_pose"
+required-features = ["wgpu"]
+
+[[example]]
+name = "barcode_detection"
+required-features = ["wgpu"]
+
+[[example]]
+name = "camera_calibration"
+required-features = ["wgpu"]
+
+[[example]]
+name = "canny"
+required-features = ["wgpu"]
+
+[[example]]
+name = "contours"
+required-features = ["wgpu"]
+
+[[example]]
+name = "drawing"
+required-features = ["wgpu"]
+
+[[example]]
+name = "face_recognition"
+required-features = ["wgpu"]
+
+[[example]]
+name = "filters"
+required-features = ["wgpu"]
+
+[[example]]
+name = "gui_windows"
+required-features = ["wgpu"]
+
+[[example]]
+name = "image_loading"
+required-features = ["wgpu"]
+
+[[example]]
+name = "kmeans_clustering"
+required-features = ["wgpu"]
+
+[[example]]
+name = "morphology"
+required-features = ["wgpu"]
+
+[[example]]
+name = "ocr"
+required-features = ["wgpu"]
+
+[[example]]
+name = "onnx_inference"
+required-features = ["wgpu"]
+
+[[example]]
+name = "optical_flow"
+required-features = ["wgpu"]
+
+[[example]]
+name = "photo_processing"
+required-features = ["wgpu"]
+
+[[example]]
+name = "qr_detection"
+required-features = ["wgpu"]
+
+[[example]]
+name = "safetensors_loading"
+required-features = ["wgpu", "safetensors"]
+
+[[example]]
+name = "segmentation"
+required-features = ["wgpu"]
+
+[[example]]
+name = "stitching"
+required-features = ["wgpu"]
+
+[[example]]
+name = "threshold"
+required-features = ["wgpu"]
+
+[[example]]
+name = "tracking"
+required-features = ["wgpu"]
+
+[[example]]
+name = "video_processing"
+required-features = ["wgpu"]

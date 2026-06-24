@@ -28,13 +28,13 @@ impl<B: Backend, const D: usize> Mat<B, D> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
     use burn::tensor::{Tensor, TensorData};
 
     #[test]
     fn test_mat_operations() {
-        let device = Default::default();
-        let tensor = Tensor::<Wgpu, 2>::from_data(
+        let device = test_device();
+        let tensor = Tensor::<TestBackend, 2>::from_data(
             TensorData::new(vec![1.0f32, 2.0, 3.0, 4.0], [2, 2]),
             &device,
         );

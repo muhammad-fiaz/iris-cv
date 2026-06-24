@@ -248,7 +248,7 @@ pub fn nms_boxes(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
 
     #[test]
     fn test_nms_boxes() {
@@ -267,9 +267,9 @@ mod tests {
 
     #[test]
     fn test_dnn_helpers() {
-        let device = Default::default();
+        let device = test_device();
         let flat_data = vec![0.5f32; 3 * 8 * 8];
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
         let img = Image::new(tensor);
 
         let blob = blob_from_image(&img, 1.0, Size::new(8, 8), Scalar::all(0.0), true).unwrap();
@@ -281,7 +281,7 @@ mod tests {
         let preprocessed = net.preprocess(&img).unwrap();
         assert_eq!(preprocessed.dims(), [1, 3, 8, 8]);
 
-        let pred: Tensor<Wgpu, 2> = net.predict_raw(preprocessed).unwrap();
+        let pred: Tensor<TestBackend, 2> = net.predict_raw(preprocessed).unwrap();
         assert_eq!(pred.dims(), [1, 10]);
     }
 }

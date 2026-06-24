@@ -180,14 +180,14 @@ impl<B: Backend> Image<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
 
     #[test]
     fn test_threshold() {
-        let device = Default::default();
+        let device = test_device();
         let flat_data = vec![0.5f32; 3 * 8 * 8];
         let tensor_data = TensorData::new(flat_data, [3, 8, 8]);
-        let img = Image::new(Tensor::<Wgpu, 3>::from_data(tensor_data, &device));
+        let img = Image::new(Tensor::<TestBackend, 3>::from_data(tensor_data, &device));
 
         let thresh = img.threshold(0.4, 1.0, ThresholdType::Binary).unwrap();
         assert_eq!(thresh.shape(), [3, 8, 8]);

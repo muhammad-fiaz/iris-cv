@@ -49,12 +49,12 @@ impl<B: Backend> Camera<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
 
     #[test]
     fn test_camera_mock() {
-        let device = Default::default();
-        let mut cam = Camera::<Wgpu>::open(CameraSource::Index(0), &device).unwrap();
+        let device = test_device();
+        let mut cam = Camera::<TestBackend>::open(CameraSource::Index(0), &device).unwrap();
         assert!(cam.is_opened());
         let frame = cam.capture().unwrap();
         assert_eq!(frame.shape(), [3, 480, 640]);

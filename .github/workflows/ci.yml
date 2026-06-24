@@ -44,4 +44,4 @@ jobs:
         run: cargo test --verbose
 
       - name: Check examples compilation
-        run: cargo check --examples
+        run: cargo check --examples --features wgpu

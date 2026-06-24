@@ -49,20 +49,20 @@ impl<B: Backend> BackgroundSubtractor<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
     use burn::tensor::{Tensor, TensorData};
 
     #[test]
     fn test_background_subtractor() {
-        let device = Default::default();
+        let device = test_device();
         let flat_data1 = vec![0.5f32; 3 * 8 * 8];
         let flat_data2 = vec![0.6f32; 3 * 8 * 8];
 
-        let img1 = Image::new(Tensor::<Wgpu, 3>::from_data(
+        let img1 = Image::new(Tensor::<TestBackend, 3>::from_data(
             TensorData::new(flat_data1, [3, 8, 8]),
             &device,
         ));
-        let img2 = Image::new(Tensor::<Wgpu, 3>::from_data(
+        let img2 = Image::new(Tensor::<TestBackend, 3>::from_data(
             TensorData::new(flat_data2, [3, 8, 8]),
             &device,
         ));

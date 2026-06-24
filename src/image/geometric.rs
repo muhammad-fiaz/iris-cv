@@ -425,14 +425,14 @@ impl GeometricTransform {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
     use burn::tensor::TensorData;
 
     #[test]
     fn test_geometric_transforms() {
-        let device = Default::default();
+        let device = test_device();
         let flat_data = vec![0.5f32; 3 * 10 * 10];
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [3, 10, 10]), &device);
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 10, 10]), &device);
         let img = Image::new(tensor);
 
         let resized = img.resize(20, 20).unwrap();
@@ -448,8 +448,8 @@ mod tests {
             .unwrap();
         assert_eq!(warped_persp.shape(), [3, 10, 10]);
 
-        let map_x = Tensor::<Wgpu, 2>::zeros([10, 10], &device);
-        let map_y = Tensor::<Wgpu, 2>::zeros([10, 10], &device);
+        let map_x = Tensor::<TestBackend, 2>::zeros([10, 10], &device);
+        let map_y = Tensor::<TestBackend, 2>::zeros([10, 10], &device);
         let remapped = img.remap(&map_x, &map_y).unwrap();
         assert_eq!(remapped.shape(), [3, 10, 10]);
 

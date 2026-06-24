@@ -102,11 +102,11 @@ impl<B: Backend> Image<B> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::{test_device, TestBackend};
 
     #[test]
     fn test_connected_components() {
-        let device = Default::default();
+        let device = test_device();
         // 5x5 image with two separated components
         let mut flat_data = vec![0.0f32; 5 * 5];
         flat_data[0] = 1.0;
@@ -114,7 +114,7 @@ mod tests {
         flat_data[23] = 1.0;
         flat_data[24] = 1.0;
 
-        let tensor = Tensor::<Wgpu, 3>::from_data(TensorData::new(flat_data, [1, 5, 5]), &device);
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 5, 5]), &device);
         let img = Image::new(tensor);
 
         let (labels, stats) = img.connected_components_with_stats().unwrap();

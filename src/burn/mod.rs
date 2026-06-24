@@ -21,12 +21,12 @@ impl BurnUtils {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use burn::backend::wgpu::Wgpu;
+    use crate::test_helpers::TestBackend;
 
     #[test]
     fn test_burn_utils() {
-        let name = BurnUtils::backend_name::<Wgpu>();
+        let name = BurnUtils::backend_name::<TestBackend>();
         assert!(!name.is_empty());
-        let _device = BurnUtils::best_device::<Wgpu>();
+        let _device = BurnUtils::best_device::<TestBackend>();
     }
 }
