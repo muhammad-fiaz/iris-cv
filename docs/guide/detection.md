@@ -1,16 +1,17 @@
 ---
 title: "Object Detection & Recognition"
 description: "Detect faces, recognize embeddings, and decode QR codes and barcodes using Iris's built-in detection pipelines."
-keywords: ["object detection", "face detection", "face recognition", "QR code", "barcode", "embedding"]
+keywords: ["object detection", "face detection", "face recognition", "QR code", "barcode", "embedding", "ArUco"]
 ---
 
 # Object Detection & Recognition
 
-Iris provides built-in pipelines for object detection, face recognition, and barcode/QR reading.
+Iris provides built-in pipelines for object detection, face recognition, barcode/QR reading, and ArUco marker detection.
 
 ## Face Detection & Recognition
 
 ### Detection
+
 Detects human faces, bounding boxes, confidence scores, and facial landmark coordinates (left/right eyes, nose, left/right mouth).
 
 ```rust
@@ -24,6 +25,7 @@ for face in faces {
 ```
 
 ### Recognition (Embeddings)
+
 Extracts unique 512-dimension face embedding vectors and computes similarity metrics.
 
 ```rust
@@ -39,8 +41,6 @@ println!("Face similarity: {}", score);
 ```
 
 ## QR & Barcode Detection
-
-Detects and decodes payloads from QR codes and standard barcodes inside images.
 
 ### QR Code Detector
 
@@ -62,5 +62,25 @@ let barcodes = barcode_detector.detect_and_decode(&image)?;
 
 for bc in barcodes {
     println!("Barcode payload: '{}' (format: {})", bc.payload, bc.format);
+}
+```
+
+## ArUco Marker Detection
+
+```rust
+let aruco = ArucoDetector::new(ArucoDict::Dict6x6_250);
+let markers = aruco.detect_markers(&image)?;
+for marker in markers {
+    println!("Marker ID: {}", marker.id);
+}
+```
+
+## Object Detection (General)
+
+```rust
+let detector = ObjectDetector::<Backend>::default();
+let detections: Vec<Detection> = detector.detect(&image)?;
+for det in detections {
+    println!("Detected class {} at {:?}", det.class_id, det.bbox);
 }
 ```

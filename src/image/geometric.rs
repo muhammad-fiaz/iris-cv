@@ -44,7 +44,6 @@ impl<B: Backend> Image<B> {
         let tx_inv = -(a_inv[0][0] * m[0][2] + a_inv[0][1] * m[1][2]);
         let ty_inv = -(a_inv[1][0] * m[0][2] + a_inv[1][1] * m[1][2]);
 
-        #[cfg(feature = "parallel")]
         {
             use rayon::prelude::*;
             out_vals
@@ -71,31 +70,6 @@ impl<B: Backend> Image<B> {
                         }
                     }
                 });
-        }
-
-        #[cfg(not(feature = "parallel"))]
-        {
-            for dy in 0..new_height {
-                for dx in 0..new_width {
-                    // Map back to original coordinate space
-                    let sx = a_inv[0][0] * (dx as f64) + a_inv[0][1] * (dy as f64) + tx_inv;
-                    let sy = a_inv[1][0] * (dx as f64) + a_inv[1][1] * (dy as f64) + ty_inv;
-
-                    let sx_round = sx.round() as isize;
-                    let sy_round = sy.round() as isize;
-
-                    if sx_round >= 0
-                        && sx_round < w as isize
-                        && sy_round >= 0
-                        && sy_round < h as isize
-                    {
-                        for ch in 0..c {
-                            out_vals[ch * new_height * new_width + dy * new_width + dx] = flat_vals
-                                [ch * h * w + (sy_round as usize) * w + (sx_round as usize)];
-                        }
-                    }
-                }
-            }
         }
 
         let new_data = TensorData::new(out_vals, [c, new_height, new_width]);
@@ -150,7 +124,6 @@ impl<B: Backend> Image<B> {
             ],
         ];
 
-        #[cfg(feature = "parallel")]
         {
             use rayon::prelude::*;
             out_vals
@@ -186,40 +159,6 @@ impl<B: Backend> Image<B> {
                 });
         }
 
-        #[cfg(not(feature = "parallel"))]
-        {
-            for dy in 0..new_height {
-                for dx in 0..new_width {
-                    let x_mapped =
-                        m_inv[0][0] * (dx as f64) + m_inv[0][1] * (dy as f64) + m_inv[0][2];
-                    let y_mapped =
-                        m_inv[1][0] * (dx as f64) + m_inv[1][1] * (dy as f64) + m_inv[1][2];
-                    let z_mapped =
-                        m_inv[2][0] * (dx as f64) + m_inv[2][1] * (dy as f64) + m_inv[2][2];
-
-                    if z_mapped.abs() > 1e-9 {
-                        let sx = x_mapped / z_mapped;
-                        let sy = y_mapped / z_mapped;
-                        let sx_round = sx.round() as isize;
-                        let sy_round = sy.round() as isize;
-
-                        if sx_round >= 0
-                            && sx_round < w as isize
-                            && sy_round >= 0
-                            && sy_round < h as isize
-                        {
-                            for ch in 0..c {
-                                out_vals[ch * new_height * new_width + dy * new_width + dx] =
-                                    flat_vals[ch * h * w
-                                        + (sy_round as usize) * w
-                                        + (sx_round as usize)];
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         let new_data = TensorData::new(out_vals, [c, new_height, new_width]);
         let new_tensor = Tensor::<B, 3>::from_data(new_data, &device);
         Ok(Image::new(new_tensor))
@@ -247,7 +186,6 @@ impl<B: Backend> Image<B> {
 
         let mut out_vals = vec![0.0f32; c * out_h * out_w];
 
-        #[cfg(feature = "parallel")]
         {
             use rayon::prelude::*;
             out_vals
@@ -268,26 +206,239 @@ impl<B: Backend> Image<B> {
                 });
         }
 
-        #[cfg(not(feature = "parallel"))]
-        {
-            for dy in 0..out_h {
-                for dx in 0..out_w {
-                    let map_idx = dy * out_w + dx;
-                    let sx = float_map_x[map_idx].round() as isize;
-                    let sy = float_map_y[map_idx].round() as isize;
+        let new_data = TensorData::new(out_vals, [c, out_h, out_w]);
+        let new_tensor = Tensor::<B, 3>::from_data(new_data, &device);
+        Ok(Image::new(new_tensor))
+    }
 
-                    if sx >= 0 && sx < w as isize && sy >= 0 && sy < h as isize {
-                        for ch in 0..c {
-                            out_vals[ch * out_h * out_w + dy * out_w + dx] =
-                                flat_vals[ch * h * w + (sy as usize) * w + (sx as usize)];
+    /// Undistorts an image using a camera intrinsic matrix and distortion coefficients.
+    ///
+    /// Supports up to 5 radial distortion coefficients (k1..k5) and 2 tangential
+    /// distortion coefficients (p1, p2) following the Brown-Conrady model.
+    ///
+    /// # Arguments
+    /// * `camera_matrix` - 3x3 camera intrinsic matrix as a 2D tensor.
+    ///   Expected layout: `[[fx, 0, cx], [0, fy, cy], [0, 0, 1]]`.
+    /// * `dist_coeffs` - Distortion coefficients `[k1, k2, p1, p2, k3]`. Any
+    ///   trailing values beyond the 5th element are ignored.
+    pub fn undistort(
+        &self,
+        camera_matrix: &Tensor<B, 2>,
+        dist_coeffs: &[f32],
+    ) -> Result<Self> {
+        let dims = self.tensor.dims();
+        let c = dims[0];
+        let h = dims[1];
+        let w = dims[2];
+
+        let cm_data = camera_matrix.clone().into_data();
+        let cm_vals: Vec<f32> = cm_data.iter::<f32>().collect();
+        if cm_vals.len() < 9 {
+            return Err(IrisError::InvalidParameter(
+                "Camera matrix must be 3x3".into(),
+            ));
+        }
+        let fx = cm_vals[0] as f64;
+        let fy = cm_vals[4] as f64;
+        let cx = cm_vals[2] as f64;
+        let cy = cm_vals[5] as f64;
+
+        let k1 = dist_coeffs.first().copied().unwrap_or(0.0) as f64;
+        let k2 = dist_coeffs.get(1).copied().unwrap_or(0.0) as f64;
+        let p1 = dist_coeffs.get(2).copied().unwrap_or(0.0) as f64;
+        let p2 = dist_coeffs.get(3).copied().unwrap_or(0.0) as f64;
+        let k3 = dist_coeffs.get(4).copied().unwrap_or(0.0) as f64;
+
+        let tensor_data = self.tensor.clone().into_data();
+        let flat_vals: Vec<f32> = tensor_data.iter::<f32>().collect();
+        let mut out_vals = vec![0.0f32; c * h * w];
+
+        {
+            use rayon::prelude::*;
+            out_vals
+                .par_chunks_exact_mut(w)
+                .enumerate()
+                .for_each(|(idx, row)| {
+                    let ch = idx / h;
+                    let dy = idx % h;
+                    for dx in 0..w {
+                        // Map output pixel to normalized camera coordinates
+                        let x_cam = (dx as f64 - cx) / fx;
+                        let y_cam = (dy as f64 - cy) / fy;
+
+                        let r2 = x_cam * x_cam + y_cam * y_cam;
+                        let r4 = r2 * r2;
+                        let r6 = r4 * r2;
+
+                        // Radial factor
+                        let radial = 1.0 + k1 * r2 + k2 * r4 + k3 * r6;
+
+                        // Tangential distortion
+                        let x_distorted = x_cam * radial
+                            + 2.0 * p1 * x_cam * y_cam
+                            + p2 * (r2 + 2.0 * x_cam * x_cam);
+                        let y_distorted = y_cam * radial
+                            + p1 * (r2 + 2.0 * y_cam * y_cam)
+                            + 2.0 * p2 * x_cam * y_cam;
+
+                        // Back to pixel coordinates in source image
+                        let sx = (fx * x_distorted + cx).round() as isize;
+                        let sy = (fy * y_distorted + cy).round() as isize;
+
+                        if sx >= 0 && sx < w as isize && sy >= 0 && sy < h as isize {
+                            row[dx] = flat_vals
+                                [ch * h * w + (sy as usize) * w + (sx as usize)];
                         }
                     }
+                });
+        }
+
+        let new_data = TensorData::new(out_vals, [c, h, w]);
+        let new_tensor = Tensor::<B, 3>::from_data(new_data, &self.tensor.device());
+        Ok(Image::new(new_tensor))
+    }
+
+    /// Downsample one level of the Gaussian pyramid.
+    ///
+    /// The image is first convolved with a 5x5 Gaussian kernel (sigma = 1.0) and
+    /// then every other row and column are discarded, halving both spatial
+    /// dimensions while keeping the channel count unchanged.
+    pub fn pyr_down(&self) -> Result<Self> {
+        let dims = self.tensor.dims();
+        let c = dims[0];
+        let h = dims[1];
+        let w = dims[2];
+
+        if h < 2 || w < 2 {
+            return Err(IrisError::InvalidParameter(
+                "Image too small for pyr_down (need at least 2x2)".into(),
+            ));
+        }
+
+        let new_h = h / 2;
+        let new_w = w / 2;
+
+        let tensor_data = self.tensor.clone().into_data();
+        let flat_vals: Vec<f32> = tensor_data.iter::<f32>().collect();
+
+        // 5x5 Gaussian kernel (sigma = 1.0, pre-normalized)
+        let kernel: [f64; 25] = [
+            1.0, 4.0, 6.0, 4.0, 1.0,
+            4.0, 16.0, 24.0, 16.0, 4.0,
+            6.0, 24.0, 36.0, 24.0, 6.0,
+            4.0, 16.0, 24.0, 16.0, 4.0,
+            1.0, 4.0, 6.0, 4.0, 1.0,
+        ];
+        let ksum: f64 = 256.0;
+
+        let mut out_vals = vec![0.0f32; c * new_h * new_w];
+
+        {
+            use rayon::prelude::*;
+            out_vals
+                .par_chunks_exact_mut(new_w)
+                .enumerate()
+                .for_each(|(idx, row)| {
+                    let ch = idx / new_h;
+                    let dy = idx % new_h;
+                    for dx in 0..new_w {
+                        // Source pixel at (dx*2, dy*2) with 5x5 neighbourhood
+                        let sx_base = (dx * 2) as isize - 2;
+                        let sy_base = (dy * 2) as isize - 2;
+
+                        let mut sum = 0.0f64;
+                        for ky in 0..5i32 {
+                            for kx in 0..5i32 {
+                                let px = sx_base + kx as isize;
+                                let py = sy_base + ky as isize;
+                                let px = px.clamp(0, w as isize - 1) as usize;
+                                let py = py.clamp(0, h as isize - 1) as usize;
+                                let pixel =
+                                    flat_vals[ch * h * w + py * w + px] as f64;
+                                sum += pixel * kernel[(ky * 5 + kx) as usize];
+                            }
+                        }
+                        row[dx] = (sum / ksum) as f32;
+                    }
+                });
+        }
+
+        let new_data = TensorData::new(out_vals, [c, new_h, new_w]);
+        let new_tensor = Tensor::<B, 3>::from_data(new_data, &self.tensor.device());
+        Ok(Image::new(new_tensor))
+    }
+
+    /// Upsample one level of the Gaussian pyramid.
+    ///
+    /// Inserts a zero row/column between every pair of existing rows/columns,
+    /// convolves with the same 5x5 Gaussian kernel, and scales by 4 to
+    /// compensate for the energy lost by the zero-insertion. The output
+    /// dimensions are `2 * (h - 1) + 1` by `2 * (w - 1) + 1`.
+    pub fn pyr_up(&self) -> Result<Self> {
+        let dims = self.tensor.dims();
+        let c = dims[0];
+        let h = dims[1];
+        let w = dims[2];
+
+        let new_h = 2 * (h - 1) + 1;
+        let new_w = 2 * (w - 1) + 1;
+
+        let tensor_data = self.tensor.clone().into_data();
+        let flat_vals: Vec<f32> = tensor_data.iter::<f32>().collect();
+
+        // 5x5 Gaussian kernel (sigma = 1.0, pre-normalized)
+        let kernel: [f64; 25] = [
+            1.0, 4.0, 6.0, 4.0, 1.0,
+            4.0, 16.0, 24.0, 16.0, 4.0,
+            6.0, 24.0, 36.0, 24.0, 6.0,
+            4.0, 16.0, 24.0, 16.0, 4.0,
+            1.0, 4.0, 6.0, 4.0, 1.0,
+        ];
+        let ksum: f64 = 256.0;
+
+        // Step 1: Build upsampled (zero-inserted) image of shape [c, new_h, new_w]
+        let mut up_vals = vec![0.0f32; c * new_h * new_w];
+        for ch in 0..c {
+            for sy in 0..h {
+                for sx in 0..w {
+                    up_vals[ch * new_h * new_w + sy * 2 * new_w + sx * 2] =
+                        flat_vals[ch * h * w + sy * w + sx];
                 }
             }
         }
 
-        let new_data = TensorData::new(out_vals, [c, out_h, out_w]);
-        let new_tensor = Tensor::<B, 3>::from_data(new_data, &device);
+        // Step 2: Convolve with 5x5 Gaussian and scale by 4
+        let mut out_vals = vec![0.0f32; c * new_h * new_w];
+
+        {
+            use rayon::prelude::*;
+            out_vals
+                .par_chunks_exact_mut(new_w)
+                .enumerate()
+                .for_each(|(idx, row)| {
+                    let ch = idx / new_h;
+                    let dy = idx % new_h;
+                    for dx in 0..new_w {
+                        let sx_base = dx as isize - 2;
+                        let sy_base = dy as isize - 2;
+
+                        let mut sum = 0.0f64;
+                        for ky in 0..5i32 {
+                            for kx in 0..5i32 {
+                                let px = (sx_base + kx as isize).clamp(0, new_w as isize - 1) as usize;
+                                let py = (sy_base + ky as isize).clamp(0, new_h as isize - 1) as usize;
+                                let pixel =
+                                    up_vals[ch * new_h * new_w + py * new_w + px] as f64;
+                                sum += pixel * kernel[(ky * 5 + kx) as usize];
+                            }
+                        }
+                        row[dx] = (sum * 4.0 / ksum) as f32;
+                    }
+                });
+        }
+
+        let new_data = TensorData::new(out_vals, [c, new_h, new_w]);
+        let new_tensor = Tensor::<B, 3>::from_data(new_data, &self.tensor.device());
         Ok(Image::new(new_tensor))
     }
 }
@@ -456,5 +607,109 @@ mod tests {
 
         let rotated = img.rotate(90).unwrap();
         assert_eq!(rotated.shape(), [3, 10, 10]);
+    }
+
+    #[test]
+    fn test_undistort_identity() {
+        let device = test_device();
+        let flat_data: Vec<f32> = (0..(3 * 8 * 8)).map(|i| i as f32 / 192.0).collect();
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
+        let img = Image::new(tensor);
+
+        // Identity camera matrix (pixels == normalised coords)
+        let cam = Tensor::<TestBackend, 2>::from_data(
+            TensorData::new(vec![1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0], [3, 3]),
+            &device,
+        );
+        // No distortion
+        let dist: [f32; 0] = [];
+
+        let undistorted = img.undistort(&cam, &dist).unwrap();
+        assert_eq!(undistorted.shape(), [3, 8, 8]);
+
+        // With zero distortion coefficients the output must match the input exactly
+        let dist_zero = [0.0f32; 5];
+        let undistorted2 = img.undistort(&cam, &dist_zero).unwrap();
+        let orig_data: Vec<f32> = img.tensor.clone().into_data().iter::<f32>().collect();
+        let ud_data: Vec<f32> = undistorted2.tensor.clone().into_data().iter::<f32>().collect();
+        for (a, b) in orig_data.iter().zip(ud_data.iter()) {
+            assert!(
+                (a - b).abs() < 1e-6,
+                "Mismatch: {a} vs {b}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_undistort_with_k1() {
+        let device = test_device();
+        let flat_data: Vec<f32> = (0..(3 * 8 * 8)).map(|i| i as f32 / 192.0).collect();
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
+        let img = Image::new(tensor);
+
+        let cam = Tensor::<TestBackend, 2>::from_data(
+            TensorData::new(vec![1.0, 0.0, 3.5, 0.0, 1.0, 3.5, 0.0, 0.0, 1.0], [3, 3]),
+            &device,
+        );
+        let dist_coeffs = [0.1, 0.0, 0.0, 0.0, 0.0];
+
+        let undistorted = img.undistort(&cam, &dist_coeffs).unwrap();
+        assert_eq!(undistorted.shape(), [3, 8, 8]);
+
+        // Result should differ from original (non-zero distortion applied)
+        let orig_data: Vec<f32> = img.tensor.clone().into_data().iter::<f32>().collect();
+        let ud_data: Vec<f32> = undistorted.tensor.clone().into_data().iter::<f32>().collect();
+        let mut differs = false;
+        for (a, b) in orig_data.iter().zip(ud_data.iter()) {
+            if (a - b).abs() > 1e-6 {
+                differs = true;
+                break;
+            }
+        }
+        assert!(differs, "Undistortion with k1 should change pixel values");
+    }
+
+    #[test]
+    fn test_pyr_down_up_roundtrip() {
+        let device = test_device();
+        let flat_data = vec![0.5f32; 3 * 8 * 8];
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device);
+        let img = Image::new(tensor);
+
+        let down = img.pyr_down().unwrap();
+        // pyr_down halves dimensions
+        assert_eq!(down.shape(), [3, 4, 4]);
+
+        let up = down.pyr_up().unwrap();
+        // pyr_up: 2*(4-1)+1 = 7
+        assert_eq!(up.shape(), [3, 7, 7]);
+    }
+
+    #[test]
+    fn test_pyr_down_preserves_energy() {
+        let device = test_device();
+        // Create an image with a bright region so we can check energy is mostly preserved
+        let mut flat_data = vec![0.0f32; 3 * 16 * 16];
+        for c in 0..3 {
+            for y in 4..12 {
+                for x in 4..12 {
+                    flat_data[c * 256 + y * 16 + x] = 1.0;
+                }
+            }
+        }
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 16, 16]), &device);
+        let img = Image::new(tensor);
+
+        let down = img.pyr_down().unwrap();
+        assert_eq!(down.shape(), [3, 8, 8]);
+
+        // The downsampled image should still have bright pixels
+        let down_data: Vec<f32> = down.tensor.clone().into_data().iter::<f32>().collect();
+        let max_val = down_data.iter().cloned().fold(0.0f32, f32::max);
+        assert!(max_val > 0.5, "pyr_down should preserve bright region, got max={max_val}");
     }
 }

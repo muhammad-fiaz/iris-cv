@@ -19,17 +19,20 @@ thiserror = "2.0.18"
 safetensors = { version = "0.8.0", optional = true }
 gpui = { git = "https://github.com/zed-industries/zed", package = "gpui", optional = true }
 gpui-component = { git = "https://github.com/longbridge/gpui-component", optional = true }
-rayon = { version = "1.12.0", optional = true }
+rayon = "1.12.0"
 
 [features]
-default = ["ndarray", "safetensors", "parallel"]
+default = ["ndarray", "safetensors"]
 wgpu = ["burn/wgpu"]
 cuda = ["burn/cuda"]
 tch = ["burn/tch"]
 ndarray = ["burn/ndarray"]
 safetensors = ["dep:safetensors"]
 gpui = ["dep:gpui", "dep:gpui-component"]
-parallel = ["dep:rayon"]
+
+[[example]]
+name = "api_showcase"
+required-features = ["wgpu"]
 
 [[example]]
 name = "aruco_pose"
@@ -45,6 +48,10 @@ required-features = ["wgpu"]
 
 [[example]]
 name = "canny"
+required-features = ["wgpu"]
+
+[[example]]
+name = "color_processing"
 required-features = ["wgpu"]
 
 [[example]]
@@ -65,10 +72,14 @@ required-features = ["wgpu"]
 
 [[example]]
 name = "gui_windows"
-required-features = ["wgpu"]
+required-features = ["wgpu", "gpui"]
 
 [[example]]
 name = "image_loading"
+required-features = ["wgpu"]
+
+[[example]]
+name = "image_utils"
 required-features = ["wgpu"]
 
 [[example]]
@@ -121,4 +132,24 @@ required-features = ["wgpu"]
 
 [[example]]
 name = "video_processing"
+required-features = ["wgpu"]
+
+[[example]]
+name = "gif_video"
+required-features = ["wgpu"]
+
+[[example]]
+name = "image_sequence"
+required-features = ["wgpu"]
+
+[[example]]
+name = "video_metadata"
+required-features = ["wgpu"]
+
+[[example]]
+name = "video_frame_ops"
+required-features = ["wgpu"]
+
+[[example]]
+name = "generate_assets"
 required-features = ["wgpu"]

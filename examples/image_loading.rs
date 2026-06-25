@@ -1,34 +1,28 @@
-use burn::backend::wgpu::Wgpu;
+// Demonstrates loading a real image, resizing, grayscale conversion,
+// drawing annotations, and saving the result.
+
+use burn::backend::wgpu::{Wgpu, WgpuDevice};
 use iris::prelude::*;
 
 fn main() -> Result<()> {
-    // 1. Select compute backend
     type Backend = Wgpu;
-    let device = Default::default();
+    let device = WgpuDevice::default();
 
     println!(
         "Using compute backend: {}",
         BurnUtils::backend_name::<Backend>()
     );
 
-    // 2. Open an image
-    // Note: In real scenarios, pass a valid image path like "cat.jpg".
-    // Since we want this example to run without failing on missing assets, we generate a template image first.
-    let w = 800;
-    let h = 600;
-    let flat_data = vec![0.8f32; 3 * h * w];
-    let tensor_data = TensorData::new(flat_data, [3, h, w]);
-    let tensor = Tensor::<Backend, 3>::from_data(tensor_data, &device);
-    let image = Image::new(tensor);
-
+    // 1. Load a real image from assets
+    let image: Image<Backend> = Image::open("assets/images/gradient.png", &device)?;
     println!(
-        "Original image: {}x{} with {} channels",
+        "Original: {}x{} ({} channels)",
         image.width(),
         image.height(),
         image.channels()
     );
 
-    // 3. Process the image using method chaining
+    // 2. Process using method chaining
     let processed = image
         .resize(400, 300)?
         .grayscale()?
@@ -46,15 +40,15 @@ fn main() -> Result<()> {
         )?;
 
     println!(
-        "Processed image: {}x{} with {} channels",
+        "Processed: {}x{} ({} channels)",
         processed.width(),
         processed.height(),
         processed.channels()
     );
 
-    // 4. Save the result
-    processed.save("output_processed.png")?;
-    println!("Saved processed image to 'output_processed.png'");
+    // 3. Save the result
+    processed.save("output_image_loading.png")?;
+    println!("Saved processed image to 'output_image_loading.png'");
 
     Ok(())
 }

@@ -32,6 +32,9 @@ pub enum IrisError {
 
     #[error("Generic error: {0}")]
     Generic(String),
+
+    #[error("Video error: {0}")]
+    Video(String),
 }
 
 /// Result type for Iris library operations.

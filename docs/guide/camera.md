@@ -11,6 +11,7 @@ Interfacing with video sources and estimating camera matrices is essential for s
 ## Camera Interfacing
 
 ### Camera Capture
+
 Queries frames from direct indices (integrated cameras) or file streams.
 
 ```rust
@@ -61,7 +62,7 @@ let tvec = [[0.0, 0.0, 0.0]];
 let projected_pts = CameraCalibration::project_points(&pts_3d, &rvec, &tvec, &k, &dist)?;
 ```
 
-### Homography & Fundamental Matrices
+### Homography & PnP
 
 ```rust
 // Estimate homography mapping

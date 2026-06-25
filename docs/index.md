@@ -35,6 +35,9 @@ features:
   - icon: 🎯
     title: Type-Safe & Memory-Safe
     details: Built entirely in safe Rust — no unsafe code, no FFI bindings, no null pointers. Guaranteed memory safety and type safety at compile time.
+  - icon: 🧩
+    title: Advanced CV Algorithms
+    details: Comprehensive set of computer vision algorithms including inpainting, stereo vision, Kalman filter, HOG descriptor, watershed segmentation, FLANN matcher, and mean-shift tracking.
 ---
 
 ::: warning NOTE

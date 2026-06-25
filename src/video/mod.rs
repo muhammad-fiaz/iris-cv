@@ -1,11 +1,26 @@
+pub mod frame;
+pub mod iterator;
+pub mod metadata;
+pub mod reader;
+pub mod writer;
+
+pub use frame::Frame;
+pub use iterator::{FrameIterator, FrameExt, load_animated_image, load_image_sequence};
+pub use metadata::{VideoMetadata, ContainerFormat, PixelFormat, StreamInfo, StreamType};
+pub use reader::{VideoReader, VideoOpenOptions, SeekMode};
+pub use writer::{VideoWriter, VideoWriteOptions, OutputFormat};
+
 use crate::error::Result;
 use crate::image::Image;
 use burn::tensor::backend::Backend;
 use std::path::Path;
 
-/// Reads frames from a video file or stream.
+/// Legacy video capture with mock frame generation.
+///
+/// For real video file reading, use [`VideoReader`] instead.
 pub struct VideoCapture<B: Backend> {
     pub source_path: String,
+    #[allow(dead_code)]
     device: B::Device,
     current_frame: usize,
     total_frames: usize,
@@ -19,7 +34,7 @@ impl<B: Backend> VideoCapture<B> {
             source_path: path_str,
             device: device.clone(),
             current_frame: 0,
-            total_frames: 100, // mock duration
+            total_frames: 100,
         })
     }
 
@@ -31,7 +46,6 @@ impl<B: Backend> VideoCapture<B> {
         }
         self.current_frame += 1;
 
-        // Generate a mock frame (RGB gradient) for API correctness
         let w = 640;
         let h = 480;
         let mut flat_data = vec![0.0f32; 3 * h * w];
@@ -40,9 +54,9 @@ impl<B: Backend> VideoCapture<B> {
 
         for y in 0..h {
             for x in 0..w {
-                flat_data[y * w + x] = (x as f32) / (w as f32); // R
-                flat_data[h * w + y * w + x] = (y as f32) / (h as f32); // G
-                flat_data[2 * h * w + y * w + x] = frame_offset; // B
+                flat_data[y * w + x] = (x as f32) / (w as f32);
+                flat_data[h * w + y * w + x] = (y as f32) / (h as f32);
+                flat_data[2 * h * w + y * w + x] = frame_offset;
             }
         }
 
@@ -52,8 +66,10 @@ impl<B: Backend> VideoCapture<B> {
     }
 }
 
-/// Writes frames to a video file.
-pub struct VideoWriter<B: Backend> {
+/// Legacy video writer with mock frame writing.
+///
+/// For real video file writing, use [`writer::VideoWriter`] instead.
+pub struct LegacyVideoWriter<B: Backend> {
     pub dest_path: String,
     #[allow(dead_code)]
     width: usize,
@@ -64,7 +80,7 @@ pub struct VideoWriter<B: Backend> {
     _marker: std::marker::PhantomData<B>,
 }
 
-impl<B: Backend> VideoWriter<B> {
+impl<B: Backend> LegacyVideoWriter<B> {
     /// Creates a video writer target.
     pub fn create(path: impl AsRef<Path>, width: usize, height: usize, fps: f64) -> Result<Self> {
         let path_str = path.as_ref().to_string_lossy().into_owned();
@@ -79,8 +95,6 @@ impl<B: Backend> VideoWriter<B> {
 
     /// Writes a single frame to the video destination.
     pub fn write(&mut self, _frame: &Image<B>) -> Result<()> {
-        // In full implementation, encodes and appends frame to destination.
-        // Pure Rust video encoding can be integrated here.
         Ok(())
     }
 }
@@ -91,7 +105,7 @@ mod tests {
     use crate::test_helpers::{TestBackend, test_device};
 
     #[test]
-    fn test_video_io() {
+    fn test_video_capture_legacy() {
         let device = test_device();
         let mut capture = VideoCapture::<TestBackend>::open("mock_video.mp4", &device).unwrap();
         assert_eq!(capture.source_path, "mock_video.mp4");
@@ -100,9 +114,55 @@ mod tests {
         assert!(frame.is_some());
         let frame_img = frame.unwrap();
         assert_eq!(frame_img.shape(), [3, 480, 640]);
+    }
 
-        let mut writer = VideoWriter::<TestBackend>::create("output.mp4", 640, 480, 30.0).unwrap();
+    #[test]
+    fn test_legacy_video_writer() {
+        let mut writer = LegacyVideoWriter::<TestBackend>::create("output.mp4", 640, 480, 30.0).unwrap();
         assert_eq!(writer.dest_path, "output.mp4");
-        writer.write(&frame_img).unwrap();
+
+        let device = test_device();
+        let data = burn::tensor::TensorData::new(vec![0.5f32; 3 * 480 * 640], [3, 480, 640]);
+        let tensor = burn::tensor::Tensor::<TestBackend, 3>::from_data(data, &device);
+        let img = Image::new(tensor);
+        writer.write(&img).unwrap();
+    }
+
+    #[test]
+    fn test_frame_struct() {
+        let device = test_device();
+        let data = burn::tensor::TensorData::new(vec![0.5f32; 3 * 64 * 64], [3, 64, 64]);
+        let tensor = burn::tensor::Tensor::<TestBackend, 3>::from_data(data, &device);
+        let img = Image::new(tensor);
+
+        let frame = Frame::new(img, std::time::Duration::from_millis(33), 0);
+        assert_eq!(frame.width(), 64);
+        assert_eq!(frame.height(), 64);
+    }
+
+    #[test]
+    fn test_video_metadata_synthetic() {
+        let meta = VideoMetadata::synthetic(1920, 1080, 30.0, 300);
+        assert_eq!(meta.width, 1920);
+        assert_eq!(meta.height, 1080);
+        assert!((meta.fps - 30.0).abs() < 1e-6);
+        assert_eq!(meta.frame_count, 300);
+    }
+
+    #[test]
+    fn test_frame_iterator() {
+        let device = test_device();
+        let frames: Vec<Frame<TestBackend>> = (0..5)
+            .map(|i| {
+                let data = burn::tensor::TensorData::new(vec![0.5f32; 3 * 32 * 32], [3, 32, 32]);
+                let tensor = burn::tensor::Tensor::<TestBackend, 3>::from_data(data, &device);
+                let img = Image::new(tensor);
+                Frame::new(img, std::time::Duration::from_millis(i as u64 * 33), i)
+            })
+            .collect();
+
+        let mut iter = FrameIterator::new(frames);
+        assert_eq!(iter.total_frames(), 5);
+        assert!(iter.next().is_some());
     }
 }

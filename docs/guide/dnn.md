@@ -11,6 +11,7 @@ Deep learning modules in Iris are built natively on the **Burn** framework. This
 ## Loading Pretrained Model Weights
 
 ### Safetensors format
+
 Loads weights from standard `.safetensors` files using the `safetensors` crate.
 
 ```rust
@@ -19,6 +20,7 @@ let weights = WeightLoader::load_safetensors::<Backend>("weights/face_detector.s
 ```
 
 ### PyTorch Bin format
+
 Loads weights from raw flat binary streams.
 
 ```rust
@@ -37,7 +39,14 @@ let model = OnnxModel::load("weights/object_detector.onnx", &device)?;
 let input_tensor = model.preprocess(&image)?;
 
 // Evaluate the neural network
-let output_tensor: Tensor<Backend, 3> = model.predict_raw(input_tensor)?;
+let output_tensor: Tensor<Backend, 4> = model.predict_raw(input_tensor)?;
+```
+
+### Direct Builders
+
+```rust
+let model = read_net::<Backend>("weights/model.onnx", &device)?;
+let model = read_net_from_onnx::<Backend>("weights/model.onnx", &device)?;
 ```
 
 ## Input Preprocessing (Blobs)

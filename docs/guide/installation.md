@@ -29,7 +29,6 @@ Or add the following to your `Cargo.toml`:
 iris = { git = "https://github.com/muhammad-fiaz/iris" }
 ```
 
-
 ## Cargo Features
 
 You can customize Iris by specifying feature flags when running `cargo add`:
@@ -45,7 +44,6 @@ Or configure features directly inside your `Cargo.toml` under dependencies:
 iris = { version = "0.0.0", default-features = false, features = ["wgpu", "parallel"] }
 ```
 
-
 ### Core Features
 
 - **`parallel`** (Enabled by default): Enables CPU multi-threading parallelization using `rayon`. All major filters, morphological operations, logical/bitwise operations, and warping transforms use multi-core scheduling.
@@ -58,3 +56,11 @@ iris = { version = "0.0.0", default-features = false, features = ["wgpu", "paral
 - **`cuda`**: Enables CUDA acceleration support for deep learning inference.
 - **`tch`**: Enables LibTorch backend integration.
 - **`ndarray`**: Enables a lightweight, pure CPU ndarray backend, useful for embedded systems or serverless deployments with small memory footprints.
+
+### Running Examples
+
+```bash
+git clone https://github.com/muhammad-fiaz/iris.git
+cd iris
+cargo run --example canny --features wgpu
+```

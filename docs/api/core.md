@@ -1,17 +1,16 @@
 ---
 title: "Core Module Reference"
-description: "API reference for Iris core module — Point, Rect, Size, Scalar, and Mat types with shape utilities."
-keywords: ["core module", "Point", "Rect", "Size", "Scalar", "Mat", "geometry types"]
+description: "API reference for Iris core module — Point, Rect, Size, Scalar, Mat, Rng, image math ops, bitwise ops, normalization, and statistics."
+keywords: ["core module", "Point", "Rect", "Size", "Scalar", "Mat", "Rng", "geometry types"]
 ---
 
 # Core Module Reference
 
-The `core` module contains common algebraic representations, basic geometries, and utility structures.
+The `core` module contains common algebraic representations, basic geometries, utility structures, and image math operations.
 
 ## Geometries
 
 ### `Point<T>`
-A structure representing 2D pixel or spatial coordinates.
 
 ```rust
 pub struct Point<T> {
@@ -25,7 +24,6 @@ impl<T> Point<T> {
 ```
 
 ### `Rect<T>`
-A structure defining a 2D straight rectangle bounds.
 
 ```rust
 pub struct Rect<T> {
@@ -41,7 +39,6 @@ impl<T> Rect<T> {
 ```
 
 ### `Size<T>`
-A structure defining X/Y spatial dimensions.
 
 ```rust
 pub struct Size<T> {
@@ -55,7 +52,6 @@ impl<T> Size<T> {
 ```
 
 ### `Scalar`
-A structure representing a 4-element double array (typically used for colors).
 
 ```rust
 pub struct Scalar(pub [f64; 4]);
@@ -66,10 +62,22 @@ impl Scalar {
 }
 ```
 
+### `Rng`
+
+Pseudo-random number generator for reproducible random operations.
+
+```rust
+pub struct Rng { /* ... */ }
+impl Rng {
+    pub fn seed(seed: u64) -> Self;
+    pub fn f32(&mut self) -> f32;
+    pub fn range(&mut self, min: f32, max: f32) -> f32;
+}
+```
+
 ## Matrix Representation
 
 ### `Mat<B, const D: usize>`
-Wraps a multi-dimensional Burn `Tensor` to expose standard shape query methods.
 
 ```rust
 pub struct Mat<B: Backend, const D: usize> {
@@ -80,5 +88,52 @@ impl<B: Backend, const D: usize> Mat<B, D> {
     pub fn new(tensor: Tensor<B, D>) -> Self;
     pub fn shape(&self) -> Vec<usize>;
     pub fn total(&self) -> usize;
+}
+```
+
+## Image Math Operations
+
+All operations are performed element-wise between two images.
+
+```rust
+impl<B: Backend> Image<B> {
+    pub fn add(&self, other: &Self) -> Result<Self>;
+    pub fn subtract(&self, other: &Self) -> Result<Self>;
+    pub fn multiply(&self, other: &Self) -> Result<Self>;
+    pub fn divide(&self, other: &Self) -> Result<Self>;
+    pub fn absdiff(&self, other: &Self) -> Result<Self>;
+}
+```
+
+## Bitwise Operations
+
+```rust
+impl<B: Backend> Image<B> {
+    pub fn bitwise_and(&self, other: &Self) -> Result<Self>;
+    pub fn bitwise_or(&self, other: &Self) -> Result<Self>;
+    pub fn bitwise_xor(&self, other: &Self) -> Result<Self>;
+    pub fn bitwise_not(&self) -> Result<Self>;
+}
+```
+
+## In-Range
+
+Checks which pixels fall within a color range and creates a binary mask.
+
+```rust
+impl<B: Backend> Image<B> {
+    pub fn in_range(&self, low: &Scalar, high: &Scalar) -> Result<Self>;
+}
+```
+
+## Statistics
+
+```rust
+impl<B: Backend> Image<B> {
+    pub fn normalize(&self, alpha: f32, beta: f32) -> Result<Self>;
+    pub fn mean(&self) -> Result<f64>;
+    pub fn mean_std_dev(&self) -> Result<(f64, f64)>;
+    pub fn min_max_loc(&self) -> Result<(f32, f32, Point<usize>, Point<usize>)>;
+    pub fn count_non_zero(&self) -> Result<usize>;
 }
 ```

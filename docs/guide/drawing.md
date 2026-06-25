@@ -1,6 +1,6 @@
 ---
 title: "Drawing Canvas & Text Rendering"
-description: "Draw lines, rectangles, circles, polygons, and render text on images using Iris's built-in 5x7 bitmap font."
+description: "Draw lines, rectangles, circles, ellipses, polygons, arrows, markers, and render text on images using Iris's built-in 5x7 bitmap font."
 keywords: ["drawing", "canvas", "text rendering", "shapes", "lines", "circles", "rectangles", "bitmap font"]
 ---
 
@@ -10,9 +10,10 @@ Drawing shapes and rendering text onto frames is useful for displaying visualiza
 
 ## Basic Geometric Shapes
 
-All drawing functions operate directly on the `Image` struct (manipulating internal pixel bytes on the CPU and returning the modified frame):
+All drawing functions operate directly on the `Image` struct (manipulating internal pixel bytes on the CPU and returning the modified frame).
 
 ### Lines
+
 Draws a straight line from `p1` to `p2` with a specified `Scalar` color.
 
 ```rust
@@ -23,6 +24,7 @@ let image = image.draw_line(p1, p2, color)?;
 ```
 
 ### Rectangles
+
 Draws a rectangle with the specified borders or fills it.
 
 ```rust
@@ -36,6 +38,7 @@ let image = image.draw_rectangle(rect, color, -1)?;
 ```
 
 ### Circles
+
 Draws a circle around a center point with a given radius.
 
 ```rust
@@ -45,6 +48,74 @@ let color = Scalar::new(0.0, 0.0, 1.0, 0.0); // Blue
 // Draw a filled circle
 let image = image.draw_circle(center, radius, color, -1)?;
 ```
+
+### Ellipses
+
+Draws an ellipse with configurable rotation and angle range.
+
+```rust
+let center = Point::new(300, 200);
+let axes = (50, 30); // semi-major, semi-minor
+let color = Scalar::new(1.0, 1.0, 0.0, 0.0); // Yellow
+// Draw a filled ellipse
+let image = image.draw_ellipse(center, axes, 30.0, 0.0, 360.0, color, -1)?;
+```
+
+## Polygons & Arrows
+
+### Polyline
+
+Draws connected line segments.
+
+```rust
+let points = vec![
+    Point::new(10, 10),
+    Point::new(50, 10),
+    Point::new(50, 50),
+    Point::new(10, 50),
+    Point::new(10, 10),
+];
+let image = image.draw_polyline(&points, Scalar::all(1.0), 1)?;
+```
+
+### Filled Polygon
+
+Fills a closed polygon region using scanline fill.
+
+```rust
+let points = vec![
+    Point::new(100, 100),
+    Point::new(200, 100),
+    Point::new(150, 150),
+];
+let image = image.fill_poly(&points, Scalar::all(0.5))?;
+```
+
+### Arrowed Line
+
+Draws a line with an arrowhead.
+
+```rust
+let image = image.draw_arrowed_line(
+    Point::new(10, 10),
+    Point::new(100, 80),
+    Scalar::all(1.0),
+    1,
+    0.3, // tip_length ratio
+)?;
+```
+
+### Markers
+
+Draws a marker symbol at a point.
+
+```rust
+let image = image.draw_marker(Point::new(50, 50), Scalar::all(1.0), MarkerType::Cross, 10)?;
+let image = image.draw_marker(Point::new(50, 50), Scalar::all(1.0), MarkerType::Circle, 10)?;
+let image = image.draw_marker(Point::new(50, 50), Scalar::all(1.0), MarkerType::Diamond, 10)?;
+```
+
+Available marker types: `Cross`, `TiltedCross`, `Diamond`, `Square`, `Circle`, `Filled`.
 
 ## Rendering Text
 

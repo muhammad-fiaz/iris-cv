@@ -53,6 +53,19 @@ impl<B: Backend> Image<B> {
     pub fn width(&self) -> usize {
         self.tensor.dims()[2]
     }
+
+    /// Performs template matching and returns the result map.
+    ///
+    /// The template slides over the source image and computes a match score at each position.
+    /// Returns a 2D tensor of shape `[H - th + 1, W - tw + 1]` where `(th, tw)` is the template size.
+    pub fn template_match(
+        &self,
+        template: &Image<B>,
+        method: crate::features::TemplateMatchMethod,
+    ) -> crate::error::Result<Tensor<B, 2>> {
+        use crate::features::template_match;
+        template_match(self, template, method)
+    }
 }
 
 #[cfg(test)]

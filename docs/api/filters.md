@@ -1,14 +1,14 @@
 ---
-title: "Filters & Morphology Reference"
-description: "API reference for Iris filters — blur, gradient, edge detection, thresholding, and morphological operations."
-keywords: ["filters", "blur", "thresholding", "morphology", "edge detection", "gradients", "canny"]
+title: "Filters Reference"
+description: "API reference for Iris filters — box, Gaussian, median, bilateral blur, separable filter, distance transform, filter2D, add weighted, and copy."
+keywords: ["filters", "blur", "gaussian blur", "median filter", "bilateral filter", "box blur", "smoothing"]
 ---
 
-# Compute & Filters Reference
+# Filters Reference
 
-Details image filters, edge extraction, thresholding, and morphological operation signatures.
+Details image filtering and smoothing operation signatures.
 
-## Filters
+## Blur Filters
 
 ```rust
 impl<B: Backend> Image<B> {
@@ -20,34 +20,35 @@ impl<B: Backend> Image<B> {
 }
 ```
 
-## Gradients & Edge Detection
+## Utility Filters
 
 ```rust
 impl<B: Backend> Image<B> {
-    pub fn sobel(&self, kernel_size: usize) -> Result<(Self, Self)>;
-    pub fn scharr(&self) -> Result<(Self, Self)>;
-    pub fn laplacian(&self, kernel_size: usize) -> Result<Self>;
-    pub fn canny(&self, low_threshold: f32, high_threshold: f32) -> Result<Self>;
+    pub fn filter2d(&self, kernel: &[Vec<f32>]) -> Result<Self>;
+    pub fn distance_transform(&self) -> Result<Self>;
+    pub fn laplacian_of_gaussian(&self, sigma: f64) -> Result<Self>;
+    pub fn copy_to(&self, mask: &Image<B>) -> Result<Self>;
 }
 ```
 
-## Thresholding
+## Blending
 
 ```rust
 impl<B: Backend> Image<B> {
-    pub fn threshold(&self, thresh: f32, maxval: f32, thresh_type: ThresholdType) -> Result<Self>;
-    pub fn threshold_otsu(&self, maxval: f32) -> Result<Self>;
+    pub fn add_weighted(
+        src1: &Image<B>,
+        alpha: f32,
+        src2: &Image<B>,
+        beta: f32,
+        gamma: f32,
+    ) -> Result<Image<B>>;
 }
 ```
 
-## Morphology
+## Type Conversion
 
 ```rust
 impl<B: Backend> Image<B> {
-    pub fn dilate(self, kernel_size: usize) -> Result<Self>;
-    pub fn erode(self, kernel_size: usize) -> Result<Self>;
-    pub fn morph_open(self, kernel_size: usize) -> Result<Self>;
-    pub fn morph_close(self, kernel_size: usize) -> Result<Self>;
-    pub fn morphology_ex(&self, op: MorphOp, kernel_size: usize) -> Result<Self>;
+    pub fn convert_scale_abs(&self) -> Result<Self>;
 }
 ```

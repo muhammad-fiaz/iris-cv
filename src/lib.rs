@@ -36,6 +36,7 @@ pub mod aruco;
 pub mod barcode;
 pub mod burn;
 pub mod camera;
+pub mod color;
 pub mod contours;
 pub mod core;
 pub mod dnn;
@@ -45,11 +46,18 @@ pub mod face;
 pub mod features;
 pub mod filters;
 pub mod gpu;
+/// GUI and Window Management.
+///
+/// Requires the `gpui` feature.
+#[cfg(feature = "gpui")]
 pub mod gui;
 pub mod histogram;
+pub mod hog;
 pub mod image;
+pub mod inpaint;
 pub mod ml;
 pub mod morphology;
+pub mod noise;
 pub mod object_detection;
 pub mod ocr;
 pub mod optical_flow;
@@ -60,6 +68,8 @@ pub mod simd;
 pub mod stitching;
 pub mod threshold;
 pub mod tracking;
+pub mod stereo;
+pub mod kalman;
 pub mod utils;
 pub mod video;
 

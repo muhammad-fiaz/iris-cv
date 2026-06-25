@@ -1,4 +1,5 @@
 pub mod components;
+pub mod watershed;
 
 pub use components::ComponentStats;
 

@@ -1,51 +1,47 @@
-use burn::backend::wgpu::Wgpu;
+// Demonstrates drawing shapes, text, and annotations on images.
+// Creates a canvas and draws lines, rectangles, circles, and text.
+
+use burn::backend::wgpu::{Wgpu, WgpuDevice};
 use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
-    let device = Default::default();
+    let device = WgpuDevice::default();
 
     println!(
         "Using compute backend: {}",
         BurnUtils::backend_name::<Backend>()
     );
 
-    // 1. Generate an empty black canvas image
-    let w = 400;
-    let h = 300;
-    let flat_canvas = vec![0.0f32; 3 * h * w];
-    let tensor = Tensor::<Backend, 3>::from_data(TensorData::new(flat_canvas, [3, h, w]), &device);
-    let mut canvas = Image::new(tensor);
+    // Start with a real image as the canvas
+    let mut canvas: Image<Backend> = Image::open("assets/images/gradient.png", &device)?;
 
-    // 2. Draw various items
-    println!("Drawing shapes on the canvas...");
-    // Draw a red line
+    // Draw a red line across the top
     canvas = canvas.draw_line(
         Point::new(10, 10),
-        Point::new(390, 10),
+        Point::new(630, 10),
         Scalar::new(1.0, 0.0, 0.0, 0.0),
     )?;
 
     // Draw a green border rectangle
     canvas = canvas.draw_rectangle(
-        Rect::new(50, 50, 100, 100),
+        Rect::new(50, 50, 200, 150),
         Scalar::new(0.0, 1.0, 0.0, 0.0),
-        2,
+        3,
     )?;
 
     // Draw a blue filled circle
     canvas = canvas.draw_circle(
-        Point::new(300, 100),
-        40,
+        Point::new(400, 200),
+        60,
         Scalar::new(0.0, 0.0, 1.0, 0.0),
         -1,
     )?;
 
     // Render white text label
-    println!("Rendering text label...");
     canvas = canvas.draw_text(
-        "Iris library",
-        Point::new(50, 200),
+        "Iris CV",
+        Point::new(50, 250),
         2,
         Scalar::new(1.0, 1.0, 1.0, 0.0),
     )?;
@@ -53,6 +49,5 @@ fn main() -> Result<()> {
     canvas.save("output_drawing.png")?;
     println!("Saved drawing output to 'output_drawing.png'");
 
-    println!("Drawing example completed successfully.");
     Ok(())
 }

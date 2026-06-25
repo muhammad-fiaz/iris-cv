@@ -1,31 +1,22 @@
-use burn::backend::wgpu::Wgpu;
+// Demonstrates contour detection, convex hull, and contour moments.
+// Loads the checkerboard image which has clear edges for contour finding.
+
+use burn::backend::wgpu::{Wgpu, WgpuDevice};
 use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
-    let device = Default::default();
+    let device = WgpuDevice::default();
 
     println!(
         "Using compute backend: {}",
         BurnUtils::backend_name::<Backend>()
     );
 
-    // 1. Generate a test image with a high-contrast square in the center
-    let w = 100;
-    let h = 100;
-    let mut flat_data = vec![0.0f32; 3 * h * w];
-    for y in 30..70 {
-        for x in 30..70 {
-            flat_data[y * w + x] = 1.0;
-            flat_data[h * w + y * w + x] = 1.0;
-            flat_data[2 * h * w + y * w + x] = 1.0;
-        }
-    }
-    let tensor_data = TensorData::new(flat_data, [3, h, w]);
-    let tensor = Tensor::<Backend, 3>::from_data(tensor_data, &device);
-    let image = Image::new(tensor);
+    // Load the checkerboard image (strong contrast edges)
+    let image: Image<Backend> = Image::open("assets/images/checkerboard.png", &device)?;
 
-    // 2. Find contours
+    // Find contours
     let contours = image.find_contours()?;
     println!("Found {} contour(s)", contours.len());
 
@@ -43,6 +34,9 @@ fn main() -> Result<()> {
             println!("Contour Centroid: ({:.2}, {:.2})", centroid.x, centroid.y);
         }
     }
+
+    image.save("output_contours.png")?;
+    println!("Saved input image to 'output_contours.png'");
 
     Ok(())
 }

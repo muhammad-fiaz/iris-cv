@@ -163,6 +163,127 @@ impl<B: Backend> Image<B> {
         );
         Ok(Image::new(rgb))
     }
+
+    /// Builds a Gaussian pyramid with the specified number of levels.
+    /// Each level is half the size of the previous one, smoothed with Gaussian blur.
+    pub fn gaussian_pyramid(&self, levels: usize) -> Result<Vec<Self>> {
+        let mut pyramid = Vec::with_capacity(levels);
+        pyramid.push(self.clone());
+
+        let mut current = self.clone();
+        for _ in 1..levels {
+            let dims = current.tensor.dims();
+            let h = dims[1];
+            let w = dims[2];
+            let new_h = h / 2;
+            let new_w = w / 2;
+            if new_h == 0 || new_w == 0 {
+                break;
+            }
+            // Gaussian blur before downsampling to prevent aliasing
+            let blurred = current.gaussian_blur(3, 1.0)?;
+            let downsampled = blurred.resize(new_w, new_h)?;
+            pyramid.push(downsampled);
+            current = pyramid.last().cloned().unwrap();
+        }
+
+        Ok(pyramid)
+    }
+
+    /// Computes the integral image (summed area table) of the grayscale channel.
+    /// Returns a tensor of shape [1, H+1, W+1] where integral[y][x] is the sum
+    /// of all pixels in the rectangle (0,0) to (x-1, y-1).
+    pub fn integral_image(&self) -> Result<Image<B>> {
+        let gray = self.grayscale()?;
+        let dims = gray.tensor.dims();
+        let h = dims[1];
+        let w = dims[2];
+
+        let tensor_data = gray.tensor.clone().into_data();
+        let flat_vals: Vec<f32> = tensor_data.iter::<f32>().collect();
+
+        let mut integral = vec![0.0f32; (h + 1) * (w + 1)];
+
+        for y in 0..h {
+            let mut row_sum = 0.0f32;
+            for x in 0..w {
+                row_sum += flat_vals[y * w + x];
+                integral[(y + 1) * (w + 1) + (x + 1)] =
+                    integral[y * (w + 1) + (x + 1)] + row_sum;
+            }
+        }
+
+        let device = gray.tensor.device();
+        let data = TensorData::new(integral, [1, h + 1, w + 1]);
+        let tensor = Tensor::<B, 3>::from_data(data, &device);
+        Ok(Image::new(tensor))
+    }
+
+    /// Performs a flood fill operation starting from seed point (x, y).
+    /// Fills connected pixels with `fill_value` if they are within `lo_diff` and `hi_diff`
+    /// of the seed pixel value.
+    pub fn flood_fill(
+        &self,
+        seed_x: usize,
+        seed_y: usize,
+        fill_value: f32,
+        lo_diff: f32,
+        hi_diff: f32,
+    ) -> Result<Self> {
+        let gray = self.grayscale()?;
+        let dims = gray.tensor.dims();
+        let h = dims[1];
+        let w = dims[2];
+
+        if seed_x >= w || seed_y >= h {
+            return Err(IrisError::InvalidParameter(
+                "Seed point is outside image bounds".into(),
+            ));
+        }
+
+        let tensor_data = gray.tensor.clone().into_data();
+        let flat_vals: Vec<f32> = tensor_data.iter::<f32>().collect();
+        let mut out_vals = flat_vals.clone();
+
+        let seed_val = flat_vals[seed_y * w + seed_x];
+        let lo = seed_val - lo_diff;
+        let hi = seed_val + hi_diff;
+
+        // BFS-based flood fill
+        let mut visited = vec![false; h * w];
+        let mut queue = std::collections::VecDeque::new();
+        queue.push_back((seed_x, seed_y));
+        visited[seed_y * w + seed_x] = true;
+
+        let dx = [1, 0, -1, 0];
+        let dy = [0, 1, 0, -1];
+
+        while let Some((cx, cy)) = queue.pop_front() {
+            out_vals[cy * w + cx] = fill_value;
+
+            for d in 0..4 {
+                let nx = cx as isize + dx[d];
+                let ny = cy as isize + dy[d];
+                if nx >= 0 && nx < w as isize && ny >= 0 && ny < h as isize {
+                    let ux = nx as usize;
+                    let uy = ny as usize;
+                    let idx = uy * w + ux;
+                    if !visited[idx] {
+                        let pixel = flat_vals[idx];
+                        if pixel >= lo && pixel <= hi {
+                            visited[idx] = true;
+                            queue.push_back((ux, uy));
+                        }
+                    }
+                }
+            }
+        }
+
+        let device = gray.tensor.device();
+        let data = TensorData::new(out_vals, [1, h, w]);
+        let tensor = Tensor::<B, 3>::from_data(data, &device);
+        Ok(Image::new(tensor))
+    }
 }
 
 #[cfg(test)]

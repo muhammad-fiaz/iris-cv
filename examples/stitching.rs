@@ -1,38 +1,38 @@
-use burn::backend::wgpu::Wgpu;
+// Demonstrates image stitching (panorama creation) from multiple images.
+// Loads two real images and stitches them together.
+
+use burn::backend::wgpu::{Wgpu, WgpuDevice};
 use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
-    let device = Default::default();
+    let device = WgpuDevice::default();
 
     println!(
         "Using compute backend: {}",
         BurnUtils::backend_name::<Backend>()
     );
 
-    // 1. Generate two mock overlapping images
-    let w = 120;
-    let h = 80;
-    let flat_left = vec![0.3f32; 3 * h * w];
-    let flat_right = vec![0.4f32; 3 * h * w];
+    // Load two real images for stitching
+    let left: Image<Backend> = Image::open("assets/images/gradient.png", &device)?;
+    let right: Image<Backend> = Image::open("assets/images/color_bars.png", &device)?;
 
-    let left = Image::new(Tensor::<Backend, 3>::from_data(
-        TensorData::new(flat_left, [3, h, w]),
-        &device,
-    ));
-    let right = Image::new(Tensor::<Backend, 3>::from_data(
-        TensorData::new(flat_right, [3, h, w]),
-        &device,
-    ));
+    println!(
+        "Left: {}x{}, Right: {}x{}",
+        left.width(),
+        left.height(),
+        right.width(),
+        right.height()
+    );
 
-    // 2. Perform panorama stitching
+    // Stitch into panorama
     println!("Stitching images together...");
     let stitcher = Stitcher;
     let panorama = stitcher.stitch(&[left, right])?;
 
     println!("Stitched panorama shape: {:?}", panorama.shape());
-    panorama.save("output_panorama.png")?;
+    panorama.save("output_stitching.png")?;
+    println!("Saved panorama to 'output_stitching.png'");
 
-    println!("Stitching example completed successfully.");
     Ok(())
 }

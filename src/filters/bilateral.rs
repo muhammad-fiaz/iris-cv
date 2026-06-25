@@ -25,7 +25,6 @@ impl<B: Backend> Image<B> {
         let space_coeff = -1.0 / (2.0 * sigma_space * sigma_space);
         let color_coeff = -1.0 / (2.0 * sigma_color * sigma_color);
 
-        #[cfg(feature = "parallel")]
         {
             use rayon::prelude::*;
             out_vals
@@ -77,52 +76,6 @@ impl<B: Backend> Image<B> {
                 });
         }
 
-        #[cfg(not(feature = "parallel"))]
-        {
-            for ch in 0..c {
-                for y in 0..h {
-                    for x in 0..w {
-                        let mut sum_vals = 0.0f64;
-                        let mut sum_weights = 0.0f64;
-                        let center_val = flat_vals[ch * h * w + y * w + x] as f64;
-
-                        for ky in -rad..=rad {
-                            let py = y as isize + ky;
-                            if py >= 0 && py < h as isize {
-                                for kx in -rad..=rad {
-                                    let px = x as isize + kx;
-                                    if px >= 0 && px < w as isize {
-                                        let neighbor_val = flat_vals
-                                            [ch * h * w + (py as usize) * w + (px as usize)]
-                                            as f64;
-
-                                        // Space distance
-                                        let r2 = (kx * kx + ky * ky) as f64;
-                                        // Color difference
-                                        let diff = neighbor_val - center_val;
-                                        let diff2 = diff * diff;
-
-                                        let space_weight = (r2 * space_coeff).exp();
-                                        let color_weight = (diff2 * color_coeff).exp();
-                                        let weight = space_weight * color_weight;
-
-                                        sum_vals += neighbor_val * weight;
-                                        sum_weights += weight;
-                                    }
-                                }
-                            }
-                        }
-
-                        if sum_weights > 0.0 {
-                            out_vals[ch * h * w + y * w + x] = (sum_vals / sum_weights) as f32;
-                        } else {
-                            out_vals[ch * h * w + y * w + x] = center_val as f32;
-                        }
-                    }
-                }
-            }
-        }
-
         let new_data = TensorData::new(out_vals, [c, h, w]);
         let new_tensor = Tensor::<B, 3>::from_data(new_data, &device);
         Ok(Image::new(new_tensor))
@@ -144,7 +97,6 @@ impl<B: Backend> Image<B> {
         let mut temp_vals = vec![0.0f32; c * h * w];
         let rad_x = (kernel_x.len() / 2) as isize;
 
-        #[cfg(feature = "parallel")]
         {
             use rayon::prelude::*;
             temp_vals
@@ -166,29 +118,10 @@ impl<B: Backend> Image<B> {
                 });
         }
 
-        #[cfg(not(feature = "parallel"))]
-        {
-            for ch in 0..c {
-                for y in 0..h {
-                    for x in 0..w {
-                        let mut sum = 0.0f64;
-                        for kx in -rad_x..=rad_x {
-                            let px = x as isize + kx;
-                            let px_clamped = px.clamp(0, w as isize - 1) as usize;
-                            let weight = kernel_x[(kx + rad_x) as usize] as f64;
-                            sum += flat_vals[ch * h * w + y * w + px_clamped] as f64 * weight;
-                        }
-                        temp_vals[ch * h * w + y * w + x] = sum as f32;
-                    }
-                }
-            }
-        }
-
         // Step 2: Filter Vertically
         let mut out_vals = vec![0.0f32; c * h * w];
         let rad_y = (kernel_y.len() / 2) as isize;
 
-        #[cfg(feature = "parallel")]
         {
             use rayon::prelude::*;
             out_vals
@@ -208,24 +141,6 @@ impl<B: Backend> Image<B> {
                         row[x] = sum as f32;
                     }
                 });
-        }
-
-        #[cfg(not(feature = "parallel"))]
-        {
-            for ch in 0..c {
-                for y in 0..h {
-                    for x in 0..w {
-                        let mut sum = 0.0f64;
-                        for ky in -rad_y..=rad_y {
-                            let py = y as isize + ky;
-                            let py_clamped = py.clamp(0, h as isize - 1) as usize;
-                            let weight = kernel_y[(ky + rad_y) as usize] as f64;
-                            sum += temp_vals[ch * h * w + py_clamped * w + x] as f64 * weight;
-                        }
-                        out_vals[ch * h * w + y * w + x] = sum as f32;
-                    }
-                }
-            }
         }
 
         let new_data = TensorData::new(out_vals, [c, h, w]);

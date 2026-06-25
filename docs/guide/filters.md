@@ -1,6 +1,6 @@
 ---
 title: "Image Filters & Blur"
-description: "Apply box blur, Gaussian blur, median filter, bilateral filter, and separable 2D filters in Rust with Iris."
+description: "Apply box blur, Gaussian blur, median filter, bilateral filter, separable 2D filters, distance transform, and more in Rust with Iris."
 keywords: ["image filters", "blur", "gaussian blur", "median filter", "bilateral filter", "box blur", "smoothing"]
 ---
 
@@ -11,6 +11,7 @@ Image filtering is essential for noise reduction, smoothing, and feature enhance
 ## Available Blur Filters
 
 ### Box Blur
+
 Smooths an image using a normalized box filter of the given kernel size.
 
 ```rust
@@ -19,6 +20,7 @@ let blurred = image.box_blur(5)?;
 ```
 
 ### Gaussian Blur
+
 Smooths an image using a Gaussian kernel. You must specify the kernel size (must be odd) and standard deviation `sigma`.
 
 ```rust
@@ -27,6 +29,7 @@ let gaussian = image.gaussian_blur(5, 1.5)?;
 ```
 
 ### Median Blur
+
 Reduces salt-and-pepper noise by taking the median value in each local neighborhood.
 
 ```rust
@@ -35,18 +38,59 @@ let median = image.median_blur(5)?;
 ```
 
 ### Bilateral Filter
+
 Smooths the image while preserving sharp edges. It uses a range sigma for color similarity and space sigma for coordinate closeness.
 
 ```rust
-// Applies a bilateral filter
+// Applies a bilateral filter with d=5, sigma_color=0.1, sigma_space=10.0
 let filtered = image.bilateral_filter(5, 0.1, 10.0)?;
 ```
 
 ### Separable 2D Filter
+
 Applies two 1D kernels sequentially along the X and Y dimensions to achieve efficient custom 2D filtering.
 
 ```rust
 let kernel_x = vec![0.25, 0.5, 0.25];
 let kernel_y = vec![0.25, 0.5, 0.25];
 let filtered = image.sep_filter_2d(&kernel_x, &kernel_y)?;
+```
+
+## Utility Filters
+
+### Filter2D
+
+Applies a general 2D convolution kernel to the image.
+
+```rust
+let kernel = vec![
+    vec![0.0, -1.0, 0.0],
+    vec![-1.0, 5.0, -1.0],
+    vec![0.0, -1.0, 0.0],
+];
+let sharpened = image.filter2d(&kernel)?;
+```
+
+### Add Weighted
+
+Blends two images: `result = alpha * src1 + beta * src2 + gamma`.
+
+```rust
+let blended = Image::add_weighted(&img1, 0.7, &img2, 0.3, 0.0)?;
+```
+
+### Convert Scale Abs
+
+Converts the image to 8-bit absolute values with optional scale and offset.
+
+```rust
+let abs_img = image.convert_scale_abs()?;
+```
+
+### Distance Transform
+
+Computes the distance transform of a binary image, where each pixel value is its distance to the nearest zero pixel.
+
+```rust
+let dist = image.distance_transform()?;
 ```

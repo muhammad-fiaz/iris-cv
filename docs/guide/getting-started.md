@@ -21,33 +21,38 @@ Alternatively, to use the latest development version from GitHub, run:
 cargo add iris --git https://github.com/muhammad-fiaz/iris
 ```
 
-
-
 ## Basic Example
 
 Here is a simple example showing how to load an image, apply a Gaussian blur filter, detect edges using Canny, and save the result:
 
 ```rust
 use iris::prelude::*;
-use burn::backend::wgpu::Wgpu;
+use burn::backend::wgpu::{Wgpu, WgpuDevice};
 
 fn main() -> Result<()> {
-    // 1. Define Burn device
-    let device = Default::default();
+    type Backend = Wgpu;
+    let device = WgpuDevice::default();
 
-    // 2. Load an image from file
-    let img: Image<Wgpu> = Image::open("input.jpg", &device)?;
+    // Load an image from file
+    let img: Image<Backend> = Image::open("input.jpg", &device)?;
 
-    // 3. Smooth the image using Gaussian blur
+    // Smooth the image using Gaussian blur
     let blurred = img.gaussian_blur(5, 1.5)?;
 
-    // 4. Extract edge outlines using Canny detector
+    // Extract edge outlines using Canny detector
     let edges = blurred.grayscale()?.canny(50.0, 150.0)?;
 
-    // 5. Save the output image
+    // Save the output image
     edges.save("edges_output.png")?;
     println!("Successfully processed and saved output!");
 
     Ok(())
 }
 ```
+
+## What's Next?
+
+- Learn about [Image Representation](/guide/image) to understand how Iris handles images.
+- Explore [Filters](/guide/filters) for smoothing and noise reduction.
+- See [Edge Detection](/guide/edges) for gradient and boundary detection.
+- Browse the [API Reference](/api/) for complete function signatures.

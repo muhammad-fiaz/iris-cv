@@ -1,7 +1,7 @@
 ---
 title: "Motion Tracking & Optical Flow"
-description: "Track objects with KCF, CSRT, and MOSSE trackers. Compute dense Farneback and sparse Lucas-Kanade optical flow."
-keywords: ["tracking", "optical flow", "background subtraction", "KCF", "CSRT", "Farneback", "Lucas-Kanade"]
+description: "Track objects with MOSSE tracker, compute dense Farneback and sparse Lucas-Kanade optical flow, and subtract backgrounds."
+keywords: ["tracking", "optical flow", "background subtraction", "MOSSE", "Farneback", "Lucas-Kanade"]
 ---
 
 # Motion Tracking & Optical Flow
@@ -20,16 +20,12 @@ let mut subtractor = BackgroundSubtractor::new(0.1, 0.05);
 let mask = subtractor.apply(&frame)?; // grayscale mask highlighting motion
 ```
 
-## Object Tracking
+## Object Tracking (MOSSE)
 
-Tracks a specified bounding box across subsequent video frames using dynamic updating models. Supported backends include:
-
-- **`TrackerType::KCF`**: Kernelized Correlation Filters.
-- **`TrackerType::CSRT`**: Channel and Spatial Reliability Tracking.
-- **`TrackerType::MOSSE`**: Minimum Barrier Distance Trackers.
+Tracks a specified bounding box across subsequent video frames using the MOSSE correlation filter.
 
 ```rust
-let mut tracker = Tracker::new(TrackerType::KCF);
+let mut tracker = Tracker::new(TrackerType::MOSSE);
 
 // Initialize tracker on first frame
 let init_box = Rect::new(50, 50, 100, 100);
@@ -39,11 +35,14 @@ tracker.init(&frame1, init_box)?;
 let updated_box = tracker.update(&frame2)?;
 ```
 
+Supported tracker types: `TrackerType::KCF`, `TrackerType::CSRT`, `TrackerType::MOSSE`.
+
 ## Optical Flow
 
 Optical flow tracks movements of pixels between two images.
 
 ### Dense Flow (Farneback)
+
 Calculates flow vectors `(dx, dy)` for all pixels, returning a flow tensor of shape `[2, H, W]`.
 
 ```rust
@@ -51,6 +50,7 @@ let flow_tensor = OpticalFlow::calc_dense_farneback(&frame1, &frame2)?;
 ```
 
 ### Sparse Flow (Lucas-Kanade)
+
 Tracks specific keypoints across frames using spatial image pyramids.
 
 ```rust

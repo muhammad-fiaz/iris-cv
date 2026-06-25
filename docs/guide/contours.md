@@ -20,6 +20,7 @@ println!("Found {} contours", contours.len());
 ## Shape Analysis
 
 ### Convex Hull
+
 Computes the convex boundary wrapping around a contour using Andrew's Monotone Chain algorithm.
 
 ```rust
@@ -29,28 +30,33 @@ let hull = contour.convex_hull();
 ### Area & Perimeter
 
 ```rust
-let area = contour.contour_area();
-let perimeter = contour.arc_length(true); // true = closed loop
+let m = contour.moments();
+let area = m.m00; // m00 represents the contour area
 ```
 
-### Bounding Rectangles
-
-```rust
-// Straight bounding box
-let rect = contour.bounding_rect();
-
-// Minimum area rotated rectangle
-let (center, size, angle) = contour.min_area_rect();
-```
-
-### Hu Moments & Shape Matching
-Computes 7 scale/rotation/translation invariant Hu Moments to evaluate shape similarities.
+### Centroid
 
 ```rust
 let m = contour.moments();
-let hu_moments = ShapeAnalysis::hu_moments(&m);
+if let Some(centroid) = m.centroid() {
+    println!("Center of mass: ({:.2}, {:.2})", centroid.x, centroid.y);
+}
+```
 
-// Compare two shape moments (returns distance score)
+### Moments
+
+Computes image moments representing spatial distribution.
+
+```rust
+let m = contour.moments();
+println!("Area (m00): {}", m.m00);
+println!("Centroid: {:?}", m.centroid());
+```
+
+### Hu Moments & Shape Matching
+
+```rust
+let hu = ShapeAnalysis::hu_moments(&m);
 let diff = ShapeAnalysis::match_shapes(&m1, &m2);
 ```
 
@@ -66,4 +72,12 @@ for stat in stats {
     println!(" - Area: {} pixels", stat.area);
     println!(" - Centroid: {:?}", stat.centroid);
 }
+```
+
+## Semantic Segmentation
+
+```rust
+let segmenter = Segmenter::<Backend>::from_onnx("model.onnx", &device)?;
+let mask = segmenter.segment(&image)?;
+// mask.mask is a Tensor<B, 2, Int> of shape [H, W] with class labels
 ```

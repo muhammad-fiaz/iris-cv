@@ -1,43 +1,46 @@
-use burn::backend::wgpu::Wgpu;
+// Demonstrates dense (Farneback) and sparse (Lucas-Kanade) optical flow.
+// Loads two real images and computes motion between them.
+
+use burn::backend::wgpu::{Wgpu, WgpuDevice};
 use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
-    let device = Default::default();
+    let device = WgpuDevice::default();
 
     println!(
         "Using compute backend: {}",
         BurnUtils::backend_name::<Backend>()
     );
 
-    // 1. Generate two mock frames
-    let w = 100;
-    let h = 100;
-    let flat = vec![0.5f32; 3 * h * w];
-    let img1 = Image::new(Tensor::<Backend, 3>::from_data(
-        TensorData::new(flat.clone(), [3, h, w]),
-        &device,
-    ));
-    let img2 = Image::new(Tensor::<Backend, 3>::from_data(
-        TensorData::new(flat, [3, h, w]),
-        &device,
-    ));
+    // Load two real images as consecutive frames
+    let img1: Image<Backend> = Image::open("assets/images/checkerboard.png", &device)?;
+    let img2: Image<Backend> = Image::open("assets/images/test_pattern.png", &device)?;
 
-    // 2. Dense Optical Flow (Farneback)
+    // Dense Optical Flow (Farneback)
     println!("Calculating dense optical flow (Farneback)...");
     let flow = OpticalFlow::calc_dense_farneback(&img1, &img2)?;
     println!("Dense flow tensor shape: {:?}", flow.dims());
 
-    // 3. Sparse Optical Flow (Lucas-Kanade)
+    // Sparse Optical Flow (Lucas-Kanade)
     println!("Calculating sparse optical flow (Lucas-Kanade)...");
-    let prev_pts = vec![Point::new(10.0, 10.0), Point::new(20.0, 20.0)];
+    let prev_pts = vec![
+        Point::new(100.0, 100.0),
+        Point::new(200.0, 200.0),
+        Point::new(300.0, 300.0),
+    ];
     let (next_pts, status) = OpticalFlow::calc_sparse_pyr_lk(&img1, &img2, &prev_pts)?;
     for i in 0..prev_pts.len() {
         if status[i] == 1 {
-            println!("Point tracked from {:?} to {:?}", prev_pts[i], next_pts[i]);
+            println!(
+                "  Point tracked from {:?} to {:?}",
+                prev_pts[i], next_pts[i]
+            );
+        } else {
+            println!("  Point {:?} lost tracking", prev_pts[i]);
         }
     }
 
-    println!("Optical flow example completed successfully.");
+    println!("Optical flow example completed.");
     Ok(())
 }

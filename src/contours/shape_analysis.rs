@@ -317,26 +317,47 @@ impl ShapeAnalysis {
             return [0.0; 7];
         }
 
-        // Center moments
         let xc = m.m10 / m.m00;
         let yc = m.m01 / m.m00;
 
-        // Scaled central moments eta_pq = mu_pq / (m00 ^ (1 + (p+q)/2))
         let mu00 = m.m00;
         let mu20 = m.m20 - xc * m.m10;
         let mu02 = m.m02 - yc * m.m01;
         let mu11 = m.m11 - xc * m.m01;
+        let mu30 = m.m30 - 3.0 * xc * m.m20 + 2.0 * xc * xc * m.m10;
+        let mu03 = m.m03 - 3.0 * yc * m.m02 + 2.0 * yc * yc * m.m01;
+        let mu21 = m.m21 - 2.0 * xc * m.m11 - yc * m.m20 + 2.0 * xc * xc * m.m01;
+        let mu12 = m.m12 - 2.0 * yc * m.m11 - xc * m.m02 + 2.0 * yc * yc * m.m10;
 
-        let eta20 = mu20 / mu00.powf(2.0);
-        let eta02 = mu02 / mu00.powf(2.0);
-        let eta11 = mu11 / mu00.powf(2.0);
+        let inv = 1.0 / mu00;
+        let inv2 = inv * inv;
+        let inv3 = inv2 * inv;
 
-        // Hu Moments formulas
+        let eta20 = mu20 * inv2;
+        let eta02 = mu02 * inv2;
+        let eta11 = mu11 * inv2;
+        let eta30 = mu30 * inv3;
+        let eta03 = mu03 * inv3;
+        let eta21 = mu21 * inv3;
+        let eta12 = mu12 * inv3;
+
         let h1 = eta20 + eta02;
         let h2 = (eta20 - eta02).powi(2) + 4.0 * eta11 * eta11;
+        let h3 = (eta30 - 3.0 * eta12).powi(2) + (3.0 * eta21 - eta03).powi(2);
+        let h4 = (eta30 + eta12).powi(2) + (eta21 + eta03).powi(2);
+        let h5 = (eta30 - 3.0 * eta12) * (eta30 + eta12)
+            * ((eta30 + eta12).powi(2) - 3.0 * (eta21 + eta03).powi(2))
+            + (3.0 * eta21 - eta03) * (eta21 + eta03)
+                * (3.0 * (eta30 + eta12).powi(2) - (eta21 + eta03).powi(2));
+        let h6 = (eta20 - eta02)
+            * ((eta30 + eta12).powi(2) - (eta21 + eta03).powi(2))
+            + 4.0 * eta11 * (eta30 + eta12) * (eta21 + eta03);
+        let h7 = (3.0 * eta21 - eta03) * (eta30 + eta12)
+            * ((eta30 + eta12).powi(2) - 3.0 * (eta21 + eta03).powi(2))
+            - (eta30 - 3.0 * eta12) * (eta21 + eta03)
+                * (3.0 * (eta30 + eta12).powi(2) - (eta21 + eta03).powi(2));
 
-        // Simulating standard 7 invariants stubs based on structural inputs
-        [h1, h2, 0.0, 0.0, 0.0, 0.0, 0.0]
+        [h1, h2, h3, h4, h5, h6, h7]
     }
 
     /// Matches two shapes based on their Hu moments.

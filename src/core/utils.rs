@@ -91,21 +91,12 @@ impl<B: Backend> Image<B> {
         let flat_vals: Vec<f32> = tensor_data.iter::<f32>().collect();
         let mut out_vals = vec![0.0f32; c * h * w];
 
-        #[cfg(feature = "parallel")]
         {
             use rayon::prelude::*;
             out_vals.par_iter_mut().enumerate().for_each(|(i, val)| {
                 let pixel_val = (flat_vals[i].clamp(0.0, 1.0) * 255.0) as u8;
                 *val = f32::from(!pixel_val) / 255.0;
             });
-        }
-
-        #[cfg(not(feature = "parallel"))]
-        {
-            for i in 0..(c * h * w) {
-                let pixel_val = (flat_vals[i].clamp(0.0, 1.0) * 255.0) as u8;
-                out_vals[i] = (!pixel_val) as f32 / 255.0;
-            }
         }
 
         let new_data = TensorData::new(out_vals, [c, h, w]);
@@ -221,6 +212,82 @@ impl<B: Backend> Image<B> {
         Ok(count)
     }
 
+    /// Produces a binary mask where pixels within the range [low, high] are set to 1.0.
+    /// For multi-channel images, all channels must be in range for the pixel to be marked.
+    pub fn in_range(&self, low: &[f32], high: &[f32]) -> Result<Self> {
+        let dims = self.tensor.dims();
+        let c = dims[0];
+        let h = dims[1];
+        let w = dims[2];
+
+        if low.len() != c || high.len() != c {
+            return Err(IrisError::InvalidParameter(format!(
+                "low/high length ({}/{}) must match channels ({c})",
+                low.len(),
+                high.len(),
+            )));
+        }
+
+        let device = self.tensor.device();
+        let tensor_data = self.tensor.clone().into_data();
+        let flat_vals: Vec<f32> = tensor_data.iter::<f32>().collect();
+        let mut out_vals = vec![0.0f32; h * w];
+
+        let pixels = h * w;
+        for i in 0..pixels {
+            let mut in_range = true;
+            for ch in 0..c {
+                let val = flat_vals[ch * pixels + i];
+                if val < low[ch] || val > high[ch] {
+                    in_range = false;
+                    break;
+                }
+            }
+            out_vals[i] = if in_range { 1.0 } else { 0.0 };
+        }
+
+        let new_data = TensorData::new(out_vals, [1, h, w]);
+        let new_tensor = Tensor::<B, 3>::from_data(new_data, &device);
+        Ok(Image::new(new_tensor))
+    }
+
+    /// Normalizes the image to the given range [min_val, max_val].
+    pub fn normalize(&self, min_val: f32, max_val: f32) -> Result<Self> {
+        let dims = self.tensor.dims();
+        let c = dims[0];
+        let h = dims[1];
+        let w = dims[2];
+
+        let device = self.tensor.device();
+        let tensor_data = self.tensor.clone().into_data();
+        let flat_vals: Vec<f32> = tensor_data.iter::<f32>().collect();
+        let mut out_vals = vec![0.0f32; c * h * w];
+
+        for ch in 0..c {
+            let mut ch_min = f32::MAX;
+            let mut ch_max = f32::MIN;
+            let pixels = h * w;
+            for i in 0..pixels {
+                let v = flat_vals[ch * pixels + i];
+                if v < ch_min { ch_min = v; }
+                if v > ch_max { ch_max = v; }
+            }
+            let range = ch_max - ch_min;
+            for i in 0..pixels {
+                let v = flat_vals[ch * pixels + i];
+                out_vals[ch * pixels + i] = if range.abs() < 1e-10 {
+                    min_val
+                } else {
+                    min_val + (v - ch_min) / range * (max_val - min_val)
+                };
+            }
+        }
+
+        let new_data = TensorData::new(out_vals, [c, h, w]);
+        let new_tensor = Tensor::<B, 3>::from_data(new_data, &device);
+        Ok(Image::new(new_tensor))
+    }
+
     // Helper for pixel-wise logical operations
     fn bitwise_op(&self, other: &Self, op: impl Fn(u8, u8) -> u8 + Sync + Send) -> Result<Self> {
         if self.shape() != other.shape() {
@@ -242,7 +309,6 @@ impl<B: Backend> Image<B> {
         let vals_other: Vec<f32> = data_other.iter::<f32>().collect();
         let mut out_vals = vec![0.0f32; c * h * w];
 
-        #[cfg(feature = "parallel")]
         {
             use rayon::prelude::*;
             out_vals.par_iter_mut().enumerate().for_each(|(i, val)| {
@@ -250,15 +316,6 @@ impl<B: Backend> Image<B> {
                 let b2 = (vals_other[i].clamp(0.0, 1.0) * 255.0) as u8;
                 *val = f32::from(op(b1, b2)) / 255.0;
             });
-        }
-
-        #[cfg(not(feature = "parallel"))]
-        {
-            for i in 0..(c * h * w) {
-                let b1 = (vals_self[i].clamp(0.0, 1.0) * 255.0) as u8;
-                let b2 = (vals_other[i].clamp(0.0, 1.0) * 255.0) as u8;
-                out_vals[i] = op(b1, b2) as f32 / 255.0;
-            }
         }
 
         let new_data = TensorData::new(out_vals, [c, h, w]);
@@ -309,5 +366,50 @@ mod tests {
 
         let count = img1.count_non_zero().unwrap();
         assert_eq!(count, 3 * 4 * 4);
+    }
+
+    #[test]
+    fn test_in_range() {
+        let device = get_test_device();
+        let data = vec![0.1, 0.5, 0.9, 0.3, 0.6, 0.2, 0.7, 0.8, 0.4];
+        let img = Image::new(Tensor::<TestBackend, 3>::from_data(
+            TensorData::new(data, [3, 1, 3]),
+            &device,
+        ));
+
+        let mask = img.in_range(&[0.2, 0.2, 0.2], &[0.8, 0.8, 0.8]).unwrap();
+        assert_eq!(mask.shape(), [1, 1, 3]);
+        let vals: Vec<f32> = mask.tensor.into_data().iter::<f32>().collect();
+        // pixel 0: 0.1<0.2 -> 0.0; pixel 1: 0.5 in range -> 1.0; pixel 2: 0.9>0.8 -> 0.0
+        assert!((vals[0]).abs() < 1e-5);
+        assert!((vals[1] - 1.0).abs() < 1e-5);
+        assert!((vals[2]).abs() < 1e-5);
+    }
+
+    #[test]
+    fn test_normalize() {
+        let device = get_test_device();
+        let data = vec![0.2, 0.4, 0.6, 0.8];
+        let img = Image::new(Tensor::<TestBackend, 3>::from_data(
+            TensorData::new(data, [1, 1, 4]),
+            &device,
+        ));
+
+        let normalized = img.normalize(0.0, 1.0).unwrap();
+        assert_eq!(normalized.shape(), [1, 1, 4]);
+        let vals: Vec<f32> = normalized.tensor.into_data().iter::<f32>().collect();
+        assert!((vals[0]).abs() < 1e-5); // min => 0.0
+        assert!((vals[3] - 1.0).abs() < 1e-5); // max => 1.0
+    }
+
+    #[test]
+    fn test_in_range_invalid_length() {
+        let device = get_test_device();
+        let data = vec![0.5f32; 3 * 4 * 4];
+        let img = Image::new(Tensor::<TestBackend, 3>::from_data(
+            TensorData::new(data, [3, 4, 4]),
+            &device,
+        ));
+        assert!(img.in_range(&[0.0], &[0.5, 0.5, 0.5]).is_err());
     }
 }

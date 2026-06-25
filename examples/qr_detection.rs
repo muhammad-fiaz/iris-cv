@@ -1,32 +1,37 @@
-use burn::backend::wgpu::Wgpu;
+// Demonstrates QR code detection and decoding using QrDetector.
+// Loads a real image and searches for QR codes.
+
+use burn::backend::wgpu::{Wgpu, WgpuDevice};
 use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
-    let device = Default::default();
+    let device = WgpuDevice::default();
 
     println!(
         "Using compute backend: {}",
         BurnUtils::backend_name::<Backend>()
     );
 
-    // 1. Generate empty image
-    let w = 500;
-    let h = 500;
-    let flat_data = vec![0.5f32; 3 * h * w];
-    let tensor_data = TensorData::new(flat_data, [3, h, w]);
-    let tensor = Tensor::<Backend, 3>::from_data(tensor_data, &device);
-    let image = Image::new(tensor);
+    // Load a real image to search for QR codes
+    let image: Image<Backend> = Image::open("assets/images/test_pattern.png", &device)?;
 
-    // 2. Instantiate QR detector and search QR codes
+    // Detect QR codes
     let detector = QrDetector::new();
     let qr_codes = detector.detect_and_decode(&image)?;
 
     println!("Detected {} QR code(s):", qr_codes.len());
-    for qr in qr_codes {
-        println!(" - Payload: '{}'", qr.payload);
-        println!(" - Corners: {:?}", qr.corners);
+    for qr in &qr_codes {
+        println!("  - Payload: '{}'", qr.payload);
+        println!("    Corners: {:?}", qr.corners);
     }
+
+    if qr_codes.is_empty() {
+        println!("  (No QR codes found in test_pattern — expected)");
+    }
+
+    image.save("output_qr_detection.png")?;
+    println!("Saved input image to 'output_qr_detection.png'");
 
     Ok(())
 }

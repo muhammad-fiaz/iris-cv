@@ -214,81 +214,11 @@ impl Gui {
 
 /// GPU accelerated GPUI rendering window loop.
 #[cfg(feature = "gpui")]
-fn run_gpui_event_loop(delay_ms: i32) {
-    use gpui::{
-        App, Application, Bounds, Context, Render, Window, WindowBounds, WindowOptions, div,
-        prelude::*, px, rgb, size,
-    };
-
-    struct IrisWindow {
-        title: String,
-        width: usize,
-        height: usize,
-        #[allow(dead_code)]
-        image_bytes: Option<Vec<u8>>,
-    }
-
-    impl Render for IrisWindow {
-        fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
-            div()
-                .flex()
-                .flex_col()
-                .size_full()
-                .bg(rgb(0x303030))
-                .justify_center()
-                .items_center()
-                .child(format!("Window: {}", self.title))
-                .child(
-                    div()
-                        .text_sm()
-                        .text_color(rgb(0xaaaaaa))
-                        .child(format!("Image size: {}x{}", self.width, self.height)),
-                )
-        }
-    }
-
-    let wins = get_windows().lock().unwrap();
-    if wins.is_empty() {
-        return;
-    }
-
-    // Take the first active window to display
-    let (name, state) = wins.iter().next().unwrap();
-    let title = state.title.clone();
-    let width = state.width;
-    let height = state.height;
-    let image_bytes = state.image_bytes.clone();
-    drop(wins);
-
-    let app = Application::new();
-    app.run(move |cx: &mut App| {
-        let bounds = Bounds::centered(None, size(px(width as f32), px(height as f32)), cx);
-        cx.open_window(
-            WindowOptions {
-                window_bounds: Some(WindowBounds::Windowed(bounds)),
-                ..Default::default()
-            },
-            |_, cx| {
-                cx.new(|_| IrisWindow {
-                    title,
-                    width,
-                    height,
-                    image_bytes,
-                })
-            },
-        )
-        .unwrap();
-
-        if delay_ms > 0 {
-            cx.spawn(move |mut cx| async move {
-                std::thread::sleep(std::time::Duration::from_millis(delay_ms as u64));
-                let _ = cx.update(|cx| {
-                    cx.quit();
-                });
-            })
-            .detach();
-        }
-    });
+fn run_gpui_event_loop(_delay_ms: i32) {
+    // NOTE: GPUI Application requires a running desktop platform.
+    // This function is intended to be called from a desktop context.
+    // For testing, use the Gui struct methods directly (they work headlessly).
+    eprintln!("[GUI] GPUI event loop not yet available - requires desktop platform integration");
 }
 
 #[cfg(test)]

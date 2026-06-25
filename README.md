@@ -2,7 +2,6 @@
 
 # Iris
 
-
 <a href="https://muhammad-fiaz.github.io/iris/"><img src="https://img.shields.io/badge/docs-muhammad--fiaz.github.io-blue" alt="Documentation"></a>
 <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/Rust-2024_Edition-orange.svg" alt="Rust Version"></a>
 <a href="https://github.com/muhammad-fiaz/iris"><img src="https://img.shields.io/github/stars/muhammad-fiaz/iris" alt="GitHub stars"></a>
@@ -43,6 +42,7 @@ A Rust-powered, cross-platform computer vision and deep learning library designe
   - [Build from Source](#build-from-source)
 - [Library Usage](#library-usage)
 - [Examples](#examples)
+- [Cargo Features](#cargo-features)
 - [License](#license)
 
 </details>
@@ -55,19 +55,27 @@ A Rust-powered, cross-platform computer vision and deep learning library designe
 | Feature | Description |
 |---------|-------------|
 | **Image Representation** | Custom `Image<B>` wrapping a Burn `Tensor<B, 3>` for high performance. |
-| **Image I/O** | Native load and save support for popular formats (PNG, JPEG, etc.). |
-| **Color Conversions** | Fast transformations between RGB, Grayscale, and other color models. |
-| **Geometric Operations** | Warping, crop, flip, rotate, scale, affine/perspective warps, and remapping. |
-| **Filtering & Blur** | Smooth and blur operations (box, Gaussian, median, bilateral, separable). |
-| **Edge Detection** | Canny, Sobel, Laplacian, and custom gradient filters. |
-| **Thresholding** | Binary, inverse, trunc, Otsu's, and adaptive thresholding. |
-| **Morphological Operations** | Dilation, erosion, opening, closing, gradient, top hat, black hat. |
-| **Contours & Shapes** | Suzuki-Abe boundary tracking, convex hull, moments, bounding boxes, polygon approximation. |
-| **Drawing Canvas** | Lines, rectangles, circles, polygons, and custom text rendering using a built-in bitmap font. |
-| **DNN Inference** | Native ONNX, Safetensors, and Burn weight loading, NMS, and implicit `pretrained()` model loaders. |
+| **Image I/O** | Native load and save support for PNG, JPEG, GIF, QOI, ICO, BMP, TIFF, WebP, APNG. |
+| **Color Conversions** | RGB, Grayscale, HSV, HLS, XYZ, LAB, YUV, YCrCb conversions with channel split/merge. |
+| **Geometric Operations** | Warp, crop, flip, rotate, scale, affine/perspective transforms, remapping, resize. |
+| **Filtering & Blur** | Box, Gaussian, median, bilateral, separable, custom kernel convolution (filter2D). |
+| **Edge Detection** | Canny, Sobel, Scharr, Laplacian, LoG (Laplacian of Gaussian). |
+| **Thresholding** | Binary, Otsu's, Triangle, adaptive (mean/Gaussian) thresholding. |
+| **Histogram** | Histogram equalization, CLAHE, apply LUT, compare histograms (4 methods), per-channel operations. |
+| **Morphological Operations** | Dilation, erosion, opening, closing, gradient, top/bottom hat, custom kernels. |
+| **Contours & Shapes** | Suzuki-Abe boundary tracking, convex hull, moments, bounding boxes, polygon approximation, distance transform. |
+| **Drawing Canvas** | Lines, rectangles, circles, ellipses, polygons, arrows, markers, text rendering with bitmap font. |
+| **Noise Generation** | Gaussian, salt-and-pepper, and speckle noise with custom parameters. |
+| **Feature Detection** | ORB feature detection (FAST corners + BRIEF descriptors), template matching (6 methods). |
+| **Dense Optical Flow** | Farneback multi-scale Gaussian pyramid flow estimation. |
+| **Sparse Optical Flow** | Lucas-Kanade pyramidal feature tracking. |
+| **Object Tracking** | MOSSE correlation filter tracker. |
+| **Video Module** | Read/write video files, frame iteration, GIF/APNG/JPEG/QOI/PNG output, metadata extraction. |
+| **DNN Inference** | Native ONNX, Safetensors, and Burn weight loading, NMS. |
 | **ArUco & QR Detection** | Marker tracking, pose estimation, and QR/barcode reader pipelines. |
-| **Optical Flow & Tracking** | Dense and sparse tracking pipelines with background subtraction. |
-| **WGPU & GPU Acceleration** | Native acceleration across CUDA, Vulkan, Metal, and WGPU through Burn's backend abstraction. |
+| **Image Utilities** | addWeighted blending, convert_scale_abs, copy_to with mask, normalize, in_range masking. |
+| **WGPU & GPU Acceleration** | Native acceleration across CUDA, Vulkan, Metal, and WGPU through Burn's backend. |
+| **Parallel Processing** | Rayon-powered parallelism across filters, gradients, morphology, thresholding, and warping. |
 
 </details>
 
@@ -108,22 +116,6 @@ cargo build --release
 
 ---
 
-## Cargo Features
-
-`Iris` provides several features to customize compilation and backend acceleration:
-
-| Feature | Description | Enabled by Default |
-|---|---|---|
-| `parallel` | Enables CPU multi-threading parallelization using `rayon` for all CPU pixel-processing operators (filters, gradients, morphology, logical/bitwise ops, thresholding, warping). | **Yes** |
-| `wgpu` | Enables the WGPU backend support for hardware-accelerated deep learning via the Burn framework. | **Yes** |
-| `safetensors` | Enables native loading of model weights in `.safetensors` format. | **Yes** |
-| `gpui` | Enables GPU-accelerated desktop UI window rendering using Zed's `gpui` and `gpui-component` frameworks (cross-platform on Linux, macOS, and Windows). | No |
-| `cuda` | Enables CUDA acceleration for the Burn backend. | No |
-| `tch` | Enables LibTorch backend acceleration. | No |
-| `ndarray` | Enables lightweight, pure CPU ndarray execution fallback. | No |
-
----
-
 ## Library Usage
 
 To use `iris` in your Rust project, run:
@@ -154,27 +146,25 @@ Or add the following to your `Cargo.toml`:
 iris = { git = "https://github.com/muhammad-fiaz/iris" }
 ```
 
-
-
 In your Rust code:
 
 ```rust
 use iris::prelude::*;
-use burn::backend::wgpu::Wgpu;
+use burn::backend::wgpu::{Wgpu, WgpuDevice};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // 1. Define Burn device & backend type
-    let device = Default::default();
-    
-    // 2. Open an image
-    let img: Image<Wgpu> = Image::open("test.png", &device)?;
+    type Backend = Wgpu;
+    let device = WgpuDevice::default();
+
+    // 1. Open an image
+    let img: Image<Backend> = Image::open("assets/images/gradient.png", &device)?;
     println!("Loaded image with shape: {:?}", img.shape());
 
-    // 3. Convert to grayscale and apply Canny edges
+    // 2. Convert to grayscale and apply Canny edges
     let gray = img.grayscale()?;
     let edges = gray.canny(50.0, 150.0)?;
 
-    // 4. Draw bounding box and text
+    // 3. Draw bounding box and save
     let mut canvas = edges.to_rgb()?;
     canvas = canvas.draw_rectangle(
         Rect::new(10, 10, 100, 100),
@@ -191,18 +181,44 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## Examples
 
-Run any example to see Iris in action:
+Run any example to see Iris in action. All examples require the `wgpu` feature:
 
 ```bash
-cargo run --example image_loading
-cargo run --example canny
-cargo run --example contours
-cargo run --example qr_detection
-cargo run --example face_recognition
-cargo run --example onnx_inference
-cargo run --example gui_windows
-cargo run --example safetensors_loading
+cargo run --example image_loading --features wgpu
+cargo run --example canny --features wgpu
+cargo run --example filters --features wgpu
+cargo run --example drawing --features wgpu
+cargo run --example color_processing --features wgpu
+cargo run --example image_utils --features wgpu
+cargo run --example contours --features wgpu
+cargo run --example morphology --features wgpu
+cargo run --example threshold --features wgpu
+cargo run --example optical_flow --features wgpu
+cargo run --example tracking --features wgpu
+cargo run --example qr_detection --features wgpu
+cargo run --example face_recognition --features wgpu
+cargo run --example onnx_inference --features wgpu
+cargo run --example photo_processing --features wgpu
+cargo run --example segmentation --features wgpu
+cargo run --example kmeans_clustering --features wgpu
 ```
+
+---
+
+## Cargo Features
+
+`Iris` provides several features to customize compilation and backend acceleration:
+
+| Feature | Description | Enabled by Default |
+|---|---|---|
+| `ndarray` | Lightweight, pure CPU ndarray execution backend (used for tests). | **Yes** |
+| `safetensors` | Enables native loading of model weights in `.safetensors` format. | **Yes** |
+| `wgpu` | Enables the WGPU backend support for hardware-accelerated deep learning via Burn. | No |
+| `gpui` | Enables GPU-accelerated desktop UI window rendering using Zed's GPUI framework. | No |
+| `cuda` | Enables CUDA acceleration for the Burn backend. | No |
+| `tch` | Enables LibTorch backend acceleration. | No |
+
+> **Note**: `rayon` is a required dependency for parallel processing — it is always included.
 
 ---
 

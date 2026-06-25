@@ -1,13 +1,18 @@
+// Demonstrates camera calibration, 3D-to-2D point projection, and homography estimation.
+// Uses synthetic point correspondences (no image file needed).
+
 use iris::prelude::*;
 
 fn main() -> Result<()> {
-    println!("--- Camera Calibration & Geometry Example ---");
+    #![allow(dead_code)]
+type Backend = burn::backend::wgpu::Wgpu;
+
+    println!("=== Camera Calibration & Geometry Example ===");
 
     // 1. Generate checkerboard coordinates for calibration
     let mut object_pts = Vec::new();
     let mut image_pts = Vec::new();
 
-    // Imagine a single calibration frame with 4 point pairs
     object_pts.push(vec![
         Point::new(0.0, 0.0),
         Point::new(1.0, 0.0),

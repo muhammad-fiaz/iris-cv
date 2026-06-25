@@ -228,6 +228,279 @@ impl<B: Backend> Image<B> {
         let new_tensor = Tensor::<B, 3>::from_data(new_data, &device);
         Ok(Image::new(new_tensor))
     }
+
+    /// Draws an ellipse on the image.
+    /// `center` is the center of the ellipse, `axes` is (semi_major, semi_minor).
+    /// `angle` is the rotation angle in degrees. `start_angle` and `end_angle` in degrees.
+    /// If `thickness < 0`, the ellipse is filled.
+    #[allow(clippy::too_many_arguments)]
+    pub fn draw_ellipse(
+        self,
+        center: Point<usize>,
+        axes: (usize, usize),
+        angle: f32,
+        start_angle: f32,
+        end_angle: f32,
+        color: Scalar,
+        thickness: i32,
+    ) -> Result<Self> {
+        let dims = self.tensor.dims();
+        let c = dims[0];
+        let h = dims[1];
+        let w = dims[2];
+
+        let device = self.tensor.device();
+        let tensor_data = self.tensor.into_data();
+        let mut flat_vals: Vec<f32> = tensor_data.iter::<f32>().collect();
+
+        let cx = center.x as f32;
+        let cy = center.y as f32;
+        let (a, b) = (axes.0 as f32, axes.1 as f32);
+        let angle_rad = angle * std::f32::consts::PI / 180.0;
+        let start_rad = start_angle * std::f32::consts::PI / 180.0;
+        let end_rad = end_angle * std::f32::consts::PI / 180.0;
+
+        let cos_a = angle_rad.cos();
+        let sin_a = angle_rad.sin();
+
+        let draw_px = |px: isize, py: isize, vals: &mut [f32]| {
+            if px >= 0 && px < w as isize && py >= 0 && py < h as isize {
+                for ch in 0..c {
+                    vals[ch * h * w + py as usize * w + px as usize] = color.0[ch] as f32;
+                }
+            }
+        };
+
+        if thickness >= 0 {
+            // Draw ellipse outline
+            for t_idx in 0..720 {
+                let t = start_rad + (end_rad - start_rad) * t_idx as f32 / 720.0;
+                let ex = a * t.cos();
+                let ey = b * t.sin();
+                let rx = ex * cos_a - ey * sin_a;
+                let ry = ex * sin_a + ey * cos_a;
+                draw_px((cx + rx) as isize, (cy + ry) as isize, &mut flat_vals);
+            }
+        } else {
+            // Filled ellipse using scanline
+            let max_r = a.max(b) as usize;
+            let x0 = (cx as isize - max_r as isize).max(0) as usize;
+            let x1 = (cx as usize + max_r).min(w);
+            let y0 = (cy as isize - max_r as isize).max(0) as usize;
+            let y1 = (cy as usize + max_r).min(h);
+
+            for py in y0..y1 {
+                for px in x0..x1 {
+                    let dx = px as f32 - cx;
+                    let dy = py as f32 - cy;
+                    // Transform point into ellipse coordinate system
+                    let tx = dx * cos_a + dy * sin_a;
+                    let ty = -dx * sin_a + dy * cos_a;
+                    if a > 0.0 && b > 0.0 && (tx / a).powi(2) + (ty / b).powi(2) <= 1.0 {
+                        for ch in 0..c {
+                            flat_vals[ch * h * w + py * w + px] = color.0[ch] as f32;
+                        }
+                    }
+                }
+            }
+        }
+
+        let new_data = TensorData::new(flat_vals, [c, h, w]);
+        let new_tensor = Tensor::<B, 3>::from_data(new_data, &device);
+        Ok(Image::new(new_tensor))
+    }
+
+    /// Draws a polyline (connected line segments) on the image.
+    pub fn draw_polyline(
+        self,
+        points: &[Point<usize>],
+        color: Scalar,
+        _thickness: i32,
+    ) -> Result<Self> {
+        if points.len() < 2 {
+            return Ok(self);
+        }
+        let mut current = self;
+        for i in 0..points.len() - 1 {
+            current = current.draw_line(points[i], points[i + 1], color)?;
+        }
+        Ok(current)
+    }
+
+    /// Draws a filled polygon on the image using scanline fill.
+    pub fn fill_poly(self, points: &[Point<usize>], color: Scalar) -> Result<Self> {
+        let dims = self.tensor.dims();
+        let c = dims[0];
+        let h = dims[1];
+        let w = dims[2];
+
+        let device = self.tensor.device();
+        let tensor_data = self.tensor.into_data();
+        let mut flat_vals: Vec<f32> = tensor_data.iter::<f32>().collect();
+
+        if points.len() < 3 {
+            return Ok(Image::new(Tensor::<B, 3>::from_data(
+                TensorData::new(flat_vals, [c, h, w]),
+                &device,
+            )));
+        }
+
+        // Find bounding box
+        let min_y = points.iter().map(|p| p.y).min().unwrap_or(0);
+        let max_y = points.iter().map(|p| p.y).max().unwrap_or(h - 1);
+        let max_y = max_y.min(h - 1);
+
+        // Scanline fill
+        for y in min_y..=max_y {
+            let mut intersections = Vec::new();
+            let n = points.len();
+            for i in 0..n {
+                let j = (i + 1) % n;
+                let (p1, p2) = (points[i], points[j]);
+                if (p1.y <= y && p2.y > y) || (p2.y <= y && p1.y > y) {
+                    let x_intersect =
+                        p1.x as f64 + (y as f64 - p1.y as f64) * (p2.x as f64 - p1.x as f64)
+                            / (p2.y as f64 - p1.y as f64);
+                    intersections.push(x_intersect as usize);
+                }
+            }
+            intersections.sort_unstable();
+
+            for pair in intersections.chunks(2) {
+                if pair.len() == 2 {
+                    let x_start = pair[0];
+                    let x_end = pair[1].min(w - 1);
+                    for x in x_start..=x_end {
+                        for ch in 0..c {
+                            flat_vals[ch * h * w + y * w + x] = color.0[ch] as f32;
+                        }
+                    }
+                }
+            }
+        }
+
+        let new_data = TensorData::new(flat_vals, [c, h, w]);
+        let new_tensor = Tensor::<B, 3>::from_data(new_data, &device);
+        Ok(Image::new(new_tensor))
+    }
+
+    /// Draws an arrowed line from p1 to p2 with an arrowhead.
+    pub fn draw_arrowed_line(
+        self,
+        p1: Point<usize>,
+        p2: Point<usize>,
+        color: Scalar,
+        _thickness: i32,
+        tip_length: f32,
+    ) -> Result<Self> {
+        let img = self.draw_line(p1, p2, color)?;
+
+        // Compute arrowhead
+        let dx = p2.x as f64 - p1.x as f64;
+        let dy = p2.y as f64 - p1.y as f64;
+        let len = (dx * dx + dy * dy).sqrt();
+        if len < 1.0 {
+            return Ok(img);
+        }
+
+        let ux = dx / len;
+        let uy = dy / len;
+        let tip_size = len * tip_length as f64;
+        let angle = std::f64::consts::FRAC_PI_6; // 30 degrees
+
+        let left = (
+            (p2.x as f64 - tip_size * (ux * angle.cos() - uy * angle.sin())) as usize,
+            (p2.y as f64 - tip_size * (uy * angle.cos() + ux * angle.sin())) as usize,
+        );
+        let right = (
+            (p2.x as f64 - tip_size * (ux * angle.cos() + uy * angle.sin())) as usize,
+            (p2.y as f64 - tip_size * (uy * angle.cos() - ux * angle.sin())) as usize,
+        );
+
+        img.draw_line(
+            p2,
+            Point::new(left.0, left.1),
+            color,
+        )?
+        .draw_line(p2, Point::new(right.0, right.1), color)
+    }
+
+    /// Draws a marker symbol at a point.
+    pub fn draw_marker(
+        self,
+        center: Point<usize>,
+        color: Scalar,
+        marker_type: MarkerType,
+        marker_size: usize,
+    ) -> Result<Self> {
+        match marker_type {
+            MarkerType::Cross => {
+                let half = marker_size / 2;
+                self.draw_line(
+                    Point::new(center.x.saturating_sub(half), center.y),
+                    Point::new(center.x + half, center.y),
+                    color,
+                )?
+                .draw_line(
+                    Point::new(center.x, center.y.saturating_sub(half)),
+                    Point::new(center.x, center.y + half),
+                    color,
+                )
+            }
+            MarkerType::TiltedCross => {
+                let half = marker_size / 2;
+                self.draw_line(
+                    Point::new(center.x.saturating_sub(half), center.y.saturating_sub(half)),
+                    Point::new(center.x + half, center.y + half),
+                    color,
+                )?
+                .draw_line(
+                    Point::new(center.x + half, center.y.saturating_sub(half)),
+                    Point::new(center.x.saturating_sub(half), center.y + half),
+                    color,
+                )
+            }
+            MarkerType::Diamond => {
+                let half = marker_size / 2;
+                self.draw_polyline(
+                    &[
+                        Point::new(center.x, center.y.saturating_sub(half)),
+                        Point::new(center.x + half, center.y),
+                        Point::new(center.x, center.y + half),
+                        Point::new(center.x.saturating_sub(half), center.y),
+                        Point::new(center.x, center.y.saturating_sub(half)),
+                    ],
+                    color,
+                    1,
+                )
+            }
+            MarkerType::Square => self.draw_rectangle(
+                Rect::new(
+                    center.x.saturating_sub(marker_size / 2),
+                    center.y.saturating_sub(marker_size / 2),
+                    marker_size,
+                    marker_size,
+                ),
+                color,
+                1,
+            ),
+            MarkerType::Circle => {
+                self.draw_circle(center, marker_size / 2, color, 1)
+            }
+            MarkerType::Filled => self.draw_circle(center, marker_size / 2, color, -1),
+        }
+    }
+}
+
+/// Types of drawing markers.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum MarkerType {
+    Cross,
+    TiltedCross,
+    Diamond,
+    Square,
+    Circle,
+    Filled,
 }
 
 #[cfg(test)]
@@ -257,5 +530,114 @@ mod tests {
             .unwrap();
 
         assert_eq!(img.shape(), [3, 100, 100]);
+    }
+
+    #[test]
+    fn test_draw_ellipse() {
+        let device = test_device();
+        let data = vec![0.0f32; 3 * 60 * 60];
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 60, 60]), &device);
+        let img = Image::new(tensor);
+
+        // Outline
+        let img = img
+            .draw_ellipse(
+                Point::new(30, 30),
+                (15, 10),
+                30.0,
+                0.0,
+                360.0,
+                Scalar::all(1.0),
+                1,
+            )
+            .unwrap();
+        assert_eq!(img.shape(), [3, 60, 60]);
+
+        // Filled
+        let img = img
+            .draw_ellipse(
+                Point::new(30, 30),
+                (15, 10),
+                30.0,
+                0.0,
+                360.0,
+                Scalar::all(0.5),
+                -1,
+            )
+            .unwrap();
+        assert_eq!(img.shape(), [3, 60, 60]);
+    }
+
+    #[test]
+    fn test_draw_polyline() {
+        let device = test_device();
+        let data = vec![0.0f32; 3 * 50 * 50];
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 50, 50]), &device);
+        let img = Image::new(tensor);
+
+        let points = vec![
+            Point::new(10, 10),
+            Point::new(40, 10),
+            Point::new(40, 40),
+            Point::new(10, 40),
+            Point::new(10, 10),
+        ];
+        let img = img.draw_polyline(&points, Scalar::all(1.0), 1).unwrap();
+        assert_eq!(img.shape(), [3, 50, 50]);
+    }
+
+    #[test]
+    fn test_fill_poly() {
+        let device = test_device();
+        let data = vec![0.0f32; 3 * 50 * 50];
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 50, 50]), &device);
+        let img = Image::new(tensor);
+
+        let points = vec![
+            Point::new(10, 10),
+            Point::new(40, 10),
+            Point::new(40, 40),
+            Point::new(10, 40),
+        ];
+        let img = img.fill_poly(&points, Scalar::all(0.8)).unwrap();
+        assert_eq!(img.shape(), [3, 50, 50]);
+    }
+
+    #[test]
+    fn test_draw_arrowed_line() {
+        let device = test_device();
+        let data = vec![0.0f32; 3 * 50 * 50];
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 50, 50]), &device);
+        let img = Image::new(tensor);
+
+        let img = img
+            .draw_arrowed_line(
+                Point::new(10, 10),
+                Point::new(40, 40),
+                Scalar::all(1.0),
+                1,
+                0.3,
+            )
+            .unwrap();
+        assert_eq!(img.shape(), [3, 50, 50]);
+    }
+
+    #[test]
+    fn test_draw_marker() {
+        let device = test_device();
+        let data = vec![0.0f32; 3 * 50 * 50];
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 50, 50]), &device);
+        let img = Image::new(tensor);
+
+        let img = img
+            .draw_marker(Point::new(25, 25), Scalar::all(1.0), MarkerType::Cross, 10)
+            .unwrap();
+        let img = img
+            .draw_marker(Point::new(25, 25), Scalar::all(0.5), MarkerType::Circle, 10)
+            .unwrap();
+        let img = img
+            .draw_marker(Point::new(25, 25), Scalar::all(0.8), MarkerType::Filled, 10)
+            .unwrap();
+        assert_eq!(img.shape(), [3, 50, 50]);
     }
 }

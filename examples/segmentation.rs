@@ -1,34 +1,30 @@
-use burn::backend::wgpu::Wgpu;
+// Demonstrates semantic segmentation and connected components labeling.
+// Loads a real image for segmentation and uses a synthetic binary image for CC.
+
+use burn::backend::wgpu::{Wgpu, WgpuDevice};
 use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
-    let device = Default::default();
+    let device = WgpuDevice::default();
 
     println!(
         "Using compute backend: {}",
         BurnUtils::backend_name::<Backend>()
     );
 
-    // 1. Generate an image
-    let w = 128;
-    let h = 128;
-    let flat_data = vec![0.5f32; 3 * h * w];
-    let img = Image::new(Tensor::<Backend, 3>::from_data(
-        TensorData::new(flat_data, [3, h, w]),
-        &device,
-    ));
+    // 1. Load a real image for segmentation
+    let img: Image<Backend> = Image::open("assets/images/gradient.png", &device)?;
 
-    // 2. Perform semantic segmentation
-    println!("Instantiating Segmenter...");
+    // 2. Semantic segmentation
+    println!("Running semantic segmentation...");
     let segmenter = Segmenter::<Backend>::default();
     let mask = segmenter.segment(&img)?;
-    println!("Output segmentation mask shape: {:?}", mask.mask.dims());
+    println!("Segmentation mask shape: {:?}", mask.mask.dims());
 
-    // 3. Connected components labeling & stats
-    println!("Running connected components labeling on mock binary image...");
+    // 3. Connected components labeling on a synthetic binary image
+    println!("Running connected components labeling...");
     let mut binary_data = vec![0.0f32; 50 * 50];
-    // Create a 5x5 white square in center
     for y in 20..25 {
         for x in 20..25 {
             binary_data[y * 50 + x] = 1.0;
@@ -41,12 +37,15 @@ fn main() -> Result<()> {
     let (_labels, stats) = binary_img.connected_components_with_stats()?;
 
     println!("Found {} connected component(s):", stats.len());
-    for stat in stats {
-        println!(" - Component label: {}", stat.label);
-        println!(" - Bounding box: {:?}", stat.bbox);
-        println!(" - Area: {}", stat.area);
-        println!(" - Centroid: {:?}", stat.centroid);
+    for stat in &stats {
+        println!(
+            "  - Label: {}, bbox: {:?}, area: {}, centroid: {:?}",
+            stat.label, stat.bbox, stat.area, stat.centroid
+        );
     }
+
+    img.save("output_segmentation.png")?;
+    println!("Saved input image to 'output_segmentation.png'");
 
     Ok(())
 }

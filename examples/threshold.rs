@@ -1,46 +1,46 @@
-use burn::backend::wgpu::Wgpu;
+// Demonstrates various thresholding operations: binary, truncation, to-zero, and Otsu.
+// Loads a real grayscale-compatible image and applies each threshold type.
+
+use burn::backend::wgpu::{Wgpu, WgpuDevice};
 use iris::prelude::*;
 
 fn main() -> Result<()> {
     type Backend = Wgpu;
-    let device = Default::default();
+    let device = WgpuDevice::default();
 
     println!(
         "Using compute backend: {}",
         BurnUtils::backend_name::<Backend>()
     );
 
-    // 1. Generate a test image
-    let w = 128;
-    let h = 128;
-    let mut flat_data = vec![0.0f32; h * w];
-    for y in 0..h {
-        for x in 0..w {
-            flat_data[y * w + x] = (x as f32) / (w as f32);
-        }
-    }
-    let tensor_data = TensorData::new(flat_data, [1, h, w]);
-    let tensor = Tensor::<Backend, 3>::from_data(tensor_data, &device);
-    let image = Image::new(tensor);
+    // Load a real image and convert to grayscale for thresholding
+    let image: Image<Backend> = Image::open("assets/images/gradient.png", &device)?.grayscale()?;
+    println!(
+        "Loaded grayscale image: {}x{}",
+        image.width(),
+        image.height()
+    );
 
-    // 2. Perform fixed thresholding
+    // Binary Threshold
     println!("Applying Binary Threshold...");
     let binary = image.clone().threshold(0.5, 1.0, ThresholdType::Binary)?;
     binary.save("output_thresh_binary.png")?;
 
+    // Truncate Threshold
     println!("Applying Truncate Threshold...");
     let trunc = image.clone().threshold(0.5, 1.0, ThresholdType::Trunc)?;
     trunc.save("output_thresh_trunc.png")?;
 
+    // ToZero Threshold
     println!("Applying ToZero Threshold...");
     let tozero = image.clone().threshold(0.3, 1.0, ThresholdType::ToZero)?;
     tozero.save("output_thresh_tozero.png")?;
 
-    // 3. Otsu Thresholding
+    // Otsu Thresholding
     println!("Applying Otsu Threshold...");
     let otsu = image.clone().threshold_otsu(1.0)?;
     otsu.save("output_thresh_otsu.png")?;
 
-    println!("Thresholding operations example completed successfully.");
+    println!("All thresholding operations completed. Outputs saved to output_thresh_*.png");
     Ok(())
 }

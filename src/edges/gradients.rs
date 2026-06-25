@@ -11,14 +11,13 @@ impl<B: Backend> Image<B> {
         let w = dims[2];
 
         let device = gray.tensor.device();
-        let tensor_data = gray.tensor.into_data();
+        let tensor_data = gray.tensor.clone().into_data();
         let flat_vals: Vec<f32> = tensor_data.iter::<f32>().collect();
         let mut out_vals = vec![0.0f32; h * w];
 
         let kx = [[-3.0, 0.0, 3.0], [-10.0, 0.0, 10.0], [-3.0, 0.0, 3.0]];
         let ky = [[-3.0, -10.0, -3.0], [0.0, 0.0, 0.0], [3.0, 10.0, 3.0]];
 
-        #[cfg(feature = "parallel")]
         {
             use rayon::prelude::*;
             out_vals
@@ -44,26 +43,6 @@ impl<B: Backend> Image<B> {
                 });
         }
 
-        #[cfg(not(feature = "parallel"))]
-        {
-            for y in 1..(h - 1) {
-                for x in 1..(w - 1) {
-                    let mut gx = 0.0f32;
-                    let mut gy = 0.0f32;
-
-                    for dy in -1..=1 {
-                        for dx in -1..=1 {
-                            let val = flat_vals
-                                [(y as isize + dy) as usize * w + (x as isize + dx) as usize];
-                            gx += val * kx[(dy + 1) as usize][(dx + 1) as usize] as f32;
-                            gy += val * ky[(dy + 1) as usize][(dx + 1) as usize] as f32;
-                        }
-                    }
-                    out_vals[y * w + x] = (gx * gx + gy * gy).sqrt();
-                }
-            }
-        }
-
         let new_data = TensorData::new(out_vals, [1, h, w]);
         let new_tensor = Tensor::<B, 3>::from_data(new_data, &device);
         Ok(Image::new(new_tensor))
@@ -77,14 +56,13 @@ impl<B: Backend> Image<B> {
         let w = dims[2];
 
         let device = gray.tensor.device();
-        let tensor_data = gray.tensor.into_data();
+        let tensor_data = gray.tensor.clone().into_data();
         let flat_vals: Vec<f32> = tensor_data.iter::<f32>().collect();
         let mut out_vals = vec![0.0f32; h * w];
 
         // Standard 3x3 Laplacian kernel
         let kernel = [[0.0, 1.0, 0.0], [1.0, -4.0, 1.0], [0.0, 1.0, 0.0]];
 
-        #[cfg(feature = "parallel")]
         {
             use rayon::prelude::*;
             out_vals
@@ -105,23 +83,6 @@ impl<B: Backend> Image<B> {
                         row[x] = sum.abs();
                     }
                 });
-        }
-
-        #[cfg(not(feature = "parallel"))]
-        {
-            for y in 1..(h - 1) {
-                for x in 1..(w - 1) {
-                    let mut sum = 0.0f32;
-                    for dy in -1..=1 {
-                        for dx in -1..=1 {
-                            let val = flat_vals
-                                [(y as isize + dy) as usize * w + (x as isize + dx) as usize];
-                            sum += val * kernel[(dy + 1) as usize][(dx + 1) as usize] as f32;
-                        }
-                    }
-                    out_vals[y * w + x] = sum.abs();
-                }
-            }
         }
 
         let new_data = TensorData::new(out_vals, [1, h, w]);
