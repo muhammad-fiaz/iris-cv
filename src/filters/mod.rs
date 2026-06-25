@@ -195,7 +195,7 @@ impl<B: Backend> Image<B> {
         Ok(Image::new(new_tensor))
     }
 
-/// Computes the distance transform of a binary/grayscale image.
+    /// Computes the distance transform of a binary/grayscale image.
     /// Each pixel's value becomes its Euclidean distance to the nearest zero pixel.
     /// Uses the Meijster algorithm (two-pass) for O(n) exact Euclidean distance transform.
     pub fn distance_transform(&self) -> Result<Self> {
@@ -335,9 +335,7 @@ impl<B: Backend> Image<B> {
                             let sy = y as isize + ky as isize - ay;
                             let sx = x as isize + kx as isize - ax;
                             if sy >= 0 && sy < h as isize && sx >= 0 && sx < w as isize {
-                                sum += flat_vals
-                                    [ch * h * w + sy as usize * w + sx as usize]
-                                    as f64
+                                sum += flat_vals[ch * h * w + sy as usize * w + sx as usize] as f64
                                     * kernel[ky][kx] as f64;
                             }
                         }
@@ -525,11 +523,11 @@ mod tests {
     #[test]
     fn test_distance_transform() {
         let device = test_device();
-        let flat_data = vec![0.0f32, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-        let tensor = Tensor::<TestBackend, 3>::from_data(
-            TensorData::new(flat_data, [1, 4, 4]),
-            &device,
-        );
+        let flat_data = vec![
+            0.0f32, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        ];
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 4, 4]), &device);
         let img = Image::new(tensor);
         let dt = img.distance_transform().unwrap();
         assert_eq!(dt.shape(), [1, 4, 4]);
@@ -539,10 +537,8 @@ mod tests {
     fn test_laplacian_of_gaussian() {
         let device = test_device();
         let flat_data = vec![0.5f32; 3 * 16 * 16];
-        let tensor = Tensor::<TestBackend, 3>::from_data(
-            TensorData::new(flat_data, [3, 16, 16]),
-            &device,
-        );
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 16, 16]), &device);
         let img = Image::new(tensor);
         let log = img.laplacian_of_gaussian(1.0).unwrap();
         assert_eq!(log.shape(), [1, 16, 16]);
@@ -592,7 +588,12 @@ mod tests {
     fn test_copy_to_with_mask() {
         let device = test_device();
         let data = TensorData::new(vec![1.0f32; 3 * 4 * 4], [3, 4, 4]);
-        let mask_data = TensorData::new(vec![1.0f32, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0], [1, 4, 4]);
+        let mask_data = TensorData::new(
+            vec![
+                1.0f32, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0,
+            ],
+            [1, 4, 4],
+        );
         let src = Image::new(Tensor::<TestBackend, 3>::from_data(data, &device));
         let mut dst = Image::new(Tensor::<TestBackend, 3>::from_data(
             TensorData::new(vec![0.0f32; 3 * 4 * 4], [3, 4, 4]),

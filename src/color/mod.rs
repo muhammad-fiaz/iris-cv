@@ -53,7 +53,11 @@ impl<B: Backend> Image<B> {
             };
 
             // Normalize hue to [0, 1]
-            let hue_norm = if hue < 0.0 { (hue + 360.0) / 360.0 } else { hue / 360.0 };
+            let hue_norm = if hue < 0.0 {
+                (hue + 360.0) / 360.0
+            } else {
+                hue / 360.0
+            };
             out_vals[i] = hue_norm;
         }
 
@@ -171,7 +175,11 @@ impl<B: Backend> Image<B> {
                 60.0 * (((r - g) / delta) + 4.0)
             };
 
-            let hue_norm = if hue < 0.0 { (hue + 360.0) / 360.0 } else { hue / 360.0 };
+            let hue_norm = if hue < 0.0 {
+                (hue + 360.0) / 360.0
+            } else {
+                hue / 360.0
+            };
             out_vals[i] = hue_norm;
         }
 
@@ -406,7 +414,9 @@ impl<B: Backend> Image<B> {
     pub fn lab_to_rgb(&self) -> Result<Self> {
         let dims = self.tensor.dims();
         if dims[0] != 3 {
-            return Err(IrisError::InvalidParameter("Input must be 3-channel LAB".into()));
+            return Err(IrisError::InvalidParameter(
+                "Input must be 3-channel LAB".into(),
+            ));
         }
         let h = dims[1];
         let w = dims[2];
@@ -448,7 +458,9 @@ impl<B: Backend> Image<B> {
     pub fn rgb_to_yuv(&self) -> Result<Self> {
         let dims = self.tensor.dims();
         if dims[0] != 3 {
-            return Err(IrisError::InvalidParameter("Input must be 3-channel RGB".into()));
+            return Err(IrisError::InvalidParameter(
+                "Input must be 3-channel RGB".into(),
+            ));
         }
         let h = dims[1];
         let w = dims[2];
@@ -481,7 +493,9 @@ impl<B: Backend> Image<B> {
     pub fn yuv_to_rgb(&self) -> Result<Self> {
         let dims = self.tensor.dims();
         if dims[0] != 3 {
-            return Err(IrisError::InvalidParameter("Input must be 3-channel YUV".into()));
+            return Err(IrisError::InvalidParameter(
+                "Input must be 3-channel YUV".into(),
+            ));
         }
         let h = dims[1];
         let w = dims[2];
@@ -514,7 +528,9 @@ impl<B: Backend> Image<B> {
     pub fn rgb_to_ycrcb(&self) -> Result<Self> {
         let dims = self.tensor.dims();
         if dims[0] != 3 {
-            return Err(IrisError::InvalidParameter("Input must be 3-channel RGB".into()));
+            return Err(IrisError::InvalidParameter(
+                "Input must be 3-channel RGB".into(),
+            ));
         }
         let h = dims[1];
         let w = dims[2];
@@ -569,9 +585,9 @@ impl<B: Backend> Image<B> {
             let k = 1.0f32 - r.max(g).max(b);
             if k < 1.0 - 1e-6 {
                 let inv = 1.0 / (1.0 - k);
-                out[i] = (1.0 - r - k) * inv;                    // Cyan
-                out[pixels + i] = (1.0 - g - k) * inv;           // Magenta
-                out[2 * pixels + i] = (1.0 - b - k) * inv;       // Yellow
+                out[i] = (1.0 - r - k) * inv; // Cyan
+                out[pixels + i] = (1.0 - g - k) * inv; // Magenta
+                out[2 * pixels + i] = (1.0 - b - k) * inv; // Yellow
             } else {
                 out[i] = 0.0;
                 out[pixels + i] = 0.0;
@@ -609,9 +625,9 @@ impl<B: Backend> Image<B> {
             let y = flat[2 * pixels + i];
             let k = flat[3 * pixels + i];
 
-            out[i] = (1.0 - c) * (1.0 - k);                        // Red
-            out[pixels + i] = (1.0 - m) * (1.0 - k);               // Green
-            out[2 * pixels + i] = (1.0 - y) * (1.0 - k);           // Blue
+            out[i] = (1.0 - c) * (1.0 - k); // Red
+            out[pixels + i] = (1.0 - m) * (1.0 - k); // Green
+            out[2 * pixels + i] = (1.0 - y) * (1.0 - k); // Blue
         }
 
         let device = self.tensor.device();
@@ -739,7 +755,9 @@ impl<B: Backend> Image<B> {
     pub fn ycrcb_to_rgb(&self) -> Result<Self> {
         let dims = self.tensor.dims();
         if dims[0] != 3 {
-            return Err(IrisError::InvalidParameter("Input must be 3-channel YCrCb".into()));
+            return Err(IrisError::InvalidParameter(
+                "Input must be 3-channel YCrCb".into(),
+            ));
         }
         let h = dims[1];
         let w = dims[2];
@@ -919,10 +937,8 @@ mod tests {
         let device = test_device();
         let flat_data = vec![
             // R channel (4 pixels)
-            1.0, 0.0, 0.0, 0.5,
-            // G channel (4 pixels)
-            0.0, 1.0, 0.0, 0.5,
-            // B channel (4 pixels)
+            1.0, 0.0, 0.0, 0.5, // G channel (4 pixels)
+            0.0, 1.0, 0.0, 0.5, // B channel (4 pixels)
             0.0, 0.0, 1.0, 0.5,
         ];
         let tensor =
@@ -941,7 +957,12 @@ mod tests {
         let orig_vals: Vec<f32> = orig_data.iter::<f32>().collect();
         let back_vals: Vec<f32> = back_data.iter::<f32>().collect();
         for (a, b) in orig_vals.iter().zip(back_vals.iter()) {
-            assert!((a - b).abs() < 1e-5, "CMYK roundtrip mismatch: {} vs {}", a, b);
+            assert!(
+                (a - b).abs() < 1e-5,
+                "CMYK roundtrip mismatch: {} vs {}",
+                a,
+                b
+            );
         }
     }
 
@@ -970,7 +991,12 @@ mod tests {
         let orig_vals: Vec<f32> = orig_data.iter::<f32>().collect();
         let back_vals: Vec<f32> = back_data.iter::<f32>().collect();
         for (a, b) in orig_vals.iter().zip(back_vals.iter()) {
-            assert!((a - b).abs() < 1e-5, "HSL roundtrip mismatch: {} vs {}", a, b);
+            assert!(
+                (a - b).abs() < 1e-5,
+                "HSL roundtrip mismatch: {} vs {}",
+                a,
+                b
+            );
         }
     }
 
@@ -987,7 +1013,8 @@ mod tests {
 
         // cmyk_to_rgb requires 4 channels, so 3-channel should fail
         let data3 = vec![0.5f32; 3 * 4 * 4];
-        let tensor3 = Tensor::<TestBackend, 3>::from_data(TensorData::new(data3, [3, 4, 4]), &device);
+        let tensor3 =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(data3, [3, 4, 4]), &device);
         let img3 = Image::new(tensor3);
         assert!(img3.cmyk_to_rgb().is_err());
 

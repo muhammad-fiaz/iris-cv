@@ -194,11 +194,7 @@ impl KalmanFilter {
 
     fn scaled_eye(n: usize, scale: f64) -> Vec<Vec<f64>> {
         (0..n)
-            .map(|i| {
-                (0..n)
-                    .map(|j| if i == j { scale } else { 0.0 })
-                    .collect()
-            })
+            .map(|i| (0..n).map(|j| if i == j { scale } else { 0.0 }).collect())
             .collect()
     }
 
@@ -318,9 +314,7 @@ fn inverse(m: &[Vec<f64>]) -> Result<Vec<Vec<f64>>> {
     }
 
     // Extract inverse from right half
-    let inv: Vec<Vec<f64>> = (0..n)
-        .map(|i| aug[i][n..(2 * n)].to_vec())
-        .collect();
+    let inv: Vec<Vec<f64>> = (0..n).map(|i| aug[i][n..(2 * n)].to_vec()).collect();
 
     Ok(inv)
 }
@@ -338,7 +332,8 @@ mod tests {
         kf.set_transition(vec![vec![1.0, 1.0], vec![0.0, 1.0]])
             .unwrap();
         kf.set_measurement(vec![vec![1.0, 0.0]]).unwrap();
-        kf.set_process_noise(vec![vec![1e-4, 0.0], vec![0.0, 1e-4]]).unwrap();
+        kf.set_process_noise(vec![vec![1e-4, 0.0], vec![0.0, 1e-4]])
+            .unwrap();
         kf.set_measurement_noise(vec![vec![0.1]]).unwrap();
 
         // True position is 0, moving at velocity 1.0 per step

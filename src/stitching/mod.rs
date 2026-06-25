@@ -34,9 +34,8 @@ impl Stitcher {
 
         // Accumulate homographies: image[i] -> image[0] (the anchor)
         // accumulated[0] = identity
-        let mut accumulated: Vec<[[f64; 3]; 3]> = vec![
-            [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
-        ];
+        let mut accumulated: Vec<[[f64; 3]; 3]> =
+            vec![[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]];
         for h in &homographies {
             let prev = accumulated.last().unwrap();
             accumulated.push(multiply_3x3(prev, h));
@@ -51,12 +50,7 @@ impl Stitcher {
         for (idx, img) in images.iter().enumerate() {
             let h = img.height() as f64;
             let w = img.width() as f64;
-            let corners = [
-                (0.0, 0.0),
-                (w, 0.0),
-                (w, h),
-                (0.0, h),
-            ];
+            let corners = [(0.0, 0.0), (w, 0.0), (w, h), (0.0, h)];
 
             let h_mat = &accumulated[idx];
             for &(cx, cy) in &corners {
@@ -79,11 +73,7 @@ impl Stitcher {
         let ty = -min_y;
 
         // Translation matrix
-        let t = [
-            [1.0, 0.0, tx],
-            [0.0, 1.0, ty],
-            [0.0, 0.0, 1.0],
-        ];
+        let t = [[1.0, 0.0, tx], [0.0, 1.0, ty], [0.0, 0.0, 1.0]];
 
         // Accumulate weight map for blending (for overlap regions)
         let mut weight_canvas = vec![0.0f32; canvas_h * canvas_w];
@@ -101,10 +91,7 @@ impl Stitcher {
 
             // Invert for backward mapping
             let h_inv = invert_3x3(&h_final).ok_or_else(|| {
-                IrisError::InvalidParameter(format!(
-                    "Singular homography for image pair {}",
-                    idx
-                ))
+                IrisError::InvalidParameter(format!("Singular homography for image pair {}", idx))
             })?;
 
             for dy in 0..canvas_h {
@@ -161,10 +148,7 @@ impl Stitcher {
 }
 
 /// Compute homography from img1 to img2 using ORB features + BFMatcher + DLT + RANSAC.
-fn compute_homography<B: Backend>(
-    img1: &Image<B>,
-    img2: &Image<B>,
-) -> Result<[[f64; 3]; 3]> {
+fn compute_homography<B: Backend>(img1: &Image<B>, img2: &Image<B>) -> Result<[[f64; 3]; 3]> {
     let detector = FeatureDetector::new(FeatureType::ORB).with_max_features(500);
 
     let kps1 = detector.detect(img1)?;
@@ -188,10 +172,7 @@ fn compute_homography<B: Backend>(
     };
     let threshold = median_dist * 1.5;
 
-    let good_matches: Vec<_> = matches
-        .iter()
-        .filter(|m| m.distance <= threshold)
-        .collect();
+    let good_matches: Vec<_> = matches.iter().filter(|m| m.distance <= threshold).collect();
 
     if good_matches.len() < 4 {
         return Err(IrisError::InvalidParameter(
@@ -331,10 +312,7 @@ fn ransac_homography(
 
 /// Direct Linear Transform (DLT) homography computation from 4+ point correspondences.
 /// Solves Ah = 0 via Gaussian elimination on the 2n×9 matrix A.
-fn compute_homography_dlt(
-    src: &[(f64, f64)],
-    dst: &[(f64, f64)],
-) -> Result<[[f64; 3]; 3]> {
+fn compute_homography_dlt(src: &[(f64, f64)], dst: &[(f64, f64)]) -> Result<[[f64; 3]; 3]> {
     let n = src.len();
     if n < 4 {
         return Err(IrisError::InvalidParameter(
@@ -726,9 +704,10 @@ mod tests {
 
         // Two identical images — homography should be near identity
         let flat_data = vec![0.5f32; 3 * 16 * 16];
-        let img = Image::new(
-            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 16, 16]), &device),
-        );
+        let img = Image::new(Tensor::<TestBackend, 3>::from_data(
+            TensorData::new(flat_data, [3, 16, 16]),
+            &device,
+        ));
 
         let stitcher = Stitcher;
         let stitched = stitcher.stitch(&[img.clone(), img]).unwrap();
@@ -741,9 +720,10 @@ mod tests {
     fn test_stitching_single_image() {
         let device = test_device();
         let flat_data = vec![0.3f32; 3 * 8 * 8];
-        let img = Image::new(
-            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 8, 8]), &device),
-        );
+        let img = Image::new(Tensor::<TestBackend, 3>::from_data(
+            TensorData::new(flat_data, [3, 8, 8]),
+            &device,
+        ));
 
         let stitcher = Stitcher;
         let result = stitcher.stitch(std::slice::from_ref(&img)).unwrap();
@@ -782,11 +762,7 @@ mod tests {
 
     #[test]
     fn test_invert_3x3() {
-        let m = [
-            [2.0, 1.0, 0.0],
-            [1.0, 3.0, 1.0],
-            [0.0, 1.0, 2.0],
-        ];
+        let m = [[2.0, 1.0, 0.0], [1.0, 3.0, 1.0], [0.0, 1.0, 2.0]];
         let inv = invert_3x3(&m).unwrap();
         let product = multiply_3x3(&m, &inv);
 

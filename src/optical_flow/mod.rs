@@ -110,10 +110,8 @@ impl OpticalFlow {
                                 let inv00 = a22[idx] / det;
                                 let inv01 = -a01[idx] / det;
                                 let inv11 = a00[idx] / det;
-                                new_flow_x[idx] =
-                                    flow_x[idx] + (inv00 * b0 + inv01 * b1) as f32;
-                                new_flow_y[idx] =
-                                    flow_y[idx] + (inv01 * b0 + inv11 * b1) as f32;
+                                new_flow_x[idx] = flow_x[idx] + (inv00 * b0 + inv01 * b1) as f32;
+                                new_flow_y[idx] = flow_y[idx] + (inv01 * b0 + inv11 * b1) as f32;
                             } else {
                                 new_flow_x[idx] = flow_x[idx];
                                 new_flow_y[idx] = flow_y[idx];
@@ -217,11 +215,7 @@ impl OpticalFlow {
                             // Sample next image at warped location
                             let nx = (cx as f64 + 0.0) as i32;
                             let ny = (cy as f64 + 0.0) as i32;
-                            let gt = if nx >= 0
-                                && nx < w as i32
-                                && ny >= 0
-                                && ny < h as i32
-                            {
+                            let gt = if nx >= 0 && nx < w as i32 && ny >= 0 && ny < h as i32 {
                                 next_vals[ny as usize * w + nx as usize] as f64
                             } else {
                                 prev_vals[cy as usize * w + cx as usize] as f64
@@ -257,11 +251,7 @@ impl OpticalFlow {
 
             if tracked {
                 // Verify point is within bounds
-                if px >= 0.0
-                    && px < w as f64
-                    && py >= 0.0
-                    && py < h as f64
-                {
+                if px >= 0.0 && px < w as f64 && py >= 0.0 && py < h as f64 {
                     next_pts.push(Point::new(px, py));
                     status.push(1);
                 } else {
@@ -467,14 +457,10 @@ mod tests {
                 flat_data2[512 + y * 16 + x] = val2;
             }
         }
-        let tensor1 = Tensor::<TestBackend, 3>::from_data(
-            TensorData::new(flat_data1, [3, 16, 16]),
-            &device,
-        );
-        let tensor2 = Tensor::<TestBackend, 3>::from_data(
-            TensorData::new(flat_data2, [3, 16, 16]),
-            &device,
-        );
+        let tensor1 =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data1, [3, 16, 16]), &device);
+        let tensor2 =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data2, [3, 16, 16]), &device);
         let img1 = Image::new(tensor1);
         let img2 = Image::new(tensor2);
 
@@ -486,8 +472,10 @@ mod tests {
     fn test_sparse_optical_flow() {
         let device = test_device();
         let flat_data = vec![0.5f32; 3 * 32 * 32];
-        let tensor1 =
-            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data.clone(), [3, 32, 32]), &device);
+        let tensor1 = Tensor::<TestBackend, 3>::from_data(
+            TensorData::new(flat_data.clone(), [3, 32, 32]),
+            &device,
+        );
         let tensor2 =
             Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 32, 32]), &device);
         let img1 = Image::new(tensor1);

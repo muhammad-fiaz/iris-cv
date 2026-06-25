@@ -205,8 +205,9 @@ fn simple_dft_2d(data: &[f64], w: usize, h: usize) -> Vec<f64> {
 
             for y in 0..h {
                 for x in 0..w {
-                    let angle =
-                        -2.0 * std::f64::consts::PI * ((u * y) as f64 / h as f64 + (v * x) as f64 / w as f64);
+                    let angle = -2.0
+                        * std::f64::consts::PI
+                        * ((u * y) as f64 / h as f64 + (v * x) as f64 / w as f64);
                     let val = data[y * w + x];
                     sum_re += val * angle.cos();
                     sum_im += val * angle.sin();

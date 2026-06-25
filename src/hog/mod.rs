@@ -98,7 +98,11 @@ impl HogDescriptor {
                         let ang = direction[y * w + x]; // [-pi, pi]
 
                         // Map angle to [0, pi] (unsigned gradients)
-                        let angle = if ang < 0.0 { ang + std::f32::consts::PI } else { ang };
+                        let angle = if ang < 0.0 {
+                            ang + std::f32::consts::PI
+                        } else {
+                            ang
+                        };
 
                         let bin_f = angle / bin_width;
                         let bin0 = (bin_f as usize) % self.nbins;

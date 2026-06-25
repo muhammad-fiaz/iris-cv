@@ -235,13 +235,10 @@ impl<B: Backend> Image<B> {
             for t_idx in 1..(num_theta - 1) {
                 if accumulator[r_idx][t_idx] >= threshold
                     && !visited[r_idx][t_idx]
-                    && accumulator[r_idx][t_idx]
-                        >= accumulator[r_idx - 1][t_idx]
-                        && accumulator[r_idx][t_idx]
-                            >= accumulator[r_idx + 1][t_idx]
-                        && accumulator[r_idx][t_idx]
-                            >= accumulator[r_idx][t_idx - 1]
-                        && accumulator[r_idx][t_idx] >= accumulator[r_idx][t_idx + 1]
+                    && accumulator[r_idx][t_idx] >= accumulator[r_idx - 1][t_idx]
+                    && accumulator[r_idx][t_idx] >= accumulator[r_idx + 1][t_idx]
+                    && accumulator[r_idx][t_idx] >= accumulator[r_idx][t_idx - 1]
+                    && accumulator[r_idx][t_idx] >= accumulator[r_idx][t_idx + 1]
                 {
                     visited[r_idx][t_idx] = true;
                     let angle = t_idx as f64 * theta as f64;
@@ -322,7 +319,8 @@ impl<B: Backend> Image<B> {
                 let mut gyy = 0.0f32;
                 for dy in -1..=1 {
                     for dx in -1..=1 {
-                        let val = flat_vals[(y as isize + dy) as usize * w + (x as isize + dx) as usize];
+                        let val =
+                            flat_vals[(y as isize + dy) as usize * w + (x as isize + dx) as usize];
                         gxx += val * kx[(dy + 1) as usize][(dx + 1) as usize];
                         gyy += val * ky[(dy + 1) as usize][(dx + 1) as usize];
                     }
@@ -389,11 +387,12 @@ impl<B: Backend> Image<B> {
 
                         if is_max {
                             // Check not too close to existing circles
-                            let too_close = circles.iter().any(|&(cx, cy, _): &(usize, usize, usize)| {
-                                let dx = cx as f32 - x as f32;
-                                let dy = cy as f32 - y as f32;
-                                (dx * dx + dy * dy).sqrt() < min_dist
-                            });
+                            let too_close =
+                                circles.iter().any(|&(cx, cy, _): &(usize, usize, usize)| {
+                                    let dx = cx as f32 - x as f32;
+                                    let dy = cy as f32 - y as f32;
+                                    (dx * dx + dy * dy).sqrt() < min_dist
+                                });
                             if !too_close {
                                 circles.push((x, y, r as usize));
                             }
@@ -433,9 +432,12 @@ mod tests {
         for x in 5..27 {
             data[16 * 32 + x] = 1.0;
         }
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [1, 32, 32]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [1, 32, 32]), &device);
         let img = Image::new(tensor);
-        let lines = img.hough_lines_p(1.0, std::f32::consts::PI / 180.0, 10, 5, 5).unwrap();
+        let lines = img
+            .hough_lines_p(1.0, std::f32::consts::PI / 180.0, 10, 5, 5)
+            .unwrap();
         assert!(!lines.is_empty());
     }
 
@@ -458,7 +460,8 @@ mod tests {
                 }
             }
         }
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [1, 60, 60]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [1, 60, 60]), &device);
         let img = Image::new(tensor);
         let circles = img.hough_circles(1.0, 5.0, 2.0, 2.0, 8, 20).unwrap();
         // Algorithm runs without error; for this small synthetic image

@@ -13,7 +13,9 @@ impl<B: Backend> Image<B> {
     pub fn dilate_with_kernel(self, kernel: &[&[u8]]) -> Result<Self> {
         let kh = kernel.len();
         if kh == 0 || kernel[0].is_empty() {
-            return Err(IrisError::InvalidParameter("Kernel must be non-empty".into()));
+            return Err(IrisError::InvalidParameter(
+                "Kernel must be non-empty".into(),
+            ));
         }
         let kw = kernel[0].len();
 
@@ -42,8 +44,7 @@ impl<B: Backend> Image<B> {
                             let sy = y as isize + ky as isize - ay;
                             let sx = x as isize + kx as isize - ax;
                             if sy >= 0 && sy < h as isize && sx >= 0 && sx < w as isize {
-                                let val = flat_vals
-                                    [ch * h * w + sy as usize * w + sx as usize];
+                                let val = flat_vals[ch * h * w + sy as usize * w + sx as usize];
                                 if val > max_val {
                                     max_val = val;
                                 }
@@ -70,7 +71,9 @@ impl<B: Backend> Image<B> {
     pub fn erode_with_kernel(self, kernel: &[&[u8]]) -> Result<Self> {
         let kh = kernel.len();
         if kh == 0 || kernel[0].is_empty() {
-            return Err(IrisError::InvalidParameter("Kernel must be non-empty".into()));
+            return Err(IrisError::InvalidParameter(
+                "Kernel must be non-empty".into(),
+            ));
         }
         let kw = kernel[0].len();
 
@@ -99,8 +102,7 @@ impl<B: Backend> Image<B> {
                             let sy = y as isize + ky as isize - ay;
                             let sx = x as isize + kx as isize - ax;
                             if sy >= 0 && sy < h as isize && sx >= 0 && sx < w as isize {
-                                let val = flat_vals
-                                    [ch * h * w + sy as usize * w + sx as usize];
+                                let val = flat_vals[ch * h * w + sy as usize * w + sx as usize];
                                 if val < min_val {
                                     min_val = val;
                                 }
@@ -251,11 +253,7 @@ impl<B: Backend> Image<B> {
     /// defines the background (1 = must-be-background) pixels to match.
     /// Pixels in either pattern set to 0 are "don't care".
     /// Returns a binary image where matched structuring element origins are set to 1.0.
-    pub fn hit_or_miss(
-        &self,
-        pattern: &[&[u8]],
-        bg_pattern: &[&[u8]],
-    ) -> Result<Self> {
+    pub fn hit_or_miss(&self, pattern: &[&[u8]], bg_pattern: &[&[u8]]) -> Result<Self> {
         let dims = self.tensor.dims();
         let c = dims[0];
         let h = dims[1];
@@ -344,7 +342,10 @@ impl<B: Backend> Image<B> {
         let tensor_data = self.tensor.clone().into_data();
         let flat_vals: Vec<f32> = tensor_data.iter::<f32>().collect();
 
-        let mut grid: Vec<u8> = flat_vals.iter().map(|&v| if v > 0.5 { 1u8 } else { 0u8 }).collect();
+        let mut grid: Vec<u8> = flat_vals
+            .iter()
+            .map(|&v| if v > 0.5 { 1u8 } else { 0u8 })
+            .collect();
 
         let count_transitions = |grid: &[u8], w: usize, h: usize, x: isize, y: isize| -> u8 {
             let dx = [1, 1, 0, -1, -1, -1, 0, 1];
@@ -413,7 +414,8 @@ impl<B: Backend> Image<B> {
                     let p6 = grid[((yi + 1).min(h as isize - 1)) as usize * w + xi as usize];
                     let p8 = grid[yi as usize * w + ((xi - 1).max(0)) as usize];
 
-                    if (2..=6).contains(&n) && t == 1 && p4 == 0 && p6 == 0 && (p2 == 0 || p8 == 0) {
+                    if (2..=6).contains(&n) && t == 1 && p4 == 0 && p6 == 0 && (p2 == 0 || p8 == 0)
+                    {
                         to_remove.push((y, x));
                     }
                 }
@@ -444,7 +446,8 @@ impl<B: Backend> Image<B> {
                     let p6 = grid[((yi + 1).min(h as isize - 1)) as usize * w + xi as usize];
                     let p8 = grid[yi as usize * w + ((xi - 1).max(0)) as usize];
 
-                    if (2..=6).contains(&n) && t == 1 && p2 == 0 && p8 == 0 && (p4 == 0 || p6 == 0) {
+                    if (2..=6).contains(&n) && t == 1 && p2 == 0 && p8 == 0 && (p4 == 0 || p6 == 0)
+                    {
                         to_remove.push((y, x));
                     }
                 }
@@ -670,7 +673,8 @@ mod tests {
         // Pattern: a vertical line of 3 foreground pixels
         let pattern: Vec<&[u8]> = vec![&[0, 0, 0], &[0, 1, 0], &[0, 1, 0], &[0, 1, 0], &[0, 0, 0]];
         // Background: nothing required
-        let bg_pattern: Vec<&[u8]> = vec![&[0, 0, 0], &[1, 0, 1], &[1, 0, 1], &[1, 0, 1], &[0, 0, 0]];
+        let bg_pattern: Vec<&[u8]> =
+            vec![&[0, 0, 0], &[1, 0, 1], &[1, 0, 1], &[1, 0, 1], &[0, 0, 0]];
 
         let result = img.hit_or_miss(&pattern, &bg_pattern).unwrap();
         assert_eq!(result.shape(), [1, 8, 8]);

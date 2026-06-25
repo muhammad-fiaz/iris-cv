@@ -43,19 +43,39 @@ impl<B: Backend> Image<B> {
                     let val = flat_vals[i];
                     *out_val = match thresh_type {
                         ThresholdType::Binary => {
-                            if val > thresh { maxval } else { 0.0 }
+                            if val > thresh {
+                                maxval
+                            } else {
+                                0.0
+                            }
                         }
                         ThresholdType::BinaryInv => {
-                            if val > thresh { 0.0 } else { maxval }
+                            if val > thresh {
+                                0.0
+                            } else {
+                                maxval
+                            }
                         }
                         ThresholdType::Trunc => {
-                            if val > thresh { thresh } else { val }
+                            if val > thresh {
+                                thresh
+                            } else {
+                                val
+                            }
                         }
                         ThresholdType::ToZero => {
-                            if val > thresh { val } else { 0.0 }
+                            if val > thresh {
+                                val
+                            } else {
+                                0.0
+                            }
                         }
                         ThresholdType::ToZeroInv => {
-                            if val > thresh { 0.0 } else { val }
+                            if val > thresh {
+                                0.0
+                            } else {
+                                val
+                            }
                         }
                     };
                 });
@@ -220,8 +240,7 @@ impl<B: Backend> Image<B> {
             let mut row_sum = 0.0f64;
             for x in 0..w {
                 row_sum += flat_vals[y * w + x] as f64;
-                integral[(y + 1) * (w + 1) + (x + 1)] =
-                    integral[y * (w + 1) + (x + 1)] + row_sum;
+                integral[(y + 1) * (w + 1) + (x + 1)] = integral[y * (w + 1) + (x + 1)] + row_sum;
             }
         }
 
@@ -324,7 +343,8 @@ mod tests {
                 }
             }
         }
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 16, 16]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 16, 16]), &device);
         let img = Image::new(tensor);
         let result = img.threshold_triangle(1.0).unwrap();
         assert_eq!(result.shape(), [1, 16, 16]);
@@ -339,13 +359,18 @@ mod tests {
                 flat_data[y * 16 + x] = (x as f32) / 16.0;
             }
         }
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 16, 16]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 16, 16]), &device);
         let img = Image::new(tensor);
 
-        let result = img.adaptive_threshold(1.0, AdaptiveMethod::MeanC, 3, 0.05).unwrap();
+        let result = img
+            .adaptive_threshold(1.0, AdaptiveMethod::MeanC, 3, 0.05)
+            .unwrap();
         assert_eq!(result.shape(), [1, 16, 16]);
 
-        let result_gauss = img.adaptive_threshold(1.0, AdaptiveMethod::GaussianC, 5, 0.05).unwrap();
+        let result_gauss = img
+            .adaptive_threshold(1.0, AdaptiveMethod::GaussianC, 5, 0.05)
+            .unwrap();
         assert_eq!(result_gauss.shape(), [1, 16, 16]);
     }
 }

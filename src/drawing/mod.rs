@@ -358,8 +358,8 @@ impl<B: Backend> Image<B> {
                 let j = (i + 1) % n;
                 let (p1, p2) = (points[i], points[j]);
                 if (p1.y <= y && p2.y > y) || (p2.y <= y && p1.y > y) {
-                    let x_intersect =
-                        p1.x as f64 + (y as f64 - p1.y as f64) * (p2.x as f64 - p1.x as f64)
+                    let x_intersect = p1.x as f64
+                        + (y as f64 - p1.y as f64) * (p2.x as f64 - p1.x as f64)
                             / (p2.y as f64 - p1.y as f64);
                     intersections.push(x_intersect as usize);
                 }
@@ -417,12 +417,8 @@ impl<B: Backend> Image<B> {
             (p2.y as f64 - tip_size * (uy * angle.cos() - ux * angle.sin())) as usize,
         );
 
-        img.draw_line(
-            p2,
-            Point::new(left.0, left.1),
-            color,
-        )?
-        .draw_line(p2, Point::new(right.0, right.1), color)
+        img.draw_line(p2, Point::new(left.0, left.1), color)?
+            .draw_line(p2, Point::new(right.0, right.1), color)
     }
 
     /// Draws a marker symbol at a point.
@@ -484,9 +480,7 @@ impl<B: Backend> Image<B> {
                 color,
                 1,
             ),
-            MarkerType::Circle => {
-                self.draw_circle(center, marker_size / 2, color, 1)
-            }
+            MarkerType::Circle => self.draw_circle(center, marker_size / 2, color, 1),
             MarkerType::Filled => self.draw_circle(center, marker_size / 2, color, -1),
         }
     }
@@ -536,7 +530,8 @@ mod tests {
     fn test_draw_ellipse() {
         let device = test_device();
         let data = vec![0.0f32; 3 * 60 * 60];
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 60, 60]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 60, 60]), &device);
         let img = Image::new(tensor);
 
         // Outline
@@ -572,7 +567,8 @@ mod tests {
     fn test_draw_polyline() {
         let device = test_device();
         let data = vec![0.0f32; 3 * 50 * 50];
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 50, 50]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 50, 50]), &device);
         let img = Image::new(tensor);
 
         let points = vec![
@@ -590,7 +586,8 @@ mod tests {
     fn test_fill_poly() {
         let device = test_device();
         let data = vec![0.0f32; 3 * 50 * 50];
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 50, 50]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 50, 50]), &device);
         let img = Image::new(tensor);
 
         let points = vec![
@@ -607,7 +604,8 @@ mod tests {
     fn test_draw_arrowed_line() {
         let device = test_device();
         let data = vec![0.0f32; 3 * 50 * 50];
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 50, 50]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 50, 50]), &device);
         let img = Image::new(tensor);
 
         let img = img
@@ -626,7 +624,8 @@ mod tests {
     fn test_draw_marker() {
         let device = test_device();
         let data = vec![0.0f32; 3 * 50 * 50];
-        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 50, 50]), &device);
+        let tensor =
+            Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [3, 50, 50]), &device);
         let img = Image::new(tensor);
 
         let img = img

@@ -269,8 +269,12 @@ impl<B: Backend> Image<B> {
             let pixels = h * w;
             for i in 0..pixels {
                 let v = flat_vals[ch * pixels + i];
-                if v < ch_min { ch_min = v; }
-                if v > ch_max { ch_max = v; }
+                if v < ch_min {
+                    ch_min = v;
+                }
+                if v > ch_max {
+                    ch_max = v;
+                }
             }
             let range = ch_max - ch_min;
             for i in 0..pixels {

@@ -25,11 +25,8 @@ fn main() -> Result<()> {
 
     // --- 1. filter2D with custom kernels ---
     println!("\n--- Filter2D (Custom Kernel) ---");
-    let laplacian_kernel: Vec<&[f32]> = vec![
-        &[-1.0, -1.0, -1.0],
-        &[-1.0, 8.0, -1.0],
-        &[-1.0, -1.0, -1.0],
-    ];
+    let laplacian_kernel: Vec<&[f32]> =
+        vec![&[-1.0, -1.0, -1.0], &[-1.0, 8.0, -1.0], &[-1.0, -1.0, -1.0]];
     let edges = img.filter2d(&laplacian_kernel, None, 0.0)?;
     println!("Laplacian edges shape: {:?}", edges.shape());
     edges.save("output_image_utils_filter2d.png")?;

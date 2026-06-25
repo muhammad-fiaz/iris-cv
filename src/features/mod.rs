@@ -78,17 +78,14 @@ pub fn template_match<B: Backend>(
                         let tv = tpl_flat[ti];
 
                         match method {
-                            TemplateMatchMethod::TmSqdiff
-                            | TemplateMatchMethod::TmSqdiffNormed => {
+                            TemplateMatchMethod::TmSqdiff | TemplateMatchMethod::TmSqdiffNormed => {
                                 let diff = sv - tv;
                                 sum += diff * diff;
                             }
-                            TemplateMatchMethod::TmCcorr
-                            | TemplateMatchMethod::TmCcorrNormed => {
+                            TemplateMatchMethod::TmCcorr | TemplateMatchMethod::TmCcorrNormed => {
                                 sum += sv * tv;
                             }
-                            TemplateMatchMethod::TmCcoeff
-                            | TemplateMatchMethod::TmCcoeffNormed => {
+                            TemplateMatchMethod::TmCcoeff | TemplateMatchMethod::TmCcoeffNormed => {
                                 let src_sub = sv - {
                                     let mut region_sum = 0.0f32;
                                     for rty in 0..tpl_h {
@@ -280,17 +277,23 @@ impl FeatureDetector {
                 let center = flat_vals[y * w + x];
 
                 // Quick check: pixels 0, 4, 8, 12 must all be brighter or darker
-                let p0 = flat_vals[(y as i32 + circle[0].1) as usize * w + (x as i32 + circle[0].0) as usize];
-                let p4 = flat_vals[(y as i32 + circle[4].1) as usize * w + (x as i32 + circle[4].0) as usize];
-                let p8 = flat_vals[(y as i32 + circle[8].1) as usize * w + (x as i32 + circle[8].0) as usize];
-                let p12 = flat_vals[(y as i32 + circle[12].1) as usize * w + (x as i32 + circle[12].0) as usize];
+                let p0 = flat_vals
+                    [(y as i32 + circle[0].1) as usize * w + (x as i32 + circle[0].0) as usize];
+                let p4 = flat_vals
+                    [(y as i32 + circle[4].1) as usize * w + (x as i32 + circle[4].0) as usize];
+                let p8 = flat_vals
+                    [(y as i32 + circle[8].1) as usize * w + (x as i32 + circle[8].0) as usize];
+                let p12 = flat_vals
+                    [(y as i32 + circle[12].1) as usize * w + (x as i32 + circle[12].0) as usize];
 
-                let all_bright =
-                    p0 > center + threshold && p4 > center + threshold && p8 > center + threshold
-                        && p12 > center + threshold;
-                let all_dark =
-                    p0 < center - threshold && p4 < center - threshold && p8 < center - threshold
-                        && p12 < center - threshold;
+                let all_bright = p0 > center + threshold
+                    && p4 > center + threshold
+                    && p8 > center + threshold
+                    && p12 > center + threshold;
+                let all_dark = p0 < center - threshold
+                    && p4 < center - threshold
+                    && p8 < center - threshold
+                    && p12 < center - threshold;
 
                 if !all_bright && !all_dark {
                     continue;
@@ -434,7 +437,15 @@ impl FeatureDetector {
 }
 
 /// Compute a spatial moment of image pixels around a point.
-fn compute_moment(flat_vals: &[f32], w: usize, h: usize, cx: i32, cy: i32, px: i32, py: i32) -> f64 {
+fn compute_moment(
+    flat_vals: &[f32],
+    w: usize,
+    h: usize,
+    cx: i32,
+    cy: i32,
+    px: i32,
+    py: i32,
+) -> f64 {
     let radius = 15;
     let mut sum = 0.0f64;
     for dy in -radius..=radius {
@@ -529,8 +540,10 @@ mod tests {
                 }
             }
         }
-        let src_tensor =
-            Tensor::<TestBackend, 3>::from_data(TensorData::new(src_data.clone(), [3, 6, 6]), &device);
+        let src_tensor = Tensor::<TestBackend, 3>::from_data(
+            TensorData::new(src_data.clone(), [3, 6, 6]),
+            &device,
+        );
         let src_img = Image::new(src_tensor);
 
         // Template: same 3x3 white block
@@ -547,19 +560,30 @@ mod tests {
         let tpl_img = Image::new(tpl_tensor);
 
         // TM_SQDIFF: minimum should be at (0,0) where template matches perfectly
-        let result = src_img.template_match(&tpl_img, TemplateMatchMethod::TmSqdiff).unwrap();
+        let result = src_img
+            .template_match(&tpl_img, TemplateMatchMethod::TmSqdiff)
+            .unwrap();
         assert_eq!(result.dims(), [4, 4]);
 
         let result_data = result.into_data();
         let vals: Vec<f32> = result_data.iter::<f32>().collect();
 
         // Position (0,0) should have zero difference (perfect match)
-        assert!(vals[0] < 0.01, "Expected near-zero at (0,0), got {}", vals[0]);
+        assert!(
+            vals[0] < 0.01,
+            "Expected near-zero at (0,0), got {}",
+            vals[0]
+        );
 
         // TM_CCORR: maximum should be at (0,0)
-        let result_corr = src_img.template_match(&tpl_img, TemplateMatchMethod::TmCcorr).unwrap();
+        let result_corr = src_img
+            .template_match(&tpl_img, TemplateMatchMethod::TmCcorr)
+            .unwrap();
         let corr_data = result_corr.into_data();
         let corr_vals: Vec<f32> = corr_data.iter::<f32>().collect();
-        assert!(corr_vals[0] > corr_vals[1], "Expected (0,0) to have higher correlation");
+        assert!(
+            corr_vals[0] > corr_vals[1],
+            "Expected (0,0) to have higher correlation"
+        );
     }
 }

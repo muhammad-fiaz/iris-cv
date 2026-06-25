@@ -111,7 +111,11 @@ fn generate_test_pattern(device: &WgpuDevice) -> Result<()> {
             // Concentric circles
             let circle_interval = 40.0;
             let in_circle = (dist % circle_interval) < 2.0;
-            let circle_val = if in_circle && dist < max_dist { 1.0f32 } else { 0.0f32 };
+            let circle_val = if in_circle && dist < max_dist {
+                1.0f32
+            } else {
+                0.0f32
+            };
 
             // Crosshairs
             let cross_width = 2;

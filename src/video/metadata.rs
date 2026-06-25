@@ -239,10 +239,7 @@ mod tests {
     fn test_container_format_detection() {
         assert_eq!(ContainerFormat::from_path("test.gif"), ContainerFormat::Gif);
         assert_eq!(ContainerFormat::from_path("test.mp4"), ContainerFormat::Mp4);
-        assert_eq!(
-            ContainerFormat::from_path("test.MKV"),
-            ContainerFormat::Mkv
-        );
+        assert_eq!(ContainerFormat::from_path("test.MKV"), ContainerFormat::Mkv);
         assert_eq!(
             ContainerFormat::from_path("test.webp"),
             ContainerFormat::WebP

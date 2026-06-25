@@ -81,10 +81,10 @@ impl Photo {
                                         break;
                                     }
 
-                                    let val_c =
-                                        flat_vals[ch_offset + ny_c as usize * img_w + nx_c as usize];
-                                    let val_s =
-                                        flat_vals[ch_offset + ny_s as usize * img_w + nx_s as usize];
+                                    let val_c = flat_vals
+                                        [ch_offset + ny_c as usize * img_w + nx_c as usize];
+                                    let val_s = flat_vals
+                                        [ch_offset + ny_s as usize * img_w + nx_s as usize];
                                     let diff = val_c - val_s;
                                     patch_dist += diff * diff;
                                 }
@@ -100,7 +100,8 @@ impl Photo {
                             // Gaussian spatial weight (center of search is preferred)
                             let dx = (sx as f64 - cx as f64) as f32;
                             let dy = (sy as f64 - cy as f64) as f32;
-                            let spatial_dist = (dx * dx + dy * dy) / (search_radius as f32 * search_radius as f32);
+                            let spatial_dist =
+                                (dx * dx + dy * dy) / (search_radius as f32 * search_radius as f32);
                             let spatial_weight = (-spatial_dist * 2.0).exp();
 
                             let weight = (-patch_dist * h_sq_inv).exp() * spatial_weight;
@@ -297,7 +298,8 @@ impl MergeMertens {
                     for ch in 0..3 {
                         let mut blended = 0.0f32;
                         for (idx, pixel_data) in all_pixel_data.iter().enumerate() {
-                            blended += pixel_data[ch * h * w + ci] * all_weights[idx][ci] / total_weight;
+                            blended +=
+                                pixel_data[ch * h * w + ci] * all_weights[idx][ci] / total_weight;
                         }
                         out_vals[ch * h * w + ci] = blended.clamp(0.0, 1.0);
                     }
@@ -332,8 +334,7 @@ mod tests {
             Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 16, 16]), &device);
         let img = Image::new(tensor);
 
-        let denoised =
-            Photo::fast_nl_means_denoising(&img, 12.0, 3, 5).unwrap();
+        let denoised = Photo::fast_nl_means_denoising(&img, 12.0, 3, 5).unwrap();
         assert_eq!(denoised.shape(), [3, 16, 16]);
 
         // Uniform image should remain uniform after denoising
@@ -373,12 +374,14 @@ mod tests {
             }
         }
 
-        let img1 = Image::new(
-            Tensor::<TestBackend, 3>::from_data(TensorData::new(data1, [3, 16, 16]), &device),
-        );
-        let img2 = Image::new(
-            Tensor::<TestBackend, 3>::from_data(TensorData::new(data2, [3, 16, 16]), &device),
-        );
+        let img1 = Image::new(Tensor::<TestBackend, 3>::from_data(
+            TensorData::new(data1, [3, 16, 16]),
+            &device,
+        ));
+        let img2 = Image::new(Tensor::<TestBackend, 3>::from_data(
+            TensorData::new(data2, [3, 16, 16]),
+            &device,
+        ));
 
         let mertens = MergeMertens::new();
         let merged = mertens.process(&[img1, img2]).unwrap();

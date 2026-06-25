@@ -108,8 +108,8 @@ mod tests {
         let tensor = Tensor::<TestBackend, 3>::from_data(data, &device);
         let img = Image::new(tensor);
 
-        let frame = Frame::new(img, Duration::from_millis(0), 0)
-            .with_duration(Duration::from_millis(33));
+        let frame =
+            Frame::new(img, Duration::from_millis(0), 0).with_duration(Duration::from_millis(33));
         assert_eq!(frame.duration, Duration::from_millis(33));
     }
 }

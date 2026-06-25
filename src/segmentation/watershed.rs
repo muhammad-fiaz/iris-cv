@@ -14,7 +14,10 @@ use burn::tensor::{Int, Tensor, TensorData, backend::Backend};
 ///   Zero means unassigned; positive integers are region seeds.
 ///
 /// Returns a 2D integer tensor `[H, W]` with the segmentation labels.
-pub fn watershed<B: Backend>(image: &Image<B>, markers: &Tensor<B, 2, Int>) -> Result<Tensor<B, 2, Int>> {
+pub fn watershed<B: Backend>(
+    image: &Image<B>,
+    markers: &Tensor<B, 2, Int>,
+) -> Result<Tensor<B, 2, Int>> {
     let gray = image.grayscale()?;
     let img_dims = gray.tensor.dims();
     let h = img_dims[1];
@@ -86,7 +89,10 @@ pub fn watershed<B: Backend>(image: &Image<B>, markers: &Tensor<B, 2, Int>) -> R
                 labels[nidx] = c_label;
                 // Binary search insertion to maintain sorted order (min-heap by intensity)
                 let new_entry = (img_vals[nidx], uy, ux);
-                match queue.binary_search_by(|a| a.0.partial_cmp(&new_entry.0).unwrap_or(std::cmp::Ordering::Equal)) {
+                match queue.binary_search_by(|a| {
+                    a.0.partial_cmp(&new_entry.0)
+                        .unwrap_or(std::cmp::Ordering::Equal)
+                }) {
                     Ok(pos) | Err(pos) => queue.insert(pos, new_entry),
                 }
             } else if labels[nidx] != c_label {
@@ -153,12 +159,16 @@ mod tests {
     #[test]
     fn test_watershed_no_markers_error() {
         let device = test_device();
-        let img_tensor =
-            Tensor::<TestBackend, 3>::from_data(TensorData::new(vec![0.5f32; 16], [1, 4, 4]), &device);
+        let img_tensor = Tensor::<TestBackend, 3>::from_data(
+            TensorData::new(vec![0.5f32; 16], [1, 4, 4]),
+            &device,
+        );
         let img = Image::new(img_tensor);
 
-        let mk_tensor =
-            Tensor::<TestBackend, 2, Int>::from_data(TensorData::new(vec![0i32; 16], [4, 4]), &device);
+        let mk_tensor = Tensor::<TestBackend, 2, Int>::from_data(
+            TensorData::new(vec![0i32; 16], [4, 4]),
+            &device,
+        );
 
         assert!(watershed(&img, &mk_tensor).is_err());
     }

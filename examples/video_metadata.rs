@@ -41,9 +41,16 @@ fn main() -> Result<()> {
     println!("\n=== ContainerFormat Detection ===\n");
 
     let test_files = [
-        "animation.gif", "photo.png", "video.mp4", "movie.mkv",
-        "image.webp", "texture.qoi", "photo.jpg", "output.avi",
-        "stream.webm", "unknown.xyz",
+        "animation.gif",
+        "photo.png",
+        "video.mp4",
+        "movie.mkv",
+        "image.webp",
+        "texture.qoi",
+        "photo.jpg",
+        "output.avi",
+        "stream.webm",
+        "unknown.xyz",
     ];
 
     for file in &test_files {
@@ -114,8 +121,12 @@ fn main() -> Result<()> {
     for stream in &meta.streams {
         println!(
             "  Stream {}: {:?} - {} ({}, {}x{})",
-            stream.index, stream.stream_type, stream.codec,
-            stream.bit_rate, stream.width, stream.height,
+            stream.index,
+            stream.stream_type,
+            stream.codec,
+            stream.bit_rate,
+            stream.width,
+            stream.height,
         );
     }
 

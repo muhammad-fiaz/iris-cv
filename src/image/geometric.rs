@@ -221,11 +221,7 @@ impl<B: Backend> Image<B> {
     ///   Expected layout: `[[fx, 0, cx], [0, fy, cy], [0, 0, 1]]`.
     /// * `dist_coeffs` - Distortion coefficients `[k1, k2, p1, p2, k3]`. Any
     ///   trailing values beyond the 5th element are ignored.
-    pub fn undistort(
-        &self,
-        camera_matrix: &Tensor<B, 2>,
-        dist_coeffs: &[f32],
-    ) -> Result<Self> {
+    pub fn undistort(&self, camera_matrix: &Tensor<B, 2>, dist_coeffs: &[f32]) -> Result<Self> {
         let dims = self.tensor.dims();
         let c = dims[0];
         let h = dims[1];
@@ -286,8 +282,7 @@ impl<B: Backend> Image<B> {
                         let sy = (fy * y_distorted + cy).round() as isize;
 
                         if sx >= 0 && sx < w as isize && sy >= 0 && sy < h as isize {
-                            row[dx] = flat_vals
-                                [ch * h * w + (sy as usize) * w + (sx as usize)];
+                            row[dx] = flat_vals[ch * h * w + (sy as usize) * w + (sx as usize)];
                         }
                     }
                 });
@@ -323,11 +318,8 @@ impl<B: Backend> Image<B> {
 
         // 5x5 Gaussian kernel (sigma = 1.0, pre-normalized)
         let kernel: [f64; 25] = [
-            1.0, 4.0, 6.0, 4.0, 1.0,
-            4.0, 16.0, 24.0, 16.0, 4.0,
-            6.0, 24.0, 36.0, 24.0, 6.0,
-            4.0, 16.0, 24.0, 16.0, 4.0,
-            1.0, 4.0, 6.0, 4.0, 1.0,
+            1.0, 4.0, 6.0, 4.0, 1.0, 4.0, 16.0, 24.0, 16.0, 4.0, 6.0, 24.0, 36.0, 24.0, 6.0, 4.0,
+            16.0, 24.0, 16.0, 4.0, 1.0, 4.0, 6.0, 4.0, 1.0,
         ];
         let ksum: f64 = 256.0;
 
@@ -353,8 +345,7 @@ impl<B: Backend> Image<B> {
                                 let py = sy_base + ky as isize;
                                 let px = px.clamp(0, w as isize - 1) as usize;
                                 let py = py.clamp(0, h as isize - 1) as usize;
-                                let pixel =
-                                    flat_vals[ch * h * w + py * w + px] as f64;
+                                let pixel = flat_vals[ch * h * w + py * w + px] as f64;
                                 sum += pixel * kernel[(ky * 5 + kx) as usize];
                             }
                         }
@@ -388,11 +379,8 @@ impl<B: Backend> Image<B> {
 
         // 5x5 Gaussian kernel (sigma = 1.0, pre-normalized)
         let kernel: [f64; 25] = [
-            1.0, 4.0, 6.0, 4.0, 1.0,
-            4.0, 16.0, 24.0, 16.0, 4.0,
-            6.0, 24.0, 36.0, 24.0, 6.0,
-            4.0, 16.0, 24.0, 16.0, 4.0,
-            1.0, 4.0, 6.0, 4.0, 1.0,
+            1.0, 4.0, 6.0, 4.0, 1.0, 4.0, 16.0, 24.0, 16.0, 4.0, 6.0, 24.0, 36.0, 24.0, 6.0, 4.0,
+            16.0, 24.0, 16.0, 4.0, 1.0, 4.0, 6.0, 4.0, 1.0,
         ];
         let ksum: f64 = 256.0;
 
@@ -425,10 +413,11 @@ impl<B: Backend> Image<B> {
                         let mut sum = 0.0f64;
                         for ky in 0..5i32 {
                             for kx in 0..5i32 {
-                                let px = (sx_base + kx as isize).clamp(0, new_w as isize - 1) as usize;
-                                let py = (sy_base + ky as isize).clamp(0, new_h as isize - 1) as usize;
-                                let pixel =
-                                    up_vals[ch * new_h * new_w + py * new_w + px] as f64;
+                                let px =
+                                    (sx_base + kx as isize).clamp(0, new_w as isize - 1) as usize;
+                                let py =
+                                    (sy_base + ky as isize).clamp(0, new_h as isize - 1) as usize;
+                                let pixel = up_vals[ch * new_h * new_w + py * new_w + px] as f64;
                                 sum += pixel * kernel[(ky * 5 + kx) as usize];
                             }
                         }
@@ -632,12 +621,14 @@ mod tests {
         let dist_zero = [0.0f32; 5];
         let undistorted2 = img.undistort(&cam, &dist_zero).unwrap();
         let orig_data: Vec<f32> = img.tensor.clone().into_data().iter::<f32>().collect();
-        let ud_data: Vec<f32> = undistorted2.tensor.clone().into_data().iter::<f32>().collect();
+        let ud_data: Vec<f32> = undistorted2
+            .tensor
+            .clone()
+            .into_data()
+            .iter::<f32>()
+            .collect();
         for (a, b) in orig_data.iter().zip(ud_data.iter()) {
-            assert!(
-                (a - b).abs() < 1e-6,
-                "Mismatch: {a} vs {b}"
-            );
+            assert!((a - b).abs() < 1e-6, "Mismatch: {a} vs {b}");
         }
     }
 
@@ -660,7 +651,12 @@ mod tests {
 
         // Result should differ from original (non-zero distortion applied)
         let orig_data: Vec<f32> = img.tensor.clone().into_data().iter::<f32>().collect();
-        let ud_data: Vec<f32> = undistorted.tensor.clone().into_data().iter::<f32>().collect();
+        let ud_data: Vec<f32> = undistorted
+            .tensor
+            .clone()
+            .into_data()
+            .iter::<f32>()
+            .collect();
         let mut differs = false;
         for (a, b) in orig_data.iter().zip(ud_data.iter()) {
             if (a - b).abs() > 1e-6 {
@@ -710,6 +706,9 @@ mod tests {
         // The downsampled image should still have bright pixels
         let down_data: Vec<f32> = down.tensor.clone().into_data().iter::<f32>().collect();
         let max_val = down_data.iter().cloned().fold(0.0f32, f32::max);
-        assert!(max_val > 0.5, "pyr_down should preserve bright region, got max={max_val}");
+        assert!(
+            max_val > 0.5,
+            "pyr_down should preserve bright region, got max={max_val}"
+        );
     }
 }

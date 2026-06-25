@@ -208,8 +208,7 @@ impl<B: Backend> Image<B> {
             let mut row_sum = 0.0f32;
             for x in 0..w {
                 row_sum += flat_vals[y * w + x];
-                integral[(y + 1) * (w + 1) + (x + 1)] =
-                    integral[y * (w + 1) + (x + 1)] + row_sum;
+                integral[(y + 1) * (w + 1) + (x + 1)] = integral[y * (w + 1) + (x + 1)] + row_sum;
             }
         }
 

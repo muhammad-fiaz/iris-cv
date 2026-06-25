@@ -50,8 +50,7 @@ fn main() -> Result<()> {
 
     // 2. Load the sequence
     println!("\nLoading image sequence...");
-    let loaded_frames =
-        load_image_sequence::<Backend>(&seq_dir, "frame", &device, 30.0)?;
+    let loaded_frames = load_image_sequence::<Backend>(&seq_dir, "frame", &device, 30.0)?;
 
     println!("Loaded {} frames", loaded_frames.len());
 

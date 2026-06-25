@@ -100,7 +100,8 @@ impl<B: Backend> Image<B> {
         // Reconstruct YCrCb with equalized Y
         let cr = ycrcb.tensor.clone().slice([1..2, 0..dims[1], 0..dims[2]]);
         let cb = ycrcb.tensor.clone().slice([2..3, 0..dims[1], 0..dims[2]]);
-        let ycrcb_equalized = Image::merge_channels(&[y_equalized, Image::new(cr), Image::new(cb)])?;
+        let ycrcb_equalized =
+            Image::merge_channels(&[y_equalized, Image::new(cr), Image::new(cb)])?;
 
         // Convert back to RGB
         ycrcb_equalized.ycrcb_to_rgb()
@@ -111,9 +112,7 @@ impl<B: Backend> Image<B> {
     /// histogram equalization to each tile independently with clip limit.
     pub fn clahe(&self, clip_limit: f32, grid_size: usize) -> Result<Self> {
         if grid_size == 0 {
-            return Err(IrisError::InvalidParameter(
-                "grid_size must be > 0".into(),
-            ));
+            return Err(IrisError::InvalidParameter("grid_size must be > 0".into()));
         }
 
         let gray = self.grayscale()?;
@@ -189,8 +188,7 @@ impl<B: Backend> Image<B> {
                 if total > cdf_min {
                     for i in 0..256 {
                         lut[i] =
-                            ((cdf[i] as f32 - cdf_min) / (total - cdf_min) * 255.0).round()
-                                / 255.0;
+                            ((cdf[i] as f32 - cdf_min) / (total - cdf_min) * 255.0).round() / 255.0;
                     }
                 }
 
@@ -297,7 +295,11 @@ impl<B: Backend> Image<B> {
 
     /// Compares two color histograms using the specified method.
     /// Returns per-channel comparison results.
-    pub fn compare_hist_color(hist_a: &[Vec<f32>], hist_b: &[Vec<f32>], method: &str) -> Result<Vec<f64>> {
+    pub fn compare_hist_color(
+        hist_a: &[Vec<f32>],
+        hist_b: &[Vec<f32>],
+        method: &str,
+    ) -> Result<Vec<f64>> {
         if hist_a.len() != hist_b.len() {
             return Err(IrisError::DimensionMismatch {
                 expected: vec![hist_a.len()],
@@ -325,9 +327,7 @@ impl<B: Backend> Image<B> {
         bins: usize,
     ) -> Result<Tensor<B, 2>> {
         if bins == 0 {
-            return Err(IrisError::InvalidParameter(
-                "bins must be > 0".into(),
-            ));
+            return Err(IrisError::InvalidParameter("bins must be > 0".into()));
         }
 
         let dims = self.tensor.dims();
@@ -352,10 +352,10 @@ impl<B: Backend> Image<B> {
                 let val_x = flat_vals[channel_x * h * w + y * w + x];
                 let val_y = flat_vals[channel_y * h * w + y * w + x];
 
-                let bin_x = ((val_x.clamp(0.0, 1.0) * (bins as f32 - 1.0)).round() as usize)
-                    .min(bins - 1);
-                let bin_y = ((val_y.clamp(0.0, 1.0) * (bins as f32 - 1.0)).round() as usize)
-                    .min(bins - 1);
+                let bin_x =
+                    ((val_x.clamp(0.0, 1.0) * (bins as f32 - 1.0)).round() as usize).min(bins - 1);
+                let bin_y =
+                    ((val_y.clamp(0.0, 1.0) * (bins as f32 - 1.0)).round() as usize).min(bins - 1);
 
                 hist[bin_y * bins + bin_x] += 1;
             }
@@ -376,15 +376,9 @@ impl<B: Backend> Image<B> {
     /// Divides the image into `grid_size x grid_size` tiles, equalizes each tile,
     /// and blends neighboring tiles using bilinear interpolation to avoid artifacts
     /// at tile boundaries.
-    pub fn equalize_hist_adaptive(
-        &self,
-        clip_limit: f32,
-        grid_size: usize,
-    ) -> Result<Self> {
+    pub fn equalize_hist_adaptive(&self, clip_limit: f32, grid_size: usize) -> Result<Self> {
         if grid_size == 0 {
-            return Err(IrisError::InvalidParameter(
-                "grid_size must be > 0".into(),
-            ));
+            return Err(IrisError::InvalidParameter("grid_size must be > 0".into()));
         }
 
         let gray = self.grayscale()?;
@@ -460,8 +454,8 @@ impl<B: Backend> Image<B> {
                 let mut lut = [0.0f32; 256];
                 if total > cdf_min {
                     for i in 0..256 {
-                        lut[i] = ((cdf[i] as f32 - cdf_min) / (total - cdf_min) * 255.0).round()
-                            / 255.0;
+                        lut[i] =
+                            ((cdf[i] as f32 - cdf_min) / (total - cdf_min) * 255.0).round() / 255.0;
                     }
                 }
 
@@ -538,7 +532,9 @@ mod tests {
     #[test]
     fn test_equalize_hist_color() {
         let device = test_device();
-        let flat_data = vec![0.2f32, 0.4, 0.6, 0.8, 0.1, 0.3, 0.5, 0.7, 0.9, 0.0, 0.2, 0.4];
+        let flat_data = vec![
+            0.2f32, 0.4, 0.6, 0.8, 0.1, 0.3, 0.5, 0.7, 0.9, 0.0, 0.2, 0.4,
+        ];
         let tensor =
             Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [3, 2, 2]), &device);
         let img = Image::new(tensor);
@@ -660,8 +656,7 @@ mod tests {
     fn test_equalize_hist_adaptive() {
         let device = test_device();
         let data: Vec<f32> = (0..64).map(|i| (i as f32) / 64.0).collect();
-        let tensor =
-            Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [1, 8, 8]), &device);
+        let tensor = Tensor::<TestBackend, 3>::from_data(TensorData::new(data, [1, 8, 8]), &device);
         let img = Image::new(tensor);
 
         let result = img.equalize_hist_adaptive(2.0, 2).unwrap();

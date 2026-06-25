@@ -76,9 +76,7 @@ impl<B: Backend> VideoReader<B> {
             )));
         }
 
-        let file_size = std::fs::metadata(path)
-            .map(|m| m.len())
-            .unwrap_or(0);
+        let file_size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
 
         let device = B::Device::default();
         let mut frames = match format {
@@ -99,7 +97,8 @@ impl<B: Backend> VideoReader<B> {
 
                     let rgb = img.to_rgb8();
                     let (w, h) = rgb.dimensions();
-                    let raw: Vec<f32> = rgb.pixels()
+                    let raw: Vec<f32> = rgb
+                        .pixels()
                         .flat_map(|p| {
                             let [r, g, b] = p.0;
                             [r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0]
@@ -151,7 +150,9 @@ impl<B: Backend> VideoReader<B> {
                 file_size,
             }
         } else {
-            return Err(IrisError::Video("No frames found in video file".to_string()));
+            return Err(IrisError::Video(
+                "No frames found in video file".to_string(),
+            ));
         };
 
         Ok(Self {
@@ -212,14 +213,12 @@ impl<B: Backend> VideoReader<B> {
 
     /// Gets a specific frame by index.
     pub fn get_frame(&self, index: usize) -> Result<&Frame<B>> {
-        self.frames
-            .get(index)
-            .ok_or_else(|| {
-                IrisError::InvalidParameter(format!(
-                    "Frame index {index} out of range [0, {})",
-                    self.frames.len()
-                ))
-            })
+        self.frames.get(index).ok_or_else(|| {
+            IrisError::InvalidParameter(format!(
+                "Frame index {index} out of range [0, {})",
+                self.frames.len()
+            ))
+        })
     }
 
     /// Gets frames in a range.
@@ -245,7 +244,9 @@ impl<B: Backend> VideoReader<B> {
             return Err(IrisError::Video("No frames to batch".to_string()));
         }
 
-        let tensors: Vec<burn::tensor::Tensor<B, 4>> = self.frames.iter()
+        let tensors: Vec<burn::tensor::Tensor<B, 4>> = self
+            .frames
+            .iter()
             .map(|f| f.image.tensor.clone().unsqueeze())
             .collect();
 
@@ -258,7 +259,9 @@ impl<B: Backend> VideoReader<B> {
             return Err(IrisError::Video("Need at least 2 frames".to_string()));
         }
 
-        let diffs = self.frames.windows(2)
+        let diffs = self
+            .frames
+            .windows(2)
             .map(|w| {
                 let diff = w[1].image.tensor.clone() - w[0].image.tensor.clone();
                 diff.abs()
@@ -273,8 +276,10 @@ impl<B: Backend> VideoReader<B> {
         let diffs = self.frame_differences()?;
         let mut mags = Vec::with_capacity(diffs.len());
         for d in &diffs {
-            let data: Vec<f32> = d.to_data().convert::<f32>().into_vec()
-                .map_err(|e| IrisError::Tensor(format!("Failed to convert tensor data: {e}")))?;
+            let data: Vec<f32> =
+                d.to_data().convert::<f32>().into_vec().map_err(|e| {
+                    IrisError::Tensor(format!("Failed to convert tensor data: {e}"))
+                })?;
             let sum: f32 = data.iter().sum();
             mags.push(sum);
         }

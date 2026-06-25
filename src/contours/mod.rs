@@ -221,12 +221,16 @@ impl Contour {
             m11 += (2.0 * xi * yi + xi * yi1 + xi1 * yi + 2.0 * xi1 * yi1) * cross;
             m30 += (xi * xi * xi + xi * xi * xi1 + xi * xi1 * xi1 + xi1 * xi1 * xi1) * cross;
             m03 += (yi * yi * yi + yi * yi * yi1 + yi * yi1 * yi1 + yi1 * yi1 * yi1) * cross;
-            m21 += (2.0 * xi * xi * yi + xi * xi * yi1 + 2.0 * xi * xi1 * yi
+            m21 += (2.0 * xi * xi * yi
+                + xi * xi * yi1
+                + 2.0 * xi * xi1 * yi
                 + xi * xi1 * yi1
                 + xi1 * xi1 * yi
                 + 2.0 * xi1 * xi1 * yi1)
                 * cross;
-            m12 += (2.0 * yi * yi * xi + yi * yi * xi1 + 2.0 * yi * yi1 * xi
+            m12 += (2.0 * yi * yi * xi
+                + yi * yi * xi1
+                + 2.0 * yi * yi1 * xi
                 + yi * yi1 * xi1
                 + yi1 * yi1 * xi
                 + 2.0 * yi1 * yi1 * xi1)
@@ -336,10 +340,7 @@ impl<B: Backend> Image<B> {
     /// is `[next, prev, child, parent]` using -1 as a sentinel for "none".
     /// The hierarchy encodes the nesting relationship between external contours
     /// and holes.
-    pub fn find_contours_with_hierarchy(
-        &self,
-        mode: RetrievalMode,
-    ) -> Result<ContourResult> {
+    pub fn find_contours_with_hierarchy(&self, mode: RetrievalMode) -> Result<ContourResult> {
         let gray = self.grayscale()?;
         let dims = gray.tensor.dims();
         let h = dims[1];
@@ -558,15 +559,15 @@ impl<B: Backend> Image<B> {
                 found
             };
 
-            let parent = parent_map[old_idx]
-                .map(|p| index_map[p])
-                .unwrap_or(-1);
+            let parent = parent_map[old_idx].map(|p| index_map[p]).unwrap_or(-1);
 
             filtered_hierarchy[new_idx] = [next_sibling, prev_sibling, first_child, parent];
         }
 
-        let contours_out: Vec<Vec<Point<usize>>> =
-            filtered_indices.into_iter().map(|i| all_contours[i].clone()).collect();
+        let contours_out: Vec<Vec<Point<usize>>> = filtered_indices
+            .into_iter()
+            .map(|i| all_contours[i].clone())
+            .collect();
 
         Ok((contours_out, filtered_hierarchy))
     }
@@ -658,8 +659,8 @@ mod tests {
             Point::new(0.0, 0.0),
             Point::new(10.0, 0.0),
             Point::new(10.0, 5.0),
-            Point::new(7.0, 3.0),  // notch inward
-            Point::new(5.0, 5.0),  // notch bottom
+            Point::new(7.0, 3.0), // notch inward
+            Point::new(5.0, 5.0), // notch bottom
             Point::new(5.0, 10.0),
             Point::new(0.0, 10.0),
         ];
@@ -702,7 +703,9 @@ mod tests {
             Tensor::<TestBackend, 3>::from_data(TensorData::new(flat_data, [1, 20, 20]), &device);
         let img = Image::new(tensor);
 
-        let (contours, hierarchy) = img.find_contours_with_hierarchy(RetrievalMode::External).unwrap();
+        let (contours, hierarchy) = img
+            .find_contours_with_hierarchy(RetrievalMode::External)
+            .unwrap();
         assert!(!contours.is_empty());
         assert_eq!(contours.len(), hierarchy.len());
         // Hierarchy entries should have 4 elements each

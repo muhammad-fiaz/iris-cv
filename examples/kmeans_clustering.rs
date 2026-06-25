@@ -31,10 +31,7 @@ fn main() -> Result<()> {
 
     // 3. Predict cluster assignments
     let assignments = km.predict(&data)?;
-    println!(
-        "Point assignments: {:?}",
-        assignments.into_data()
-    );
+    println!("Point assignments: {:?}", assignments.into_data());
 
     println!("K-Means clustering example completed.");
     Ok(())

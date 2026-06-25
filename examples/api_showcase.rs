@@ -12,7 +12,9 @@ fn main() -> Result<()> {
 
     // --- 1. Color Space Conversions ---
     println!("--- Color Space Conversions ---");
-    let data = vec![0.8f32, 0.2, 0.5, 0.1, 0.9, 0.3, 0.6, 0.4, 0.7, 0.2, 0.8, 0.1];
+    let data = vec![
+        0.8f32, 0.2, 0.5, 0.1, 0.9, 0.3, 0.6, 0.4, 0.7, 0.2, 0.8, 0.1,
+    ];
     let rgb = Image::new(Tensor::<Backend, 3>::from_data(
         TensorData::new(data, [3, 2, 2]),
         &device,
@@ -51,18 +53,17 @@ fn main() -> Result<()> {
 
     // --- 3. General Convolution (filter2D) ---
     println!("\n--- Filter2D (General Convolution) ---");
-    let kernel: Vec<&[f32]> = vec![
-        &[-1.0, -1.0, -1.0],
-        &[-1.0, 8.0, -1.0],
-        &[-1.0, -1.0, -1.0],
-    ];
+    let kernel: Vec<&[f32]> = vec![&[-1.0, -1.0, -1.0], &[-1.0, 8.0, -1.0], &[-1.0, -1.0, -1.0]];
     let edges = base.filter2d(&kernel, None, 0.0)?;
     println!("  Laplacian kernel: shape = {:?}", edges.shape());
 
     // --- 4. Alpha Blending (addWeighted) ---
     println!("\n--- Alpha Blending (addWeighted) ---");
     let blended = base.add_weighted(&gaussian, 0.7, 0.3, 0.0)?;
-    println!("  Blended (0.7*src + 0.3*noise): shape = {:?}", blended.shape());
+    println!(
+        "  Blended (0.7*src + 0.3*noise): shape = {:?}",
+        blended.shape()
+    );
 
     // --- 5. CLAHE ---
     println!("\n--- CLAHE (Adaptive Histogram Equalization) ---");
@@ -97,17 +98,26 @@ fn main() -> Result<()> {
     ));
 
     let canvas = canvas.draw_ellipse(
-        Point::new(50, 50), (30, 20), 30.0, 0.0, 360.0,
-        Scalar::all(1.0), 1,
+        Point::new(50, 50),
+        (30, 20),
+        30.0,
+        0.0,
+        360.0,
+        Scalar::all(1.0),
+        1,
     )?;
     println!("  Ellipse drawn: shape = {:?}", canvas.shape());
 
     let canvas = canvas.draw_polyline(
         &[
-            Point::new(10, 80), Point::new(30, 60), Point::new(50, 80),
-            Point::new(70, 60), Point::new(90, 80),
+            Point::new(10, 80),
+            Point::new(30, 60),
+            Point::new(50, 80),
+            Point::new(70, 60),
+            Point::new(90, 80),
         ],
-        Scalar::all(0.5), 1,
+        Scalar::all(0.5),
+        1,
     )?;
     println!("  Polyline drawn: shape = {:?}", canvas.shape());
 
@@ -118,13 +128,15 @@ fn main() -> Result<()> {
     println!("  Filled polygon: shape = {:?}", canvas.shape());
 
     let canvas = canvas.draw_arrowed_line(
-        Point::new(80, 10), Point::new(10, 10), Scalar::all(1.0), 1, 0.3,
+        Point::new(80, 10),
+        Point::new(10, 10),
+        Scalar::all(1.0),
+        1,
+        0.3,
     )?;
     println!("  Arrowed line: shape = {:?}", canvas.shape());
 
-    let canvas = canvas.draw_marker(
-        Point::new(50, 50), Scalar::all(0.5), MarkerType::Circle, 8,
-    )?;
+    let canvas = canvas.draw_marker(Point::new(50, 50), Scalar::all(0.5), MarkerType::Circle, 8)?;
     println!("  Circle marker: shape = {:?}", canvas.shape());
 
     // --- 10. Custom Morphological Kernels ---

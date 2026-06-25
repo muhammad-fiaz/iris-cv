@@ -204,7 +204,15 @@ impl FlannMatcher {
     ) -> (usize, f32) {
         let mut best_idx = 0usize;
         let mut best_dist = f32::MAX;
-        Self::search_nn_recursive(nodes, train, query, root, checks_remaining, &mut best_idx, &mut best_dist);
+        Self::search_nn_recursive(
+            nodes,
+            train,
+            query,
+            root,
+            checks_remaining,
+            &mut best_idx,
+            &mut best_dist,
+        );
         (best_idx, best_dist)
     }
 
@@ -300,9 +308,7 @@ impl FlannMatcher {
             let mut indices: Vec<usize> = (0..n2).collect();
             let mut seed = (t as u32).wrapping_mul(1103515245).wrapping_add(12345);
             for i in (1..n2).rev() {
-                seed = seed
-                    .wrapping_mul(1103515245)
-                    .wrapping_add(12345);
+                seed = seed.wrapping_mul(1103515245).wrapping_add(12345);
                 let j = (seed as usize) % (i + 1);
                 indices.swap(i, j);
             }
@@ -499,10 +505,7 @@ mod tests {
         //   group A around [1, 0, 0, 0]
         //   group B around [0, 1, 0, 0]
         let query = Tensor::<TestBackend, 2>::from_data(
-            TensorData::new(
-                vec![1.01, 0.01, 0.0, 0.0, 0.01, 0.99, 0.0, 0.0],
-                [2, 4],
-            ),
+            TensorData::new(vec![1.01, 0.01, 0.0, 0.0, 0.01, 0.99, 0.0, 0.0], [2, 4]),
             &device,
         );
         let train = Tensor::<TestBackend, 2>::from_data(

@@ -5,10 +5,10 @@ pub mod reader;
 pub mod writer;
 
 pub use frame::Frame;
-pub use iterator::{FrameIterator, FrameExt, load_animated_image, load_image_sequence};
-pub use metadata::{VideoMetadata, ContainerFormat, PixelFormat, StreamInfo, StreamType};
-pub use reader::{VideoReader, VideoOpenOptions, SeekMode};
-pub use writer::{VideoWriter, VideoWriteOptions, OutputFormat};
+pub use iterator::{FrameExt, FrameIterator, load_animated_image, load_image_sequence};
+pub use metadata::{ContainerFormat, PixelFormat, StreamInfo, StreamType, VideoMetadata};
+pub use reader::{SeekMode, VideoOpenOptions, VideoReader};
+pub use writer::{OutputFormat, VideoWriteOptions, VideoWriter};
 
 use crate::error::Result;
 use crate::image::Image;
@@ -118,7 +118,8 @@ mod tests {
 
     #[test]
     fn test_legacy_video_writer() {
-        let mut writer = LegacyVideoWriter::<TestBackend>::create("output.mp4", 640, 480, 30.0).unwrap();
+        let mut writer =
+            LegacyVideoWriter::<TestBackend>::create("output.mp4", 640, 480, 30.0).unwrap();
         assert_eq!(writer.dest_path, "output.mp4");
 
         let device = test_device();

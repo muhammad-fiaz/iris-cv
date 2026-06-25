@@ -46,11 +46,7 @@ impl StereoBlockMatcher {
     /// Both images must be single-channel (grayscale) `Image`s of identical dimensions.
     /// Returns a 2D tensor of shape `[H, W]` containing disparity values scaled by 16
     /// (fixed-point Q4 format, matching OpenCV convention).
-    pub fn compute<B: Backend>(
-        &self,
-        left: &Image<B>,
-        right: &Image<B>,
-    ) -> Result<Tensor<B, 2>> {
+    pub fn compute<B: Backend>(&self, left: &Image<B>, right: &Image<B>) -> Result<Tensor<B, 2>> {
         if left.channels() != 1 || right.channels() != 1 {
             return Err(IrisError::InvalidParameter(
                 "Stereo input images must be single-channel (grayscale)".into(),
@@ -156,7 +152,9 @@ mod tests {
 
     #[test]
     fn test_stereo_with_min_disparity() {
-        let matcher = StereoBlockMatcher::new(3, 32).unwrap().with_min_disparity(5);
+        let matcher = StereoBlockMatcher::new(3, 32)
+            .unwrap()
+            .with_min_disparity(5);
         assert_eq!(matcher.min_disparity, 5);
     }
 

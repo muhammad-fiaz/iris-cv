@@ -27,10 +27,8 @@ fn main() -> Result<()> {
                 flat_data[2 * 480 * 640 + idx] = 1.0 - x as f32 / 640.0;
             }
         }
-        let tensor = Tensor::<Backend, 3>::from_data(
-            TensorData::new(flat_data, [3, 480, 640]),
-            &device,
-        );
+        let tensor =
+            Tensor::<Backend, 3>::from_data(TensorData::new(flat_data, [3, 480, 640]), &device);
         let img = Image::new(tensor);
         let frame = Frame::new(img, Duration::from_millis(i as u64 * 33), i)
             .with_duration(Duration::from_millis(33))

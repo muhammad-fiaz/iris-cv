@@ -109,10 +109,7 @@ impl<B: Backend> Iterator for FrameIterator<B> {
 impl<B: Backend> ExactSizeIterator for FrameIterator<B> {}
 
 /// Loads all frames from an animated GIF file.
-pub fn load_animated_image<B: Backend>(
-    path: &Path,
-    device: &B::Device,
-) -> Result<Vec<Frame<B>>> {
+pub fn load_animated_image<B: Backend>(path: &Path, device: &B::Device) -> Result<Vec<Frame<B>>> {
     use image::AnimationDecoder;
     use image::codecs::gif::GifDecoder;
 
@@ -138,12 +135,17 @@ pub fn load_animated_image<B: Backend>(
 
                 let delay = frame.delay();
                 let (numer, denom) = delay.numer_denom_ms();
-                let duration_ms = if denom > 0 { numer as u64 * 1000 / denom as u64 } else { 33 };
+                let duration_ms = if denom > 0 {
+                    numer as u64 * 1000 / denom as u64
+                } else {
+                    33
+                };
                 let duration = Duration::from_millis(duration_ms);
 
                 let img = frame.buffer();
                 let (w, h) = img.dimensions();
-                let raw: Vec<f32> = img.pixels()
+                let raw: Vec<f32> = img
+                    .pixels()
                     .flat_map(|p| {
                         let [r, g, b, _a] = p.0;
                         [r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0]
@@ -176,7 +178,8 @@ pub fn load_animated_image<B: Backend>(
             let decoder = PngDecoder::new(reader2)
                 .map_err(|e| IrisError::Video(format!("Failed to decode PNG: {e}")))?;
 
-            let apng = decoder.apng()
+            let apng = decoder
+                .apng()
                 .map_err(|e| IrisError::Video(format!("Failed to parse APNG: {e}")))?;
 
             let frames_iter = apng.into_frames();
@@ -188,12 +191,17 @@ pub fn load_animated_image<B: Backend>(
 
                 let delay = frame.delay();
                 let (numer, denom) = delay.numer_denom_ms();
-                let duration_ms = if denom > 0 { numer as u64 * 1000 / denom as u64 } else { 33 };
+                let duration_ms = if denom > 0 {
+                    numer as u64 * 1000 / denom as u64
+                } else {
+                    33
+                };
                 let duration = Duration::from_millis(duration_ms);
 
                 let img = frame.buffer();
                 let (w, h) = img.dimensions();
-                let raw: Vec<f32> = img.pixels()
+                let raw: Vec<f32> = img
+                    .pixels()
                     .flat_map(|p| {
                         let [r, g, b, _a] = p.0;
                         [r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0]
@@ -223,7 +231,8 @@ pub fn load_animated_image<B: Backend>(
 
             let rgb = img.to_rgb8();
             let (w, h) = rgb.dimensions();
-            let raw: Vec<f32> = rgb.pixels()
+            let raw: Vec<f32> = rgb
+                .pixels()
                 .flat_map(|p| {
                     let [r, g, b] = p.0;
                     [r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0]
@@ -257,9 +266,14 @@ pub fn load_image_sequence<B: Backend>(
                 .map(|n| n.contains(pattern))
                 .unwrap_or(false)
         })
-        .filter(|p| p.extension().is_some_and(|ext| {
-            matches!(ext.to_str(), Some("png" | "jpg" | "jpeg" | "bmp" | "tiff" | "webp"))
-        }))
+        .filter(|p| {
+            p.extension().is_some_and(|ext| {
+                matches!(
+                    ext.to_str(),
+                    Some("png" | "jpg" | "jpeg" | "bmp" | "tiff" | "webp")
+                )
+            })
+        })
         .collect();
 
     entries.sort();
@@ -271,7 +285,8 @@ pub fn load_image_sequence<B: Backend>(
 
         let rgb = img.to_rgb8();
         let (w, h) = rgb.dimensions();
-        let raw: Vec<f32> = rgb.pixels()
+        let raw: Vec<f32> = rgb
+            .pixels()
             .flat_map(|p| {
                 let [r, g, b] = p.0;
                 [r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0]

@@ -64,10 +64,7 @@ fn main() -> Result<()> {
 
     // Verify roundtrip: YCrCb -> RGB
     let rgb_from_ycrcb = ycrcb.ycrcb_to_rgb()?;
-    println!(
-        "YCrCb -> RGB roundtrip shape: {:?}",
-        rgb_from_ycrcb.shape()
-    );
+    println!("YCrCb -> RGB roundtrip shape: {:?}", rgb_from_ycrcb.shape());
 
     // --- 5. RGB to HLS conversion ---
     println!("\n--- RGB to HLS ---");

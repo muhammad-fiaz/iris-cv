@@ -171,7 +171,11 @@ impl<B: Backend> VideoWriter<B> {
         let [c, h, w] = frame.shape();
         assert!(c == 3, "Only RGB frames supported for output");
 
-        let raw_data: Vec<f32> = frame.image.tensor.to_data().into_vec()
+        let raw_data: Vec<f32> = frame
+            .image
+            .tensor
+            .to_data()
+            .into_vec()
             .expect("Tensor data should be valid");
         let mut img = image::RgbImage::new(w as u32, h as u32);
 
@@ -197,12 +201,16 @@ impl<B: Backend> VideoWriter<B> {
             .map_err(|e| IrisError::Video(format!("Failed to create GIF file: {e}")))?;
 
         let mut encoder = GifEncoder::new(file);
-        encoder.set_repeat(Repeat::Infinite)
+        encoder
+            .set_repeat(Repeat::Infinite)
             .map_err(|e| IrisError::Video(format!("Failed to set GIF repeat: {e}")))?;
 
-        let delay = image::Delay::from_saturating_duration(Duration::from_secs_f64(1.0 / self.options.fps));
+        let delay =
+            image::Delay::from_saturating_duration(Duration::from_secs_f64(1.0 / self.options.fps));
 
-        let frames: Vec<image::Frame> = self.frames.iter()
+        let frames: Vec<image::Frame> = self
+            .frames
+            .iter()
             .map(|f| {
                 let img = self.frame_to_image(f);
                 let dyn_img = image::DynamicImage::ImageRgb8(img);
@@ -211,7 +219,8 @@ impl<B: Backend> VideoWriter<B> {
             })
             .collect();
 
-        encoder.encode_frames(frames)
+        encoder
+            .encode_frames(frames)
             .map_err(|e| IrisError::Video(format!("Failed to write GIF: {e}")))?;
 
         Ok(())
@@ -219,11 +228,12 @@ impl<B: Backend> VideoWriter<B> {
 
     /// Writes frames as a PNG image sequence.
     fn write_png_sequence(&self) -> Result<()> {
-        let base = self.output_path.file_stem()
+        let base = self
+            .output_path
+            .file_stem()
             .and_then(|s| s.to_str())
             .unwrap_or("frame");
-        let parent = self.output_path.parent()
-            .unwrap_or(Path::new("."));
+        let parent = self.output_path.parent().unwrap_or(Path::new("."));
 
         for (i, frame) in self.frames.iter().enumerate() {
             let img = self.frame_to_image(frame);
@@ -239,11 +249,12 @@ impl<B: Backend> VideoWriter<B> {
     fn write_jpeg_sequence(&self) -> Result<()> {
         use image::codecs::jpeg::JpegEncoder;
 
-        let base = self.output_path.file_stem()
+        let base = self
+            .output_path
+            .file_stem()
             .and_then(|s| s.to_str())
             .unwrap_or("frame");
-        let parent = self.output_path.parent()
-            .unwrap_or(Path::new("."));
+        let parent = self.output_path.parent().unwrap_or(Path::new("."));
 
         for (i, frame) in self.frames.iter().enumerate() {
             let img = self.frame_to_image(frame);
@@ -260,11 +271,12 @@ impl<B: Backend> VideoWriter<B> {
 
     /// Writes frames as a QOI image sequence.
     fn write_qoi_sequence(&self) -> Result<()> {
-        let base = self.output_path.file_stem()
+        let base = self
+            .output_path
+            .file_stem()
             .and_then(|s| s.to_str())
             .unwrap_or("frame");
-        let parent = self.output_path.parent()
-            .unwrap_or(Path::new("."));
+        let parent = self.output_path.parent().unwrap_or(Path::new("."));
 
         for (i, frame) in self.frames.iter().enumerate() {
             let img = self.frame_to_image(frame);
@@ -348,7 +360,8 @@ mod tests {
     #[test]
     fn test_video_writer_write_frame() {
         let opts = VideoWriteOptions::default();
-        let mut writer = VideoWriter::<TestBackend>::create("/tmp/test.gif", 32, 32, &opts).unwrap();
+        let mut writer =
+            VideoWriter::<TestBackend>::create("/tmp/test.gif", 32, 32, &opts).unwrap();
 
         let frame = make_test_frame(0);
         writer.write_frame(&frame).unwrap();
@@ -362,7 +375,8 @@ mod tests {
     #[test]
     fn test_video_writer_dimension_mismatch() {
         let opts = VideoWriteOptions::default();
-        let mut writer = VideoWriter::<TestBackend>::create("/tmp/test.gif", 64, 64, &opts).unwrap();
+        let mut writer =
+            VideoWriter::<TestBackend>::create("/tmp/test.gif", 64, 64, &opts).unwrap();
 
         let device = test_device();
         let data = TensorData::new(vec![0.5f32; 3 * 32 * 32], [3, 32, 32]);
@@ -375,8 +389,12 @@ mod tests {
 
     #[test]
     fn test_video_writer_duration() {
-        let opts = VideoWriteOptions { fps: 30.0, ..Default::default() };
-        let mut writer = VideoWriter::<TestBackend>::create("/tmp/test.gif", 32, 32, &opts).unwrap();
+        let opts = VideoWriteOptions {
+            fps: 30.0,
+            ..Default::default()
+        };
+        let mut writer =
+            VideoWriter::<TestBackend>::create("/tmp/test.gif", 32, 32, &opts).unwrap();
 
         for i in 0..30 {
             writer.write_frame(&make_test_frame(i)).unwrap();
@@ -389,8 +407,17 @@ mod tests {
     #[test]
     fn test_output_format_detection() {
         assert_eq!(OutputFormat::from_path("out.gif"), OutputFormat::Gif);
-        assert_eq!(OutputFormat::from_path("out.png"), OutputFormat::PngSequence);
-        assert_eq!(OutputFormat::from_path("out.jpg"), OutputFormat::JpegSequence);
-        assert_eq!(OutputFormat::from_path("out.qoi"), OutputFormat::QoiSequence);
+        assert_eq!(
+            OutputFormat::from_path("out.png"),
+            OutputFormat::PngSequence
+        );
+        assert_eq!(
+            OutputFormat::from_path("out.jpg"),
+            OutputFormat::JpegSequence
+        );
+        assert_eq!(
+            OutputFormat::from_path("out.qoi"),
+            OutputFormat::QoiSequence
+        );
     }
 }

@@ -5,7 +5,7 @@ use iris::prelude::*;
 
 fn main() -> Result<()> {
     #![allow(dead_code)]
-type Backend = burn::backend::wgpu::Wgpu;
+    type Backend = burn::backend::wgpu::Wgpu;
 
     println!("=== Camera Calibration & Geometry Example ===");
 
