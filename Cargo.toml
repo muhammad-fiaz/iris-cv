@@ -10,7 +10,7 @@ homepage = "https://muhammad-fiaz.github.io/iris-cv"
 documentation = "https://docs.rs/iris-cv"
 readme = "README.md"
 keywords = ["computer-vision", "image-processing", "deep-learning", "burn", "gpu"]
-categories = ["computer-vision", "image-processing", "machine-learning", "parser-implementations"]
+categories = ["computer-vision", "multimedia::images", "artificial-intelligence", "parser-implementations"]
 
 [lib]
 name = "iris"
