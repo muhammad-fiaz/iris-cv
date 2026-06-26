@@ -53,10 +53,10 @@ Brute-force matcher for comparing feature descriptors.
 pub struct BFMatcher;
 
 impl BFMatcher {
-    pub fn new() -> Self;
     pub fn match_descriptors<B: Backend>(
-        desc1: &Tensor<B, 2>,
-        desc2: &Tensor<B, 2>,
+        &self,
+        query: &Tensor<B, 2>,
+        train: &Tensor<B, 2>,
     ) -> Result<Vec<DMatch>>;
 }
 ```
@@ -67,6 +67,7 @@ impl BFMatcher {
 pub struct DMatch {
     pub query_idx: usize,
     pub train_idx: usize,
+    pub img_idx: usize,
     pub distance: f32,
 }
 ```
@@ -118,7 +119,7 @@ impl<B: Backend> Image<B> {
 
 ### Example
 
-```rust,ignore
+```rust
 use iris::prelude::*;
 
 let device = WgpuDevice::default();
@@ -170,7 +171,7 @@ impl FlannMatcher {
 
 ### Example
 
-```rust,ignore
+```rust
 use iris::prelude::*;
 
 let device = WgpuDevice::default();

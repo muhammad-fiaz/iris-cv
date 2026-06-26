@@ -40,7 +40,7 @@ fn main() -> Result<()> {
     let blurred = img.gaussian_blur(5, 1.5)?;
 
     // Extract edge outlines using Canny detector
-    let edges = blurred.grayscale()?.canny(50.0, 150.0)?;
+    let edges = blurred.grayscale()?.canny(0.1, 0.3)?;
 
     // Save the output image
     edges.save("edges_output.png")?;

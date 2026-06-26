@@ -63,12 +63,12 @@ let filtered = image.sep_filter_2d(&kernel_x, &kernel_y)?;
 Applies a general 2D convolution kernel to the image.
 
 ```rust
-let kernel = vec![
-    vec![0.0, -1.0, 0.0],
-    vec![-1.0, 5.0, -1.0],
-    vec![0.0, -1.0, 0.0],
+let kernel: &[&[f32]] = &[
+    &[0.0, -1.0, 0.0],
+    &[-1.0, 5.0, -1.0],
+    &[0.0, -1.0, 0.0],
 ];
-let sharpened = image.filter2d(&kernel)?;
+let sharpened = image.filter2d(kernel, None, 0.0)?;
 ```
 
 ### Add Weighted
@@ -76,15 +76,15 @@ let sharpened = image.filter2d(&kernel)?;
 Blends two images: `result = alpha * src1 + beta * src2 + gamma`.
 
 ```rust
-let blended = Image::add_weighted(&img1, 0.7, &img2, 0.3, 0.0)?;
+let blended = img1.add_weighted(&img2, 0.7, 0.3, 0.0)?;
 ```
 
 ### Convert Scale Abs
 
-Converts the image to 8-bit absolute values with optional scale and offset.
+Converts the image with per-pixel scale and shift, then takes absolute values.
 
 ```rust
-let abs_img = image.convert_scale_abs()?;
+let abs_img = image.convert_scale_abs(1.0, 0.0)?;
 ```
 
 ### Distance Transform

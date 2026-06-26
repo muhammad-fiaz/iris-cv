@@ -89,7 +89,7 @@ let custom_dilated = img.dilate_with_kernel(&kernel)?;
 
 ```rust
 impl<B: Backend> Image<B> {
-    pub fn hit_or_miss(&self, foreground: &[&[u8]], background: &[&[u8]]) -> Result<Self>;
+    pub fn hit_or_miss(&self, pattern: &[&[u8]], bg_pattern: &[&[u8]]) -> Result<Self>;
 }
 ```
 
@@ -97,12 +97,12 @@ Finds pixels matching a specific pattern of foreground (1) and background (0) ne
 
 | Parameter | Description |
 |---|---|
-| `foreground` | Kernel where 1 marks pixels that must be foreground. |
-| `background` | Kernel where 1 marks pixels that must be background. |
+| `pattern` | Kernel where 1 marks pixels that must be foreground. |
+| `bg_pattern` | Kernel where 1 marks pixels that must be background. |
 
 ### Example
 
-```rust,ignore
+```rust
 let fg: Vec<&[u8]> = vec![&[0, 1, 0], &[1, 1, 1], &[0, 1, 0]];
 let bg: Vec<&[u8]> = vec![&[1, 0, 1], &[0, 0, 0], &[1, 0, 1]];
 let hits = img.hit_or_miss(&fg, &bg)?;
@@ -120,7 +120,7 @@ Applies the Zhang-Suen thinning algorithm to reduce foreground regions to single
 
 ### Example
 
-```rust,ignore
+```rust
 let thinned = img.thin()?;
 ```
 
@@ -136,6 +136,6 @@ Extracts the topological skeleton of a binary image using iterative morphologica
 
 ### Example
 
-```rust,ignore
+```rust
 let skel = img.skeleton()?;
 ```

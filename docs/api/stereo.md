@@ -1,13 +1,13 @@
 ---
-title: "Stereo Vision Module Reference"
-description: "API reference for Iris stereo vision — block matching disparity computation."
-keywords: ["stereo", "disparity", "block matching", "SAD", "depth", "stereo vision"]
+title: "Stereo Vision Reference"
+description: "API reference for Iris stereo vision module — block matching for disparity computation."
+keywords: ["stereo vision", "block matching", "disparity", "depth estimation"]
 canonical: "https://muhammad-fiaz.github.io/iris-cv/api/stereo"
 ---
 
-# Stereo Vision Module Reference
+# Stereo Vision Reference
 
-Computes disparity maps from stereo image pairs using block matching.
+Provides stereo block matching for disparity map computation from rectified stereo image pairs.
 
 ::: note
 This module is under active development. API signatures may change between versions.
@@ -15,49 +15,33 @@ This module is under active development. API signatures may change between versi
 
 ## StereoBlockMatcher
 
-Block-matching stereo correspondence engine using Sum of Absolute Differences (SAD).
-
 ```rust
 pub struct StereoBlockMatcher {
-    num_disparities: u32,
-    block_size: u32,
+    block_size: i32,
+    num_disparities: i32,
+    min_disparity: i32,
 }
 
 impl StereoBlockMatcher {
-    pub fn new(num_disparities: u32, block_size: u32) -> Result<Self>;
+    pub fn new(block_size: i32, num_disparities: i32) -> Result<Self>;
+    pub fn with_min_disparity(self, min_disparity: i32) -> Self;
     pub fn compute<B: Backend>(
         &self,
         left: &Image<B>,
         right: &Image<B>,
-        device: &B::Device,
-    ) -> Result<Image<B>>;
+    ) -> Result<Tensor<B, 2>>;
 }
 ```
 
-### Constructor
-
-#### `new(num_disparities, block_size)`
+### Parameters
 
 | Parameter | Type | Description |
-|-----------|------|-------------|
-| `num_disparities` | `u32` | Maximum disparity search range. Must be a multiple of 16. |
-| `block_size` | `u32` | Size of the matching block (kernel). Must be odd. |
+|---|---|---|
+| `block_size` | `i32` | Size of the matching block (odd number, e.g., 3, 5, 7). |
+| `num_disparities` | `i32` | Maximum disparity range (must be divisible by 16). |
+| `min_disparity` | `i32` | Minimum disparity to search (default 0). |
 
-### Methods
-
-#### `compute(left, right, device)`
-
-Computes a disparity map from a rectified stereo pair.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `left` | `&Image<B>` | Left rectified grayscale image. |
-| `right` | `&Image<B>` | Right rectified grayscale image. |
-| `device` | `&B::Device` | Compute device for GPU acceleration. |
-
-**Returns:** `Result<Image<B>>` — Single-channel disparity map where intensity encodes pixel shift.
-
-## Example
+### Example
 
 ```rust
 use iris::prelude::*;
@@ -66,16 +50,10 @@ use burn::backend::wgpu::Wgpu;
 type Backend = Wgpu;
 let device = Default::default();
 
-let left = Image::<Backend>::open("left.png", &device)?.to_grayscale()?;
-let right = Image::<Backend>::open("right.png", &device)?.to_grayscale()?;
+let left = Image::<Backend>::open("left.png", &device)?;
+let right = Image::<Backend>::open("right.png", &device)?;
 
-let matcher = StereoBlockMatcher::new(64, 11)?;
-let disparity = matcher.compute(&left, &right, &device)?;
-disparity.save("disparity.png")?;
+let matcher = StereoBlockMatcher::new(5, 64)?;
+let disparity = matcher.compute(&left, &right)?;
+println!("Disparity map shape: {:?}", disparity.dims());
 ```
-
-## Notes
-
-- Both input images must be rectified (epipolar aligned).
-- `num_disparities` must be divisible by 16 for efficient GPU kernel dispatch.
-- Larger `block_size` values improve noise tolerance but reduce detail.

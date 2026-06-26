@@ -95,7 +95,7 @@ Computes a 2D histogram over two specified channels. Returns a `(bins, bins)` te
 
 ### Example
 
-```rust,ignore
+```rust
 let hist_2d = img.calc_hist_2d(0, 1, 64)?; // Red vs Green, 64x64 bins
 println!("2D histogram shape: {:?}", hist_2d.dims());
 ```
@@ -104,18 +104,19 @@ println!("2D histogram shape: {:?}", hist_2d.dims());
 
 ```rust
 impl<B: Backend> Image<B> {
-    pub fn equalize_hist_adaptive(&self, grid_size: usize) -> Result<Self>;
+    pub fn equalize_hist_adaptive(&self, clip_limit: f32, grid_size: usize) -> Result<Self>;
 }
 ```
 
-Applies adaptive histogram equalization by dividing the image into a `grid_size x grid_size` grid of tiles and equalizing each independently.
+Applies adaptive histogram equalization by dividing the image into a `grid_size x grid_size` grid of tiles and equalizing each independently with clip limiting.
 
 | Parameter | Description |
 |---|---|
+| `clip_limit` | Maximum allowed contrast enhancement (e.g., 2.0). |
 | `grid_size` | Number of tiles per row/column (e.g., 8 yields an 8×8 grid). |
 
 ### Example
 
-```rust,ignore
-let adaptive_eq = img.equalize_hist_adaptive(8)?;
+```rust
+let adaptive_eq = img.equalize_hist_adaptive(2.0, 8)?;
 ```

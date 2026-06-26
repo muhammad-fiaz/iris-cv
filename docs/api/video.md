@@ -16,7 +16,12 @@ This module is under active development. API signatures may change between versi
 ## VideoCapture (Legacy)
 
 ```rust
-pub struct VideoCapture<B: Backend>;
+pub struct VideoCapture<B: Backend> {
+    pub source_path: String,
+    device: B::Device,
+    current_frame: usize,
+    total_frames: usize,
+}
 
 impl<B: Backend> VideoCapture<B> {
     pub fn open(path: impl AsRef<Path>, device: &B::Device) -> Result<Self>;
@@ -29,15 +34,27 @@ impl<B: Backend> VideoCapture<B> {
 High-level video reader that loads all frames into memory for random access.
 
 ```rust
-pub struct VideoReader<B: Backend> { /* ... */ }
+pub struct VideoReader<B: Backend> {
+    frames: Vec<Frame<B>>,
+    metadata: VideoMetadata,
+    source_path: Option<PathBuf>,
+}
 
 impl<B: Backend> VideoReader<B> {
     pub fn open(path: impl AsRef<Path>, options: &VideoOpenOptions) -> Result<Self>;
+    pub fn from_frames(frames: Vec<Frame<B>>, metadata: VideoMetadata) -> Self;
     pub fn frames(&self) -> &[Frame<B>];
-    pub fn frame(&self, index: usize) -> Option<&Frame<B>>;
-    pub fn metadata(&self) -> &VideoMetadata;
     pub fn frame_count(&self) -> usize;
-    pub fn duration(&self) -> Duration;
+    pub fn metadata(&self) -> &VideoMetadata;
+    pub fn source_path(&self) -> Option<&Path>;
+    pub fn iter(&self) -> FrameIterator<B>;
+    pub fn loop_iter(&self) -> FrameIterator<B>;
+    pub fn get_frame(&self, index: usize) -> Result<&Frame<B>>;
+    pub fn get_range(&self, start: usize, end: usize) -> Result<&[Frame<B>]>;
+    pub fn seek_to_time(&self, time: Duration) -> Result<&Frame<B>>;
+    pub fn to_batch_tensor(&self) -> Result<Tensor<B, 4>>;
+    pub fn frame_differences(&self) -> Result<Vec<Tensor<B, 3>>>;
+    pub fn motion_magnitudes(&self) -> Result<Vec<f32>>;
 }
 ```
 
@@ -68,7 +85,14 @@ pub enum SeekMode {
 ## VideoWriter
 
 ```rust
-pub struct VideoWriter<B: Backend> { /* ... */ }
+pub struct VideoWriter<B: Backend> {
+    frames: Vec<Frame<B>>,
+    output_path: PathBuf,
+    options: VideoWriteOptions,
+    width: usize,
+    height: usize,
+    finished: bool,
+}
 
 impl<B: Backend> VideoWriter<B> {
     pub fn create(
@@ -81,6 +105,8 @@ impl<B: Backend> VideoWriter<B> {
     pub fn frame_count(&self) -> usize;
     pub fn duration(&self) -> Duration;
     pub fn finish(&mut self) -> Result<()>;
+    pub fn is_finished(&self) -> bool;
+    pub fn output_path(&self) -> &Path;
 }
 ```
 
@@ -123,13 +149,19 @@ impl<B: Backend> Frame<B> {
     pub fn with_duration(self, duration: Duration) -> Self;
     pub fn width(&self) -> usize;
     pub fn height(&self) -> usize;
+    pub fn channels(&self) -> usize;
+    pub fn shape(&self) -> [usize; 3];
 }
 ```
 
 ## FrameIterator
 
 ```rust
-pub struct FrameIterator<B: Backend> { /* ... */ }
+pub struct FrameIterator<B: Backend> {
+    frames: Vec<Frame<B>>,
+    current: usize,
+    loop_playback: bool,
+}
 
 impl<B: Backend> FrameIterator<B> {
     pub fn new(frames: Vec<Frame<B>>) -> Self;
@@ -151,26 +183,49 @@ pub struct VideoMetadata {
     pub width: usize,
     pub height: usize,
     pub frame_count: usize,
+    pub video_codec: String,
+    pub pixel_format: PixelFormat,
+    pub rotation: u32,
+    pub bit_rate: u64,
+    pub streams: Vec<StreamInfo>,
+    pub has_audio: bool,
+    pub has_subtitles: bool,
     pub file_size: u64,
-    pub codec: String,
 }
 
 impl VideoMetadata {
     pub fn synthetic(width: usize, height: usize, fps: f64, frame_count: usize) -> Self;
+    pub fn aspect_ratio(&self) -> f64;
+    pub fn video_stream_count(&self) -> usize;
+    pub fn audio_stream_count(&self) -> usize;
 }
 ```
 
 ## Utility Functions
 
 ```rust
-pub fn load_animated_image<B: Backend>(path: impl AsRef<Path>, device: &B::Device) -> Result<Vec<Frame<B>>>;
-pub fn load_image_sequence<B: Backend>(pattern: &str, device: &B::Device) -> Result<Vec<Frame<B>>>;
+pub fn load_animated_image<B: Backend>(
+    path: impl AsRef<Path>,
+    device: &B::Device,
+) -> Result<Vec<Frame<B>>>;
+
+pub fn load_image_sequence<B: Backend>(
+    dir: &Path,
+    pattern: &str,
+    device: &B::Device,
+    fps: f64,
+) -> Result<Vec<Frame<B>>>;
 ```
 
 ## Legacy
 
 ```rust
-pub struct LegacyVideoWriter<B: Backend>;
+pub struct LegacyVideoWriter<B: Backend> {
+    pub dest_path: String,
+    width: usize,
+    height: usize,
+    fps: f64,
+}
 
 impl<B: Backend> LegacyVideoWriter<B> {
     pub fn create(path: impl AsRef<Path>, width: usize, height: usize, fps: f64) -> Result<Self>;
@@ -187,15 +242,9 @@ use burn::backend::wgpu::Wgpu;
 type Backend = Wgpu;
 let device = Default::default();
 
-// Legacy capture
-let mut capture = VideoCapture::<Backend>::open("video.mp4", &device)?;
-while let Some(frame) = capture.read()? {
-    println!("Frame shape: {:?}", frame.shape());
-}
-
 // Read real video
 let options = VideoOpenOptions::default();
-let reader = VideoReader::open("video.gif", &options)?;
+let reader = VideoReader::open("animation.gif", &options)?;
 println!("Frames: {}, FPS: {}", reader.frame_count(), reader.metadata().fps);
 
 // Write video

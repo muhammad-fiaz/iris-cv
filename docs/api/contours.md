@@ -65,10 +65,10 @@ impl ShapeAnalysis {
 ## Rotated Rectangle
 
 ```rust
-pub struct RotatedRect {
-    pub center: Point<f64>,
-    pub size: Size<f64>,
-    pub angle: f64,
+pub struct RotatedRect;
+
+impl RotatedRect {
+    pub fn box_points(center: Point<f64>, size: Size<f64>, angle_degrees: f64) -> [Point<f64>; 4];
 }
 ```
 
@@ -106,14 +106,14 @@ if contours.len() >= 2 {
 
 ```rust
 pub struct ConvexityDefect {
-    pub start: Point<usize>,
-    pub end: Point<usize>,
-    pub farthest: Point<usize>,
-    pub distance: f64,
+    pub start: Point<f64>,
+    pub end: Point<f64>,
+    pub far_point: Point<f64>,
+    pub depth: f64,
 }
 
 impl Contour {
-    pub fn convexity_defects(&self) -> Vec<ConvexityDefect>;
+    pub fn convexity_defects(contour: &[Point<f64>], hull: &[Point<f64>]) -> Vec<ConvexityDefect>;
 }
 ```
 
@@ -123,16 +123,16 @@ Finds the convexity defects of a contour — points on the contour that lie beyo
 |---|---|
 | `start` | Start point of the convex hull edge. |
 | `end` | End point of the convex hull edge. |
-| `farthest` | Point on the contour farthest from the hull edge. |
-| `distance` | Perpendicular distance from `farthest` to the hull edge. |
+| `far_point` | Point on the contour farthest from the hull edge. |
+| `depth` | Perpendicular distance from `far_point` to the hull edge. |
 
 ### Example
 
-```rust,ignore
+```rust
 let contour = &contours[0];
-let defects = contour.convexity_defects();
+let defects = Contour::convexity_defects(&contour.points, &hull.points);
 for d in &defects {
-    println!("Defect: farthest=({},{}), depth={:.2}", d.farthest.x, d.farthest.y, d.distance);
+    println!("Defect: farthest=({},{}), depth={:.2}", d.far_point.x, d.far_point.y, d.depth);
 }
 ```
 
@@ -148,7 +148,7 @@ pub enum RetrievalMode {
 }
 
 impl<B: Backend> Image<B> {
-    pub fn find_contours_with_hierarchy(&self, mode: RetrievalMode) -> Result<(Vec<Contour>, Vec<[i32; 3]>)>;
+    pub fn find_contours_with_hierarchy(&self, mode: RetrievalMode) -> Result<(Vec<Vec<Point<usize>>>, Vec<[i32; 4]>)>;
 }
 ```
 
@@ -164,7 +164,7 @@ Returns contours along with their parent-child hierarchy. Each hierarchy entry i
 
 ### Example
 
-```rust,ignore
+```rust
 let (contours, hierarchy) = img.find_contours_with_hierarchy(RetrievalMode::Tree)?;
 for (i, h) in hierarchy.iter().enumerate() {
     println!("Contour {}: next={}, prev={}, child={}", i, h[0], h[1], h[2]);

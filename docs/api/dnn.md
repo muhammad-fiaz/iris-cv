@@ -15,6 +15,7 @@ Contains definitions for neural network loaders, non-maximum suppression, and bl
 ```rust
 pub struct OnnxModel<B: Backend> {
     pub model_path: String,
+    device: B::Device,
 }
 
 impl<B: Backend> OnnxModel<B> {

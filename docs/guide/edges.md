@@ -24,8 +24,8 @@ let edges = image.sobel()?;
 Provides more accurate derivative estimations compared to the Sobel operator.
 
 ```rust
-// Compute Scharr derivatives
-let (scharr_x, scharr_y) = image.scharr()?;
+// Compute Scharr gradient magnitude
+let scharr_img = image.scharr()?;
 ```
 
 ### Laplacian
@@ -33,8 +33,8 @@ let (scharr_x, scharr_y) = image.scharr()?;
 Calculates the second-order derivative (sum of second spatial derivatives), emphasizing high-frequency regions.
 
 ```rust
-// Compute Laplacian gradient
-let laplacian = image.laplacian(3)?;
+// Compute Laplacian
+let laplacian = image.laplacian()?;
 ```
 
 ## Canny Edge Detection

@@ -60,18 +60,24 @@ pub struct Size<T> {
 | **[core](/api/core)** | Point, Rect, Size, Scalar, Mat, Rng, image math ops, bitwise ops, normalization. |
 | **[image](/api/image)** | Image struct, open, save, resize, crop, flip, rotate, geometric transforms. |
 | **[filters](/api/filters)** | Box, Gaussian, median, bilateral blur, separable filter, distance transform, filter2D. |
-| **[color](/api/color)** | RGB/HSV/HLS/XYZ/Lab/YUV/YCrCb conversions, split/merge channels. |
+| **[color](/api/color)** | RGB/HSV/HLS/XYZ/Lab/YUV/YCrCb/CMYK conversions, split/merge channels. |
 | **[edges](/api/edges)** | Sobel, Canny, Scharr, Laplacian, Hough lines, Hough circles. |
-| **[morphology](/api/morphology)** | Dilate, erode, open, close, morphology_ex, custom kernels. |
+| **[morphology](/api/morphology)** | Dilate, erode, open, close, morphology_ex, custom kernels, hit-or-miss, thinning, skeleton. |
 | **[threshold](/api/threshold)** | Binary, Otsu, triangle, adaptive thresholding. |
-| **[histogram](/api/histogram)** | Histogram computation, equalization, CLAHE, LUT, comparison. |
-| **[drawing](/api/drawing)** | Lines, rectangles, circles, ellipses, text, polylines, arrows, markers. |
+| **[histogram](/api/histogram)** | Histogram computation, equalization, CLAHE, LUT, comparison, 2D histogram. |
+| **[drawing](/api/drawing)** | Lines, rectangles, circles, ellipses, text, polylines, arrows, markers, fill poly. |
 | **[noise](/api/noise)** | Gaussian, salt-and-pepper, and speckle noise generation. |
-| **[contours](/api/contours)** | Contour detection, convex hull, moments, shape analysis. |
-| **[features](/api/features)** | ORB feature detection, keypoints, BFMatcher. |
-| **[tracking](/api/tracking)** | MOSSE tracker, background subtraction, optical flow. |
+| **[contours](/api/contours)** | Contour detection, convex hull, moments, shape analysis, hierarchy, convexity defects. |
+| **[features](/api/features)** | ORB feature detection, keypoints, BFMatcher, FLANN matcher, template matching. |
+| **[tracking](/api/tracking)** | MOSSE tracker, MeanShift tracker, background subtraction. |
 | **[dnn](/api/dnn)** | ONNX model loading, weight loaders, blob preprocessing, NMS. |
 | **[video](/api/video)** | Video capture, reading, writing, frame iteration, metadata. |
+| **[inpaint](/api/inpaint)** | Telea Fast Marching Method inpainting for damaged image regions. |
+| **[stereo](/api/stereo)** | Stereo block matching for disparity map computation. |
+| **[kalman](/api/kalman)** | Discrete Kalman filter for state estimation and prediction. |
+| **[hog](/api/hog)** | Histogram of Oriented Gradients descriptor for feature extraction. |
+| **[photo](/api/photo)** | Non-Local Means denoising and Mertens exposure fusion. |
+| **[stitching](/api/stitching)** | Image stitching for panorama creation. |
 
 ## Importing the Prelude
 

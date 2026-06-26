@@ -1,7 +1,7 @@
 ---
 title: "Installation"
-description: "Install Iris in your Rust project — cargo add, Git dependency, feature flags for wgpu, parallel, cuda, tch, ndarray, and gpui."
-keywords: ["installation", "cargo add", "dependencies", "feature flags", "wgpu", "cuda", "setup"]
+description: "Install Iris in your Rust project — cargo add, Git dependency, feature flags for wgpu, ndarray, safetensors, and gpui."
+keywords: ["installation", "cargo add", "dependencies", "feature flags", "wgpu", "setup"]
 ---
 
 # Installation
@@ -11,7 +11,7 @@ Iris compiles with a standard Rust toolchain. We recommend using the latest stab
 To install Iris in your Rust project, run:
 
 ```bash
-cargo add iris
+cargo add iris-cv
 ```
 
 ### Development Version (Git)
@@ -19,14 +19,14 @@ cargo add iris
 To use the latest development branch directly from GitHub, run:
 
 ```bash
-cargo add iris --git https://github.com/muhammad-fiaz/iris-cv
+cargo add iris-cv --git https://github.com/muhammad-fiaz/iris-cv
 ```
 
 Or add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-iris = { git = "https://github.com/muhammad-fiaz/iris-cv" }
+iris-cv = { git = "https://github.com/muhammad-fiaz/iris-cv" }
 ```
 
 ## Cargo Features
@@ -34,33 +34,30 @@ iris = { git = "https://github.com/muhammad-fiaz/iris-cv" }
 You can customize Iris by specifying feature flags when running `cargo add`:
 
 ```bash
-cargo add iris --no-default-features --features wgpu,parallel
+cargo add iris-cv --no-default-features --features wgpu
 ```
 
 Or configure features directly inside your `Cargo.toml` under dependencies:
 
 ```toml
 [dependencies]
-iris = { version = "0.0.0", default-features = false, features = ["wgpu", "parallel"] }
+iris-cv = { version = "0.0.0", default-features = false, features = ["wgpu"] }
 ```
 
-### Core Features
+### Default Features
 
-- **`parallel`** (Enabled by default): Enables CPU multi-threading parallelization using `rayon`. All major filters, morphological operations, logical/bitwise operations, and warping transforms use multi-core scheduling.
+- **`ndarray`** (Enabled by default): Includes the CPU ndarray backend for testing and environments without GPU.
 - **`safetensors`** (Enabled by default): Includes support for loading `.safetensors` model weights for DNN inference.
-- **`wgpu`** (Enabled by default): Enables the Burn Wgpu backend, providing hardware-accelerated execution on graphics hardware.
 
-### Extra Features
+### Optional Features
 
-- **`gpui`**: Integrates Zed's `gpui` and `gpui-component` libraries inside the direct `gui::Gui` window manager. Allows GPU-accelerated windows and UI layout loops across Windows, Linux, and macOS.
-- **`cuda`**: Enables CUDA acceleration support for deep learning inference.
-- **`tch`**: Enables LibTorch backend integration.
-- **`ndarray`**: Enables a lightweight, pure CPU ndarray backend, useful for embedded systems or serverless deployments with small memory footprints.
+- **`wgpu`**: Enables the Burn Wgpu backend, providing hardware-accelerated execution on graphics hardware. Required for all examples.
+- **`gpui`**: Integrates Zed's `gpui` and `gpui-component` libraries for GPU-accelerated windows and UI layout.
 
 ### Running Examples
 
 ```bash
 git clone https://github.com/muhammad-fiaz/iris-cv.git
-cd iris
+cd iris-cv
 cargo run --example canny --features wgpu
 ```

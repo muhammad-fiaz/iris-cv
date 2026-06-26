@@ -2,11 +2,16 @@
 title: "Image Operators Reference"
 description: "API reference for Iris image operators — conversions, I/O, geometric transforms, resize, crop, flip, rotate, warp, remap, lens undistortion, Gaussian pyramid, and morphological operations."
 keywords: ["image operators", "conversions", "grayscale", "RGB", "geometric transforms", "resize", "crop", "flip", "undistort", "lens undistortion", "pyr_down", "pyr_up", "Gaussian pyramid"]
+canonical: "https://muhammad-fiaz.github.io/iris-cv/api/image"
 ---
 
 # Image Operators Reference
 
 Exposes image allocation, transformation, and pixel operators on the `Image` struct.
+
+::: note
+This module is under active development. API signatures may change between versions.
+:::
 
 ## Image Struct
 
@@ -47,8 +52,8 @@ impl<B: Backend> Image<B> {
 ```rust
 impl<B: Backend> Image<B> {
     pub fn resize(&self, new_width: usize, new_height: usize) -> Result<Self>;
-    pub fn crop(&self, rect: Rect<usize>) -> Result<Self>;
-    pub fn flip(&self, axis: i32) -> Result<Self>;
+    pub fn crop(&self, x: usize, y: usize, width: usize, height: usize) -> Result<Self>;
+    pub fn flip(&self, horizontal: bool, vertical: bool) -> Result<Self>;
     pub fn rotate(&self, angle_degrees: u32) -> Result<Self>;
     pub fn transpose(&self) -> Result<Self>;
     pub fn warp_affine(&self, m: [[f64; 3]; 2], new_width: usize, new_height: usize) -> Result<Self>;
@@ -61,9 +66,9 @@ impl<B: Backend> Image<B> {
 
 ```rust
 impl<B: Backend> Image<B> {
-    pub fn gaussian_pyramid(&self) -> Result<Self>;
+    pub fn gaussian_pyramid(&self, levels: usize) -> Result<Vec<Self>>;
     pub fn integral_image(&self) -> Result<Self>;
-    pub fn flood_fill(&self, seed: Point<usize>, color: Scalar) -> Result<Self>;
+    pub fn flood_fill(&self, seed_x: usize, seed_y: usize, fill_value: f32, lo_diff: f32, hi_diff: f32) -> Result<Self>;
 }
 ```
 
@@ -71,7 +76,7 @@ impl<B: Backend> Image<B> {
 
 ```rust
 impl<B: Backend> Image<B> {
-    pub fn undistort(&self, camera_matrix: [[f64; 3]; 3], dist_coeffs: &[f64; 5]) -> Result<Self>;
+    pub fn undistort(&self, camera_matrix: &Tensor<B, 2>, dist_coeffs: &[f32]) -> Result<Self>;
 }
 ```
 
@@ -80,15 +85,7 @@ Removes lens distortion using a pinhole camera model with radial and tangential 
 | Parameter | Description |
 |---|---|
 | `camera_matrix` | 3×3 intrinsic camera matrix (focal length, principal point). |
-| `dist_coeffs` | Five distortion coefficients `[k1, k2, p1, p2, k3]`. |
-
-### Example
-
-```rust,ignore
-let camera = [[500.0, 0.0, 320.0], [0.0, 500.0, 240.0], [0.0, 0.0, 1.0]];
-let dist = [-0.1, 0.01, 0.001, -0.002, 0.0];
-let corrected = img.undistort(camera, &dist)?;
-```
+| `dist_coeffs` | Distortion coefficients `[k1, k2, p1, p2, k3, ...]`. |
 
 ## Gaussian Pyramid
 
@@ -108,7 +105,7 @@ Applies Gaussian pyramid operations for multi-scale image analysis.
 
 ### Example
 
-```rust,ignore
+```rust
 let small = img.pyr_down()?;
 let restored = small.pyr_up()?;
 ```

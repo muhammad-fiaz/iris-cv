@@ -84,16 +84,16 @@ let resized = image.resize(640, 480)?;
 // Rotate by angle in degrees
 let rotated = image.rotate(90)?;
 
-// Flip horizontally (axis = 1)
-let flipped = image.flip(1)?;
+// Flip horizontally
+let flipped = image.flip(true, false)?;
 
-// Crop a region
-let cropped = image.crop(Rect::new(10, 10, 200, 200))?;
+// Crop a region (x, y, width, height)
+let cropped = image.crop(10, 10, 200, 200)?;
 ```
 
 ## Gaussian Pyramid
 
 ```rust
-// Downsample to create a pyramid level
-let pyramid = image.gaussian_pyramid()?;
+// Build a 3-level Gaussian pyramid
+let pyramid = image.gaussian_pyramid(3)?;
 ```

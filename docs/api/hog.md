@@ -1,13 +1,13 @@
 ---
 title: "HOG Descriptor Reference"
 description: "API reference for Iris HOG descriptor — Histogram of Oriented Gradients for feature extraction."
-keywords: ["HOG", "histogram of oriented gradients", "feature extraction", "pedestrian detection"]
+keywords: ["HOG", "histogram of oriented gradients", "feature extraction", "descriptor"]
 canonical: "https://muhammad-fiaz.github.io/iris-cv/api/hog"
 ---
 
 # HOG Descriptor Reference
 
-Computes Histogram of Oriented Gradients descriptors for feature extraction and object detection.
+Computes Histogram of Oriented Gradients (HOG) descriptors for image regions.
 
 ::: note
 This module is under active development. API signatures may change between versions.
@@ -17,59 +17,26 @@ This module is under active development. API signatures may change between versi
 
 ```rust
 pub struct HogDescriptor {
-    cell_size: (u32, u32),
-    block_size: (u32, u32),
-    nbins: u32,
-    block_stride: (u32, u32),
+    cell_size: usize,
+    block_size: usize,
+    nbins: usize,
 }
 
 impl HogDescriptor {
-    pub fn new(
-        cell_size: (u32, u32),
-        block_size: (u32, u32),
-        nbins: u32,
-    ) -> Self;
-
-    pub fn compute<B: Backend>(
-        &self,
-        image: &Image<B>,
-        device: &B::Device,
-    ) -> Result<Vec<f32>>;
+    pub fn new(cell_size: usize, block_size: usize, nbins: usize) -> Self;
+    pub fn compute<B: Backend>(&self, image: &Image<B>) -> Result<Tensor<B, 1>>;
 }
 ```
 
-### Constructor
-
-#### `new(cell_size, block_size, nbins)`
+### Parameters
 
 | Parameter | Type | Description |
-|-----------|------|-------------|
-| `cell_size` | `(u32, u32)` | Size of each cell in pixels `(width, height)`. |
-| `block_size` | `(u32, u32)` | Number of cells per block `(cols, rows)`. |
-| `nbins` | `u32` | Number of orientation histogram bins (typically 9). |
+|---|---|---|
+| `cell_size` | `usize` | Size of each cell in pixels (e.g., 8). |
+| `block_size` | `usize` | Number of cells per block (e.g., 2 for 2×2). |
+| `nbins` | `usize` | Number of orientation bins (e.g., 9). |
 
-### Methods
-
-#### `compute(image, device)`
-
-Extracts the HOG feature descriptor from a grayscale image.
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `image` | `&Image<B>` | Input grayscale image. |
-| `device` | `&B::Device` | Compute device. |
-
-**Returns:** `Result<Vec<f32>>` — Flat vector of HOG features.
-
-## Algorithm
-
-1. Compute horizontal and vertical gradients using `[-1, 0, 1]` kernels.
-2. Calculate gradient magnitude and orientation at each pixel.
-3. Accumulate oriented gradients into cells (histograms).
-4. Normalize overlapping blocks using L2-norm.
-5. Concatenate all block descriptors into the final feature vector.
-
-## Example
+### Example
 
 ```rust
 use iris::prelude::*;
@@ -78,21 +45,8 @@ use burn::backend::wgpu::Wgpu;
 type Backend = Wgpu;
 let device = Default::default();
 
-let image = Image::<Backend>::open("pedestrian.png", &device)?
-    .to_grayscale()?;
-
-let hog = HogDescriptor::new(
-    (8, 8),   // cell size
-    (2, 2),   // block size
-    9,        // bins
-);
-
-let features = hog.compute(&image, &device)?;
-println!("HOG feature vector length: {}", features.len());
+let img = Image::<Backend>::open("person.png", &device)?;
+let hog = HogDescriptor::new(8, 2, 9);
+let descriptor = hog.compute(&img)?;
+println!("HOG descriptor shape: {:?}", descriptor.dims());
 ```
-
-## Notes
-
-- Input should be grayscale. Convert with `to_grayscale()` first.
-- The classic pedestrian detector uses `cell_size=(8,8)`, `block_size=(2,2)`, `nbins=9`.
-- Feature vector length: `(width/8 - 1) * (height/8 - 1) * 2 * 2 * 9`.

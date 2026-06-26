@@ -20,7 +20,7 @@ impl<B: Backend> Image<B> {
     pub fn box_blur(self, kernel_size: usize) -> Result<Self>;
     pub fn gaussian_blur(self, kernel_size: usize, sigma: f64) -> Result<Self>;
     pub fn median_blur(self, kernel_size: usize) -> Result<Self>;
-    pub fn bilateral_filter(self, d: usize, sigma_color: f32, sigma_space: f64) -> Result<Self>;
+    pub fn bilateral_filter(&self, d: isize, sigma_color: f64, sigma_space: f64) -> Result<Self>;
     pub fn sep_filter_2d(&self, kernel_x: &[f32], kernel_y: &[f32]) -> Result<Self>;
 }
 ```

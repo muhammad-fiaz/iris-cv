@@ -124,7 +124,7 @@ Checks which pixels fall within a color range and creates a binary mask.
 
 ```rust
 impl<B: Backend> Image<B> {
-    pub fn in_range(&self, low: &Scalar, high: &Scalar) -> Result<Self>;
+    pub fn in_range(&self, low: &[f32], high: &[f32]) -> Result<Self>;
 }
 ```
 
@@ -132,10 +132,10 @@ impl<B: Backend> Image<B> {
 
 ```rust
 impl<B: Backend> Image<B> {
-    pub fn normalize(&self, alpha: f32, beta: f32) -> Result<Self>;
-    pub fn mean(&self) -> Result<f64>;
-    pub fn mean_std_dev(&self) -> Result<(f64, f64)>;
-    pub fn min_max_loc(&self) -> Result<(f32, f32, Point<usize>, Point<usize>)>;
+    pub fn normalize(&self, min_val: f32, max_val: f32) -> Result<Self>;
+    pub fn mean(&self) -> Result<Vec<f64>>;
+    pub fn mean_std_dev(&self) -> Result<(Vec<f64>, Vec<f64>)>;
+    pub fn min_max_loc(&self) -> Result<(f64, f64, Point<usize>, Point<usize>)>;
     pub fn count_non_zero(&self) -> Result<usize>;
 }
 ```

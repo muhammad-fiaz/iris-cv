@@ -5,7 +5,7 @@ interface TransformPageData {
   title: string;
   description: string;
   relativePath: string;
-  lastUpdated: number;
+  lastUpdated?: number;
   frontmatter: {
     head?: unknown[];
     description?: string;
@@ -34,13 +34,9 @@ export default defineConfig({
   lang: "en-US",
   title: SITE_NAME,
   description: SITE_DESCRIPTION,
-  base: "/iris/",
+  base: "/iris-cv/",
   lastUpdated: true,
   cleanUrls: true,
-
-  sitemap: {
-    hostname: "https://muhammad-fiaz.github.io/iris-cv",
-  },
 
   vite: {
     plugins: [llmstxt()],
@@ -89,7 +85,7 @@ export default defineConfig({
     ["meta", { name: "twitter:creator", content: "@muhammadfiaz_" }],
 
     // Favicons
-    ["link", { rel: "icon", href: "/iris/logo.svg" }],
+    ["link", { rel: "icon", href: "/iris-cv/logo.svg" }],
 
     // Theme color
     ["meta", { name: "theme-color", content: "#5e35b1" }],
@@ -389,6 +385,45 @@ gtag('config', '${GA_ID}');`,
             { text: "HOG Descriptor", link: "/api/hog" },
             { text: "Photo Processing", link: "/api/photo" },
             { text: "Image Stitching", link: "/api/stitching" },
+          ],
+        },
+      ],
+      "/examples/": [
+        {
+          text: "Examples",
+          items: [
+            { text: "Overview", link: "/examples/" },
+            { text: "Image Loading", link: "/examples/image-loading" },
+            { text: "Filters", link: "/examples/filters" },
+            { text: "Canny Edge Detection", link: "/examples/canny" },
+            { text: "Morphology", link: "/examples/morphology" },
+            { text: "Threshold", link: "/examples/threshold" },
+            { text: "Contours", link: "/examples/contours" },
+            { text: "Drawing", link: "/examples/drawing" },
+            { text: "Color Processing", link: "/examples/color-processing" },
+            { text: "Photo Processing", link: "/examples/photo-processing" },
+            { text: "Optical Flow", link: "/examples/optical-flow" },
+            { text: "Tracking", link: "/examples/tracking" },
+            { text: "GIF Video", link: "/examples/gif-video" },
+            { text: "Video Processing", link: "/examples/video-processing" },
+            { text: "Video Frame Ops", link: "/examples/video-frame-ops" },
+            { text: "Video Metadata", link: "/examples/video-metadata" },
+            { text: "Image Sequence", link: "/examples/image-sequence" },
+            { text: "Barcode Detection", link: "/examples/barcode-detection" },
+            { text: "QR Detection", link: "/examples/qr-detection" },
+            { text: "ArUco Pose", link: "/examples/aruco-pose" },
+            { text: "Face Recognition", link: "/examples/face-recognition" },
+            { text: "Segmentation", link: "/examples/segmentation" },
+            { text: "ONNX Inference", link: "/examples/onnx-inference" },
+            { text: "SafeTensors Loading", link: "/examples/safetensors-loading" },
+            { text: "K-Means Clustering", link: "/examples/kmeans-clustering" },
+            { text: "OCR", link: "/examples/ocr" },
+            { text: "Stitching", link: "/examples/stitching" },
+            { text: "Camera Calibration", link: "/examples/camera-calibration" },
+            { text: "API Showcase", link: "/examples/api-showcase" },
+            { text: "Image Utils", link: "/examples/image-utils" },
+            { text: "GUI Windows", link: "/examples/gui-windows" },
+            { text: "Generate Assets", link: "/examples/generate-asset" },
           ],
         },
       ],

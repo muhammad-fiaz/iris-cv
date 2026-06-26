@@ -32,11 +32,15 @@ impl<B: Backend> Tracker<B> {
 ## BackgroundSubtractor
 
 ```rust
-pub struct BackgroundSubtractor;
+pub struct BackgroundSubtractor<B: Backend> {
+    learning_rate: f32,
+    threshold: f32,
+    background: Option<Image<B>>,
+}
 
-impl BackgroundSubtractor {
+impl<B: Backend> BackgroundSubtractor<B> {
     pub fn new(learning_rate: f32, threshold: f32) -> Self;
-    pub fn apply<B: Backend>(&mut self, frame: &Image<B>) -> Result<Image<B>>;
+    pub fn apply(&mut self, frame: &Image<B>) -> Result<Image<B>>;
 }
 ```
 
@@ -74,8 +78,8 @@ pub struct MeanShiftTracker {
 
 impl MeanShiftTracker {
     pub fn new() -> Self;
-    pub fn init<B: Backend>(&mut self, image: &Image<B>, roi: Rect) -> Result<()>;
-    pub fn update<B: Backend>(&mut self, image: &Image<B>) -> Result<Rect>;
+    pub fn init<B: Backend>(&mut self, image: &Image<B>, roi: Rect<usize>) -> Result<()>;
+    pub fn update<B: Backend>(&mut self, image: &Image<B>) -> Result<Rect<usize>>;
 }
 ```
 
@@ -89,7 +93,7 @@ impl MeanShiftTracker {
 
 ### Example
 
-```rust,ignore
+```rust
 use iris::prelude::*;
 
 let device = WgpuDevice::default();
