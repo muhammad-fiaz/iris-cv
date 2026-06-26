@@ -12,13 +12,13 @@ keywords: ["getting started", "quick start", "install iris", "first project", "t
 To get started with **Iris**, install it in your project:
 
 ```bash
-cargo add iris
+cargo add iris-cv
 ```
 
 Alternatively, to use the latest development version from GitHub, run:
 
 ```bash
-cargo add iris --git https://github.com/muhammad-fiaz/iris-cv
+cargo add iris-cv --git https://github.com/muhammad-fiaz/iris-cv
 ```
 
 ## Basic Example
