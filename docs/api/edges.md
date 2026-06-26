@@ -2,19 +2,24 @@
 title: "Edges Module Reference"
 description: "API reference for Iris edges module — Sobel, Canny, Scharr, Laplacian edge detection, Hough lines, and Hough circles."
 keywords: ["edges", "edge detection", "Canny", "Sobel", "Scharr", "Laplacian", "Hough lines", "Hough circles", "gradient"]
+canonical: "https://muhammad-fiaz.github.io/iris-cv/api/edges"
 ---
 
 # Edges Module Reference
 
 Provides gradient computation, edge detection, and geometric shape detection.
 
+::: note
+This module is under active development. API signatures may change between versions.
+:::
+
 ## Edge Detection
 
 ```rust
 impl<B: Backend> Image<B> {
     pub fn sobel(&self) -> Result<Self>;
-    pub fn scharr(&self) -> Result<(Self, Self)>;
-    pub fn laplacian(&self, kernel_size: usize) -> Result<Self>;
+    pub fn scharr(&self) -> Result<Self>;
+    pub fn laplacian(&self) -> Result<Self>;
     pub fn canny(&self, low_threshold: f32, high_threshold: f32) -> Result<Self>;
 }
 ```

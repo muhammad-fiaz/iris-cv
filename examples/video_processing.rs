@@ -1,5 +1,6 @@
 // Demonstrates video capture, writing, and frame iteration.
 // Uses synthetic gradient frames (no external video file required).
+// Shows VideoFileWriter, FrameIterator with loop, and frame timing.
 
 use burn::backend::wgpu::{Wgpu, WgpuDevice};
 use iris::prelude::*;

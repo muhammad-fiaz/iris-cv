@@ -1,5 +1,5 @@
 // Demonstrates video metadata: format detection, stream info, pixel formats,
-// and synthetic metadata construction.
+// and synthetic metadata construction. No image files required.
 
 use burn::backend::wgpu::Wgpu;
 use iris::prelude::*;

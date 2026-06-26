@@ -21,25 +21,23 @@ pub struct Photo;
 impl Photo {
     pub fn fast_nl_means_denoising<B: Backend>(
         image: &Image<B>,
-        filter_strength: f32,
-        template_window_size: u32,
-        search_window_size: u32,
-        device: &B::Device,
+        h: f32,
+        patch_radius: usize,
+        search_radius: usize,
     ) -> Result<Image<B>>;
 }
 ```
 
 ### `fast_nl_means_denoising()`
 
-Applies Non-Local Means (NLM) denoising to a single image.
+Applies Non-Local Means (NLM) denoising to a single image using patch-based similarity.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `image` | `&Image<B>` | Input image (grayscale or color). |
-| `filter_strength` | `f32` | Strength of the filter. Higher values remove more noise but blur detail. Typical: 3.0–10.0. |
-| `template_window_size` | `u32` | Size of the patch used for comparison (odd). Typical: 7. |
-| `search_window_size` | `u32` | Size of the search area (odd). Typical: 21. |
-| `device` | `&B::Device` | Compute device. |
+| `image` | `&Image<B>` | Input image (grayscale or color), values in [0, 1]. |
+| `h` | `f32` | Filter strength. Higher values remove more noise but blur detail. Typical: 3.0–10.0. |
+| `patch_radius` | `usize` | Half-size of the comparison patch (default: 3 → 7×7 patch). |
+| `search_radius` | `usize` | Half-size of the search window (default: 5 → 11×11 window). |
 
 **Returns:** `Result<Image<B>>` — Denoised image.
 
@@ -49,48 +47,42 @@ Exposure fusion using the Mertens algorithm. Combines multiple differently-expos
 
 ```rust
 pub struct MergeMertens {
-    contrast_weight: f32,
-    saturation_weight: f32,
-    exposure_weight: f32,
+    pub contrast_weight: f32,
+    pub saturation_weight: f32,
+    pub exposure_weight: f32,
 }
 
 impl MergeMertens {
-    pub fn new(
-        contrast_weight: f32,
-        saturation_weight: f32,
-        exposure_weight: f32,
-    ) -> Self;
-
-    pub fn process<B: Backend>(
-        &self,
-        images: &[Image<B>],
-        device: &B::Device,
-    ) -> Result<Image<B>>;
+    pub fn new() -> Self;
+    pub fn with_contrast_weight(self, w: f32) -> Self;
+    pub fn with_saturation_weight(self, w: f32) -> Self;
+    pub fn with_exposure_weight(self, w: f32) -> Self;
+    pub fn process<B: Backend>(&self, images: &[Image<B>]) -> Result<Image<B>>;
 }
 ```
 
 ### Constructor
 
-#### `new(contrast_weight, saturation_weight, exposure_weight)`
+#### `new()`
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `contrast_weight` | `f32` | Weight for well-exposedness measure. |
-| `saturation_weight` | `f32` | Weight for color saturation. |
-| `exposure_weight` | `f32` | Weight for contrast measure. |
+Creates a new merger with default weights (1.0, 1.0, 1.0). Use builder methods to customize:
 
-Use equal weights `(1.0, 1.0, 1.0)` for balanced fusion.
+```rust
+let merger = MergeMertens::new()
+    .with_contrast_weight(1.0)
+    .with_saturation_weight(1.0)
+    .with_exposure_weight(1.0);
+```
 
 ### Methods
 
-#### `process(images, device)`
+#### `process(images)`
 
-Fuses multiple exposures into a single output.
+Fuses multiple exposures into a single output. All images must have the same dimensions and 3 channels.
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `images` | `&[Image<B>]` | Slice of images with different exposures. |
-| `device` | `&B::Device` | Compute device. |
 
 **Returns:** `Result<Image<B>>` — Fused image.
 
@@ -104,7 +96,7 @@ type Backend = Wgpu;
 let device = Default::default();
 
 let noisy = Image::<Backend>::open("noisy.png", &device)?;
-let clean = Photo::fast_nl_means_denoising(&noisy, 5.0, 7, 21, &device)?;
+let clean = Photo::fast_nl_means_denoising(&noisy, 5.0, 3, 5)?;
 clean.save("denoised.png")?;
 ```
 
@@ -121,8 +113,8 @@ let under = Image::<Backend>::open("underexposed.png", &device)?;
 let normal = Image::<Backend>::open("normal.png", &device)?;
 let over = Image::<Backend>::open("overexposed.png", &device)?;
 
-let merger = MergeMertens::new(1.0, 1.0, 1.0);
-let fused = merger.process(&[under, normal, over], &device)?;
+let merger = MergeMertens::new();
+let fused = merger.process(&[under, normal, over])?;
 fused.save("hdr_result.png")?;
 ```
 

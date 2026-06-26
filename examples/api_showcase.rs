@@ -4,11 +4,14 @@ use iris::drawing::MarkerType;
 use iris::image::Image;
 use iris::prelude::*;
 
+/// Demonstrates the core API features: color space conversions, noise generation,
+/// custom convolution filters, CLAHE, LUT, in_range, normalize, drawing, and
+/// morphological kernels. Uses synthetic data (no image files required).
 fn main() -> Result<()> {
     type Backend = Wgpu;
     let device = WgpuDevice::default();
 
-    println!("=== Iris New Features Demo ===\n");
+    println!("=== Iris API Showcase ===\n");
 
     // --- 1. Color Space Conversions ---
     println!("--- Color Space Conversions ---");

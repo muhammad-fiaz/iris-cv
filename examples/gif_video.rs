@@ -1,5 +1,6 @@
 // Demonstrates GIF creation and reading: generates animated frames,
 // writes to GIF, reads back, and verifies frame data.
+// Uses synthetic gradient frames (no external video file required).
 
 use burn::backend::wgpu::{Wgpu, WgpuDevice};
 use iris::prelude::*;

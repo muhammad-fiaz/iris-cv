@@ -1,5 +1,6 @@
 // Demonstrates video frame operations: frame differencing, motion magnitudes,
 // batch tensor conversion, random access, seeking, and looping.
+// Uses synthetic gradient frames (no external video file required).
 
 use burn::backend::wgpu::{Wgpu, WgpuDevice};
 use iris::prelude::*;

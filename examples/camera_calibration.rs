@@ -1,5 +1,6 @@
 // Demonstrates camera calibration, 3D-to-2D point projection, and homography estimation.
 // Uses synthetic point correspondences (no image file needed).
+// Shows calibrate_camera, project_points, and find_homography.
 
 use iris::prelude::*;
 

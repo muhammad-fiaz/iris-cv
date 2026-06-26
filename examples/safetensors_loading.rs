@@ -1,5 +1,6 @@
 // Demonstrates weight loading from binary and safetensors files,
 // and Non-Maximum Suppression (NMS) for bounding box filtering.
+// Uses mock data (no image file needed).
 
 use burn::backend::wgpu::{Wgpu, WgpuDevice};
 use iris::prelude::*;

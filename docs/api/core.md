@@ -69,9 +69,11 @@ Pseudo-random number generator for reproducible random operations.
 ```rust
 pub struct Rng { /* ... */ }
 impl Rng {
-    pub fn seed(seed: u64) -> Self;
-    pub fn f32(&mut self) -> f32;
-    pub fn range(&mut self, min: f32, max: f32) -> f32;
+    pub fn new(seed: u64) -> Self;
+    pub fn next_u64(&mut self) -> u64;
+    pub fn next_u32(&mut self) -> u32;
+    pub fn next_f32(&mut self) -> f32;
+    pub fn next_f64(&mut self) -> f64;
 }
 ```
 

@@ -1,5 +1,6 @@
 // Demonstrates K-Means clustering on 2D point data.
 // Uses synthetic point clusters (no image file needed).
+// Shows fit, predict, and centroid extraction.
 
 use burn::backend::wgpu::{Wgpu, WgpuDevice};
 use iris::prelude::*;

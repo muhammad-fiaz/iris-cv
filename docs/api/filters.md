@@ -1,12 +1,17 @@
 ---
 title: "Filters Reference"
-description: "API reference for Iris filters — box, Gaussian, median, bilateral blur, separable filter, distance transform, filter2D, add weighted, and copy."
+description: "API reference for Iris filters — blur, Gaussian, median, bilateral, separable filter, distance transform, filter2D, add weighted, copy, CLAHE, LUT."
 keywords: ["filters", "blur", "gaussian blur", "median filter", "bilateral filter", "box blur", "smoothing"]
+canonical: "https://muhammad-fiaz.github.io/iris-cv/api/filters"
 ---
 
 # Filters Reference
 
 Details image filtering and smoothing operation signatures.
+
+::: note
+This module is under active development. API signatures may change between versions.
+:::
 
 ## Blur Filters
 
@@ -24,10 +29,16 @@ impl<B: Backend> Image<B> {
 
 ```rust
 impl<B: Backend> Image<B> {
-    pub fn filter2d(&self, kernel: &[Vec<f32>]) -> Result<Self>;
+    pub fn filter2d(
+        &self,
+        kernel: &[&[f32]],
+        anchor: Option<(isize, isize)>,
+        delta: f32,
+    ) -> Result<Self>;
+
     pub fn distance_transform(&self) -> Result<Self>;
     pub fn laplacian_of_gaussian(&self, sigma: f64) -> Result<Self>;
-    pub fn copy_to(&self, mask: &Image<B>) -> Result<Self>;
+    pub fn copy_to(&self, dst: &mut Self, mask: Option<&Self>) -> Result<()>;
 }
 ```
 
@@ -35,13 +46,7 @@ impl<B: Backend> Image<B> {
 
 ```rust
 impl<B: Backend> Image<B> {
-    pub fn add_weighted(
-        src1: &Image<B>,
-        alpha: f32,
-        src2: &Image<B>,
-        beta: f32,
-        gamma: f32,
-    ) -> Result<Image<B>>;
+    pub fn add_weighted(&self, other: &Self, alpha: f32, beta: f32, gamma: f32) -> Result<Self>;
 }
 ```
 
@@ -49,6 +54,6 @@ impl<B: Backend> Image<B> {
 
 ```rust
 impl<B: Backend> Image<B> {
-    pub fn convert_scale_abs(&self) -> Result<Self>;
+    pub fn convert_scale_abs(&self, scale: f32, shift: f32) -> Result<Self>;
 }
 ```
