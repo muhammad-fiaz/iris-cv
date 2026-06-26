@@ -110,7 +110,7 @@ Iris supports a wide range of platforms and architectures:
 ### Build from Source
 ```bash
 git clone https://github.com/muhammad-fiaz/iris-cv.git
-cd iris
+cd iris-cv
 cargo build --release
 ```
 
@@ -121,14 +121,14 @@ cargo build --release
 To use `iris` in your Rust project, run:
 
 ```bash
-cargo add iris
+cargo add iris-cv
 ```
 
 Or add it directly to your `Cargo.toml` under dependencies:
 
 ```toml
 [dependencies]
-iris = "0.0.0"
+iris-cv = "0.0.0"
 ```
 
 ### Development Version (Git)
@@ -136,14 +136,14 @@ iris = "0.0.0"
 To use the latest development branch directly from GitHub, run:
 
 ```bash
-cargo add iris --git https://github.com/muhammad-fiaz/iris-cv
+cargo add iris-cv --git https://github.com/muhammad-fiaz/iris-cv
 ```
 
 Or add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-iris = { git = "https://github.com/muhammad-fiaz/iris-cv" }
+iris-cv = { git = "https://github.com/muhammad-fiaz/iris-cv" }
 ```
 
 In your Rust code:
